@@ -16,7 +16,10 @@ def create_app():
     login_manager.init_app(app)
     migrate.init_app(app, db)
 
-    # User loader for Flask-Login
+    # Login configuration
+    login_manager.login_view = "auth.login"
+    login_manager.login_message_category = "error"
+
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
@@ -34,7 +37,7 @@ def create_app():
 
     register_error_handlers(app)
 
-    # Create database tables + seed data
+    # Create DB + upload folder + seed
     with app.app_context():
         db.create_all()
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -42,7 +45,8 @@ def create_app():
 
     return app
 
+app = create_app()
 
-if __name__ == '__main__':
-    app = create_app()
-    app.run(debug=True, port=5000)
+
+if __name__ == "__main__":
+    app.run(debug=True)
