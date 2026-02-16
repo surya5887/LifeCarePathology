@@ -5,7 +5,7 @@ from extensions import db
 def seed_database():
 
     # Prevent duplicate seeding
-    if User.query.filter_by(email="admin@lifecare.com").first():
+    if User.query.filter_by(email="samsaad@lifecare.com").first():
         return
 
     print("Seeding database...")
@@ -13,11 +13,11 @@ def seed_database():
     # Create Admin
     admin = User(
         name="Admin",
-        email="admin@lifecare.com",
-        phone="9999999999",
+        email="samsaad@lifecare.com",
+        phone="8923291708",
         role="admin"
     )
-    admin.set_password("admin123")
+    admin.set_password("Samsaad@8923")
     db.session.add(admin)
 
     # Categories
