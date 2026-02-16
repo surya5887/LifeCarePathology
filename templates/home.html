@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% block title %}Life Care Pathology Lab — Trusted Diagnostics{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-bg">
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
+    </div>
+    <div class="hero-content">
+        <div class="hero-badge">🏥 NABL Accredited Lab</div>
+        <h1 class="hero-title">Accurate Diagnostics for <span class="gradient-text">Better Health</span></h1>
+        <p class="hero-subtitle">Life Care Pathology Lab offers reliable pathology & diagnostic services with fast results, home sample collection, and online report access.</p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('main.services') }}" class="btn btn-primary btn-lg">
+                View All Tests <span class="btn-arrow">→</span>
+            </a>
+            <a href="{{ url_for('main.check_report') }}" class="btn btn-outline btn-lg">
+                <i class="fas fa-file-medical"></i> Check Report
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Services Overview -->
+<section class="services-section" id="services">
+    <div class="section-container">
+        <div class="section-header">
+            <span class="section-badge">Our Services</span>
+            <h2 class="section-title">Comprehensive <span class="gradient-text">Diagnostic Tests</span></h2>
+            <p class="section-subtitle">We offer a wide range of pathology tests with accurate results and quick turnaround time.</p>
+        </div>
+        <div class="services-grid">
+            {% for cat in categories[:6] %}
+            <div class="service-card animate-on-scroll">
+                <div class="service-icon">{{ cat.icon }}</div>
+                <h3>{{ cat.name }}</h3>
+                <p>{{ cat.description or 'Comprehensive testing services with accurate results.' }}</p>
+                <a href="{{ url_for('main.services', category=cat.id) }}" class="service-link">View Tests →</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="why-section">
+    <div class="section-container">
+        <div class="section-header">
+            <span class="section-badge">Why Choose Us</span>
+            <h2 class="section-title">Trusted by <span class="gradient-text">Thousands</span></h2>
+        </div>
+        <div class="why-grid">
+            <div class="why-card animate-on-scroll">
+                <div class="why-icon"><i class="fas fa-award"></i></div>
+                <h3>NABL Accredited</h3>
+                <p>Our lab is certified and follows international quality standards for all tests.</p>
+            </div>
+            <div class="why-card animate-on-scroll">
+                <div class="why-icon"><i class="fas fa-clock"></i></div>
+                <h3>Fast Reports</h3>
+                <p>Get your test reports within 24 hours. Emergency results available in 4 hours.</p>
+            </div>
+            <div class="why-card animate-on-scroll">
+                <div class="why-icon"><i class="fas fa-home"></i></div>
+                <h3>Home Collection</h3>
+                <p>Free sample collection from your doorstep. Book online or call us.</p>
+            </div>
+            <div class="why-card animate-on-scroll">
+                <div class="why-icon"><i class="fas fa-rupee-sign"></i></div>
+                <h3>Affordable Prices</h3>
+                <p>Quality diagnostics at the most competitive prices. No hidden charges.</p>
+            </div>
+            <div class="why-card animate-on-scroll">
+                <div class="why-icon"><i class="fas fa-user-md"></i></div>
+                <h3>Expert Team</h3>
+                <p>Experienced pathologists and trained technicians for reliable results.</p>
+            </div>
+            <div class="why-card animate-on-scroll">
+                <div class="why-icon"><i class="fas fa-laptop-medical"></i></div>
+                <h3>Online Reports</h3>
+                <p>Download your reports online anytime using your token number.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Counter -->
+<section class="stats-section">
+    <div class="section-container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" data-count="10000">0</div>
+                <div class="stat-label">Tests Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" data-count="5000">0</div>
+                <div class="stat-label">Happy Patients</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" data-count="50">0</div>
+                <div class="stat-label">Types of Tests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" data-count="10">0</div>
+                <div class="stat-label">Years Experience</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Tests -->
+{% if popular_tests %}
+<section class="popular-tests-section">
+    <div class="section-container">
+        <div class="section-header">
+            <span class="section-badge">Popular Tests</span>
+            <h2 class="section-title">Most Booked <span class="gradient-text">Tests</span></h2>
+        </div>
+        <div class="tests-grid">
+            {% for test in popular_tests %}
+            <div class="test-card animate-on-scroll">
+                <div class="test-category-badge">{{ test.category.name }}</div>
+                <h3>{{ test.name }}</h3>
+                <div class="test-meta">
+                    <span><i class="fas fa-vial"></i> {{ test.sample_type }}</span>
+                    <span><i class="fas fa-clock"></i> {{ test.report_time }}</span>
+                </div>
+                <div class="test-price">₹{{ "%.0f"|format(test.price) }}</div>
+                <a href="{{ url_for('patient.book_test') }}" class="btn btn-primary btn-sm">Book Now</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Testimonials -->
+{% if testimonials %}
+<section class="testimonials-section">
+    <div class="section-container">
+        <div class="section-header">
+            <span class="section-badge">Testimonials</span>
+            <h2 class="section-title">What Our <span class="gradient-text">Patients Say</span></h2>
+        </div>
+        <div class="testimonials-grid">
+            {% for t in testimonials %}
+            <div class="testimonial-card animate-on-scroll">
+                <div class="testimonial-stars">
+                    {% for i in range(t.rating) %}⭐{% endfor %}
+                </div>
+                <p class="testimonial-text">"{{ t.review }}"</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">{{ t.reviewer_name[0] }}</div>
+                    <span>{{ t.reviewer_name }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="section-container">
+        <div class="cta-container">
+            <h2>Book Your Test <span class="gradient-text">Today</span></h2>
+            <p>Get accurate results at affordable prices. Home sample collection available.</p>
+            <div class="cta-buttons">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+                    Get Started <span class="btn-arrow">→</span>
+                </a>
+                <a href="{{ url_for('main.contact') }}" class="btn btn-outline btn-lg">
+                    <i class="fas fa-phone"></i> Contact Us
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

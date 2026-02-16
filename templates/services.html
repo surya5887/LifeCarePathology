@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Our Services — Life Care Pathology Lab{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="page-hero-content">
+        <span class="section-badge">Our Services</span>
+        <h1 class="page-title">Diagnostic <span class="gradient-text">Tests & Services</span></h1>
+        <p class="page-subtitle">Explore our comprehensive range of pathology tests. Search by name or filter by category.</p>
+    </div>
+</section>
+
+<section class="services-page-section">
+    <div class="section-container">
+        <!-- Search & Filter -->
+        <div class="services-filter">
+            <form method="GET" action="{{ url_for('main.services') }}" class="filter-form">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="q" placeholder="Search tests..." value="{{ search_query }}" id="testSearch">
+                </div>
+                <div class="category-filter">
+                    <select name="category" onchange="this.form.submit()" id="categoryFilter">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if selected_category == cat.id|string %}selected{% endif %}>
+                            {{ cat.icon }} {{ cat.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Search</button>
+            </form>
+        </div>
+
+        <!-- Tests Grid -->
+        {% if tests %}
+        <div class="tests-grid" id="testsGrid">
+            {% for test in tests %}
+            <div class="test-card animate-on-scroll">
+                <div class="test-category-badge">{{ test.category.name }}</div>
+                <h3>{{ test.name }}</h3>
+                {% if test.description %}
+                <p class="test-desc">{{ test.description }}</p>
+                {% endif %}
+                <div class="test-meta">
+                    <span><i class="fas fa-vial"></i> {{ test.sample_type }}</span>
+                    <span><i class="fas fa-clock"></i> {{ test.report_time }}</span>
+                </div>
+                <div class="test-footer">
+                    <div class="test-price">₹{{ "%.0f"|format(test.price) }}</div>
+                    <a href="{{ url_for('patient.book_test') }}" class="btn btn-primary btn-sm">Book Now</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <h3>No tests found</h3>
+            <p>Try a different search term or category.</p>
+            <a href="{{ url_for('main.services') }}" class="btn btn-outline">View All Tests</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

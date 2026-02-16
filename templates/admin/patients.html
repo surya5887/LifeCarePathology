@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Patients — Admin{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="section-container">
+        <div class="dashboard-header">
+            <div>
+                <h1><i class="fas fa-users"></i> <span class="gradient-text">Patients</span></h1>
+                <p>View and search all registered patients.</p>
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="search-bar-wrapper">
+            <form method="GET" action="{{ url_for('admin.patients') }}" class="search-form">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="q" placeholder="Search by name, email, or phone..." value="{{ search }}">
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Search</button>
+            </form>
+        </div>
+
+        {% if patients %}
+        <div class="dashboard-table-card">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Bookings</th>
+                            <th>Joined</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in patients %}
+                        <tr>
+                            <td>#{{ p.id }}</td>
+                            <td><strong>{{ p.name }}</strong></td>
+                            <td>{{ p.email }}</td>
+                            <td>{{ p.phone }}</td>
+                            <td>{{ p.bookings|length }}</td>
+                            <td>{{ p.created_at.strftime('%d %b %Y') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">👥</div>
+            <h3>{{ 'No patients found for "' + search + '"' if search else 'No patients registered yet' }}</h3>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

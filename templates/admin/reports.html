@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}All Reports — Admin{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="section-container">
+        <div class="dashboard-header">
+            <div>
+                <h1><i class="fas fa-file-pdf"></i> Uploaded <span class="gradient-text">Reports</span></h1>
+                <p>View all uploaded patient reports.</p>
+            </div>
+            <a href="{{ url_for('admin.upload_report') }}" class="btn btn-primary">
+                <i class="fas fa-upload"></i> Upload New Report
+            </a>
+        </div>
+
+        {% if reports %}
+        <div class="dashboard-table-card">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Patient Name</th>
+                            <th>Token Number</th>
+                            <th>Uploaded On</th>
+                            <th>Remarks</th>
+                            <th>File</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in reports %}
+                        <tr>
+                            <td>#{{ r.id }}</td>
+                            <td><strong>{{ r.patient_name }}</strong></td>
+                            <td><code>{{ r.token_number }}</code></td>
+                            <td>{{ r.uploaded_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+                            <td>{{ r.remarks or '—' }}</td>
+                            <td>
+                                <a href="{{ url_for('main.download_report', report_id=r.id) }}" class="btn btn-sm btn-outline">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📄</div>
+            <h3>No reports uploaded yet</h3>
+            <a href="{{ url_for('admin.upload_report') }}" class="btn btn-primary">Upload First Report</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Appointments — Admin{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="section-container">
+        <div class="dashboard-header">
+            <div>
+                <h1><i class="fas fa-calendar-alt"></i> <span class="gradient-text">Appointments</span></h1>
+                <p>Manage all patient bookings and appointments.</p>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <a href="{{ url_for('admin.appointments') }}" class="filter-tab {% if not status_filter %}active{% endif %}">All</a>
+            <a href="{{ url_for('admin.appointments', status='pending') }}" class="filter-tab {% if status_filter == 'pending' %}active{% endif %}">Pending</a>
+            <a href="{{ url_for('admin.appointments', status='confirmed') }}" class="filter-tab {% if status_filter == 'confirmed' %}active{% endif %}">Confirmed</a>
+            <a href="{{ url_for('admin.appointments', status='completed') }}" class="filter-tab {% if status_filter == 'completed' %}active{% endif %}">Completed</a>
+            <a href="{{ url_for('admin.appointments', status='cancelled') }}" class="filter-tab {% if status_filter == 'cancelled' %}active{% endif %}">Cancelled</a>
+        </div>
+
+        {% if bookings %}
+        <div class="dashboard-table-card">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Patient</th>
+                            <th>Phone</th>
+                            <th>Test</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Home</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in bookings %}
+                        <tr>
+                            <td>#{{ b.id }}</td>
+                            <td><strong>{{ b.user.name }}</strong></td>
+                            <td>{{ b.user.phone }}</td>
+                            <td>{{ b.test.name }}</td>
+                            <td>{{ b.booking_date.strftime('%d %b %Y') }}</td>
+                            <td>{{ b.slot_time }}</td>
+                            <td>
+                                {% if b.home_collection %}
+                                ✅ <small>{{ b.collection_address[:30] }}...</small>
+                                {% else %}
+                                —
+                                {% endif %}
+                            </td>
+                            <td><span class="status-badge status-{{ b.status }}">{{ b.status|capitalize }}</span></td>
+                            <td>
+                                <form method="POST" action="{{ url_for('admin.update_appointment', booking_id=b.id) }}" class="inline-form">
+                                    <select name="status" class="form-select-sm" onchange="this.form.submit()">
+                                        <option value="">Change...</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="confirmed">Confirm</option>
+                                        <option value="completed">Complete</option>
+                                        <option value="cancelled">Cancel</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <h3>No appointments found</h3>
+            <p>{{ 'No ' + status_filter + ' appointments.' if status_filter else 'No appointments yet.' }}</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

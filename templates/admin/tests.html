@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Manage Tests — Admin{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="section-container">
+        <div class="dashboard-header">
+            <div>
+                <h1><i class="fas fa-vial"></i> Manage <span class="gradient-text">Tests</span></h1>
+                <p>Add, edit, or remove diagnostic tests.</p>
+            </div>
+            <a href="{{ url_for('admin.add_test') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add New Test
+            </a>
+        </div>
+
+        {% if tests %}
+        <div class="dashboard-table-card">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Test Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Sample</th>
+                            <th>Report Time</th>
+                            <th>Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for test in tests %}
+                        <tr>
+                            <td>#{{ test.id }}</td>
+                            <td><strong>{{ test.name }}</strong></td>
+                            <td>{{ test.category.name }}</td>
+                            <td>₹{{ "%.0f"|format(test.price) }}</td>
+                            <td>{{ test.sample_type }}</td>
+                            <td>{{ test.report_time }}</td>
+                            <td>{{ '✅' if test.is_active else '❌' }}</td>
+                            <td class="action-buttons">
+                                <a href="{{ url_for('admin.edit_test', test_id=test.id) }}" class="btn btn-sm btn-outline" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('admin.delete_test', test_id=test.id) }}" style="display:inline" onsubmit="return confirm('Delete this test?')">
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🧪</div>
+            <h3>No tests added yet</h3>
+            <a href="{{ url_for('admin.add_test') }}" class="btn btn-primary">Add First Test</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit Test' if test else 'Add New Test' }} — Admin{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="section-container">
+        <div class="dashboard-header">
+            <div>
+                <h1><i class="fas fa-{{ 'edit' if test else 'plus' }}"></i> {{ 'Edit Test' if test else 'Add New' }} <span class="gradient-text">Test</span></h1>
+            </div>
+            <a href="{{ url_for('admin.tests') }}" class="btn btn-outline">← Back to Tests</a>
+        </div>
+
+        <div class="booking-form-card">
+            <form method="POST" action="{{ url_for('admin.edit_test', test_id=test.id) if test else url_for('admin.add_test') }}">
+                <div class="form-group">
+                    <label for="name">Test Name *</label>
+                    <input type="text" id="name" name="name" value="{{ test.name if test else '' }}" placeholder="e.g. Complete Blood Count (CBC)" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="category_id">Category *</label>
+                        <select id="category_id" name="category_id" required class="form-select">
+                            <option value="">-- Select Category --</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if test and test.category_id == cat.id %}selected{% endif %}>
+                                {{ cat.icon }} {{ cat.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Price (₹) *</label>
+                        <input type="number" id="price" name="price" value="{{ test.price if test else '' }}" placeholder="e.g. 350" step="1" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sample_type">Sample Type</label>
+                        <select id="sample_type" name="sample_type" class="form-select">
+                            {% for s in ['Blood', 'Urine', 'Stool', 'Swab', 'Sputum', 'Serum', 'Other'] %}
+                            <option value="{{ s }}" {% if test and test.sample_type == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="report_time">Report Time</label>
+                        <input type="text" id="report_time" name="report_time" value="{{ test.report_time if test else '24 Hours' }}" placeholder="e.g. 24 Hours">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="3" placeholder="Brief description of the test">{{ test.description if test else '' }}</textarea>
+                </div>
+
+                {% if test %}
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="is_active" {% if test.is_active %}checked{% endif %}>
+                        <span>Active (visible to patients)</span>
+                    </label>
+                </div>
+                {% endif %}
+
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> {{ 'Update Test' if test else 'Add Test' }}
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

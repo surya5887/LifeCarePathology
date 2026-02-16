@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}My Bookings — Life Care Pathology Lab{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="section-container">
+        <div class="dashboard-header">
+            <div>
+                <h1><i class="fas fa-list"></i> My <span class="gradient-text">Bookings</span></h1>
+                <p>View all your test bookings and their status.</p>
+            </div>
+            <a href="{{ url_for('patient.book_test') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Book New Test
+            </a>
+        </div>
+
+        {% if bookings %}
+        <div class="dashboard-table-card">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Test Name</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Price</th>
+                            <th>Home Collection</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in bookings %}
+                        <tr>
+                            <td>{{ b.id }}</td>
+                            <td><strong>{{ b.test.name }}</strong></td>
+                            <td>{{ b.booking_date.strftime('%d %b %Y') }}</td>
+                            <td>{{ b.slot_time }}</td>
+                            <td>₹{{ "%.0f"|format(b.test.price) }}</td>
+                            <td>{{ '✅ Yes' if b.home_collection else '—' }}</td>
+                            <td><span class="status-badge status-{{ b.status }}">{{ b.status|capitalize }}</span></td>
+                            <td><span class="status-badge status-{{ b.payment_status }}">{{ b.payment_status|capitalize }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h3>No bookings yet</h3>
+            <p>You haven't booked any tests yet.</p>
+            <a href="{{ url_for('patient.book_test') }}" class="btn btn-primary">Book Your First Test</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

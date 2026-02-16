@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Enquiries — Admin{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="section-container">
+        <div class="dashboard-header">
+            <div>
+                <h1><i class="fas fa-envelope"></i> Contact <span class="gradient-text">Enquiries</span></h1>
+                <p>Messages received from the contact form.</p>
+            </div>
+        </div>
+
+        {% if enquiries %}
+        <div class="enquiries-grid">
+            {% for e in enquiries %}
+            <div class="enquiry-card {{ 'unread' if not e.is_read else '' }}">
+                <div class="enquiry-header">
+                    <div>
+                        <h3>{{ e.name }}</h3>
+                        <div class="enquiry-meta">
+                            {% if e.email %}<span><i class="fas fa-envelope"></i> {{ e.email }}</span>{% endif %}
+                            {% if e.phone %}<span><i class="fas fa-phone"></i> {{ e.phone }}</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="enquiry-date">
+                        <span>{{ e.created_at.strftime('%d %b %Y') }}</span>
+                        {% if not e.is_read %}
+                        <span class="unread-badge">New</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <p class="enquiry-message">{{ e.message }}</p>
+                {% if not e.is_read %}
+                <form method="POST" action="{{ url_for('admin.mark_read', enquiry_id=e.id) }}">
+                    <button type="submit" class="btn btn-sm btn-outline">
+                        <i class="fas fa-check"></i> Mark as Read
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📬</div>
+            <h3>No enquiries yet</h3>
+            <p>Contact form messages will appear here.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

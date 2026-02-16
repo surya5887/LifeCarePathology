@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Book a Test — Life Care Pathology Lab{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="section-container">
+        <div class="dashboard-header">
+            <div>
+                <h1><i class="fas fa-vial"></i> Book a <span class="gradient-text">Test</span></h1>
+                <p>Select a test, choose your preferred date and time.</p>
+            </div>
+            <a href="{{ url_for('patient.dashboard') }}" class="btn btn-outline">← Back to Dashboard</a>
+        </div>
+
+        <div class="booking-form-card">
+            <form method="POST" action="{{ url_for('patient.book_test') }}" class="booking-form">
+                <div class="form-group">
+                    <label for="test_id">Select Test *</label>
+                    <select id="test_id" name="test_id" required class="form-select">
+                        <option value="">-- Choose a test --</option>
+                        {% for test in tests %}
+                        <option value="{{ test.id }}">{{ test.name }} — ₹{{ "%.0f"|format(test.price) }} ({{ test.category.name }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="booking_date">Date *</label>
+                        <input type="date" id="booking_date" name="booking_date" required min="">
+                    </div>
+                    <div class="form-group">
+                        <label for="slot_time">Time Slot *</label>
+                        <select id="slot_time" name="slot_time" required class="form-select">
+                            <option value="">-- Select time --</option>
+                            <option value="07:00 AM">07:00 AM</option>
+                            <option value="08:00 AM">08:00 AM</option>
+                            <option value="09:00 AM">09:00 AM</option>
+                            <option value="10:00 AM">10:00 AM</option>
+                            <option value="11:00 AM">11:00 AM</option>
+                            <option value="12:00 PM">12:00 PM</option>
+                            <option value="01:00 PM">01:00 PM</option>
+                            <option value="02:00 PM">02:00 PM</option>
+                            <option value="03:00 PM">03:00 PM</option>
+                            <option value="04:00 PM">04:00 PM</option>
+                            <option value="05:00 PM">05:00 PM</option>
+                            <option value="06:00 PM">06:00 PM</option>
+                            <option value="07:00 PM">07:00 PM</option>
+                            <option value="08:00 PM">08:00 PM</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="home_collection" id="homeCollection" onchange="toggleAddress()">
+                        <span>🏠 Home Sample Collection (We'll come to your address)</span>
+                    </label>
+                </div>
+
+                <div class="form-group" id="addressGroup" style="display: none;">
+                    <label for="collection_address">Collection Address *</label>
+                    <textarea id="collection_address" name="collection_address" rows="3" placeholder="Enter your full address for sample collection"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    <i class="fas fa-calendar-check"></i> Confirm Booking
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Set minimum date to today
+    document.getElementById('booking_date').min = new Date().toISOString().split('T')[0];
+
+    function toggleAddress() {
+        const addressGroup = document.getElementById('addressGroup');
+        const homeCollection = document.getElementById('homeCollection');
+        addressGroup.style.display = homeCollection.checked ? 'block' : 'none';
+    }
+</script>
+{% endblock %}

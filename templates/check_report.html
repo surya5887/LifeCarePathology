@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Check Report — Life Care Pathology Lab{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="page-hero-content">
+        <span class="section-badge"><i class="fas fa-file-medical"></i> Report Access</span>
+        <h1 class="page-title">Check Your <span class="gradient-text">Test Report</span></h1>
+        <p class="page-subtitle">Enter your Token Number and Password to download your report.</p>
+    </div>
+</section>
+
+<section class="report-section">
+    <div class="section-container">
+        <div class="report-check-container">
+            <!-- Report Form -->
+            <div class="report-form-card">
+                <div class="report-form-header">
+                    <div class="report-form-icon"><i class="fas fa-search"></i></div>
+                    <h2>Find Your Report</h2>
+                    <p>Enter the token number and password provided by the lab.</p>
+                </div>
+
+                {% if error %}
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i> {{ error }}
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('main.check_report') }}" class="report-form">
+                    <div class="form-group">
+                        <label for="token_number">Token Number</label>
+                        <div class="input-icon-wrapper">
+                            <i class="fas fa-hashtag"></i>
+                            <input type="text" id="token_number" name="token_number" placeholder="Enter token number (e.g. LC-2026-001)" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-icon-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" name="password" placeholder="Enter report password" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        <i class="fas fa-search"></i> Find Report
+                    </button>
+                </form>
+            </div>
+
+            <!-- Report Result -->
+            {% if report %}
+            <div class="report-result-card">
+                <div class="report-result-header">
+                    <div class="report-result-icon"><i class="fas fa-check-circle"></i></div>
+                    <h2>Report Found!</h2>
+                </div>
+                <div class="report-details">
+                    <div class="report-detail-item">
+                        <span class="label">Patient Name</span>
+                        <span class="value">{{ report.patient_name }}</span>
+                    </div>
+                    <div class="report-detail-item">
+                        <span class="label">Token Number</span>
+                        <span class="value">{{ report.token_number }}</span>
+                    </div>
+                    <div class="report-detail-item">
+                        <span class="label">Uploaded On</span>
+                        <span class="value">{{ report.uploaded_at.strftime('%d %B %Y, %I:%M %p') }}</span>
+                    </div>
+                    {% if report.remarks %}
+                    <div class="report-detail-item">
+                        <span class="label">Remarks</span>
+                        <span class="value">{{ report.remarks }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('main.download_report', report_id=report.id) }}" class="btn btn-primary btn-block btn-lg">
+                    <i class="fas fa-download"></i> Download Report (PDF)
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

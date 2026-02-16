@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — Life Care Pathology Lab{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="section-container">
+        <div class="dashboard-header">
+            <div>
+                <h1>Welcome, <span class="gradient-text">{{ current_user.name }}</span>! 👋</h1>
+                <p>Manage your test bookings and profile from here.</p>
+            </div>
+            <a href="{{ url_for('patient.book_test') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Book New Test
+            </a>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="dashboard-stats">
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background: rgba(0, 119, 182, 0.1); color: #0077B6;">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="dash-stat-info">
+                    <h3>{{ total_bookings }}</h3>
+                    <p>Total Bookings</p>
+                </div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background: rgba(255, 165, 0, 0.1); color: #FFA500;">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <div class="dash-stat-info">
+                    <h3>{{ pending }}</h3>
+                    <p>Pending</p>
+                </div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon" style="background: rgba(0, 180, 216, 0.1); color: #00B4D8;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="dash-stat-info">
+                    <h3>{{ completed }}</h3>
+                    <p>Completed</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="{{ url_for('patient.book_test') }}" class="quick-action-card">
+                <i class="fas fa-vial"></i>
+                <span>Book a Test</span>
+            </a>
+            <a href="{{ url_for('patient.my_bookings') }}" class="quick-action-card">
+                <i class="fas fa-list"></i>
+                <span>My Bookings</span>
+            </a>
+            <a href="{{ url_for('main.check_report') }}" class="quick-action-card">
+                <i class="fas fa-file-medical"></i>
+                <span>Check Report</span>
+            </a>
+            <a href="{{ url_for('patient.profile') }}" class="quick-action-card">
+                <i class="fas fa-user-edit"></i>
+                <span>Edit Profile</span>
+            </a>
+        </div>
+
+        <!-- Upcoming Bookings -->
+        <div class="dashboard-table-card">
+            <div class="table-card-header">
+                <h2><i class="fas fa-calendar-alt"></i> Upcoming Bookings</h2>
+                <a href="{{ url_for('patient.my_bookings') }}" class="view-all-link">View All →</a>
+            </div>
+            {% if upcoming_bookings %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Test</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Home Collection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in upcoming_bookings %}
+                        <tr>
+                            <td><strong>{{ b.test.name }}</strong></td>
+                            <td>{{ b.booking_date.strftime('%d %b %Y') }}</td>
+                            <td>{{ b.slot_time }}</td>
+                            <td><span class="status-badge status-{{ b.status }}">{{ b.status|capitalize }}</span></td>
+                            <td>{{ '✅ Yes' if b.home_collection else '❌ No' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state-sm">
+                <p>No upcoming bookings. <a href="{{ url_for('patient.book_test') }}">Book a test now!</a></p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
