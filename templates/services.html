@@ -37,19 +37,21 @@
         {% if tests %}
         <div class="tests-grid" id="testsGrid">
             {% for test in tests %}
-            <div class="test-card animate-on-scroll">
-                <div class="test-category-badge">{{ test.category.name }}</div>
-                <h3>{{ test.name }}</h3>
-                {% if test.description %}
-                <p class="test-desc">{{ test.description }}</p>
-                {% endif %}
-                <div class="test-meta">
-                    <span><i class="fas fa-vial"></i> {{ test.sample_type }}</span>
-                    <span><i class="fas fa-clock"></i> {{ test.report_time }}</span>
-                </div>
-                <div class="test-footer">
-                    <div class="test-price">₹{{ "%.0f"|format(test.price) }}</div>
-                    <a href="{{ url_for('patient.book_test') }}" class="btn btn-primary btn-sm">Book Now</a>
+            <div class="test-card-3d">
+                <div class="test-card animate-on-scroll">
+                    <div class="test-category-badge">{{ test.category.name }}</div>
+                    <h3>{{ test.name }}</h3>
+                    {% if test.description %}
+                    <p class="test-desc">{{ test.description }}</p>
+                    {% endif %}
+                    <div class="test-meta">
+                        <span><i class="fas fa-vial"></i> {{ test.sample_type }}</span>
+                        <span><i class="fas fa-clock"></i> {{ test.report_time }}</span>
+                    </div>
+                    <div class="test-footer">
+                        <div class="test-price">₹{{ "%.0f"|format(test.price) }}</div>
+                        <a href="{{ url_for('patient.book_test') }}" class="btn btn-primary btn-sm">Book Now</a>
+                    </div>
                 </div>
             </div>
             {% endfor %}

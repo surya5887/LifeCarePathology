@@ -24,6 +24,58 @@
     </div>
 </section>
 
+<!-- Image Carousel Section -->
+<section class="carousel-section">
+    <div class="carousel-wrapper">
+        <div class="carousel-header">
+            <span class="section-badge">Our Lab</span>
+            <h2>State-of-the-Art <span class="gradient-text">Facilities</span></h2>
+        </div>
+        <div class="carousel-track-container">
+            <div class="carousel-track">
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1579154204601-01588f351e67?w=1200&h=450&fit=crop" alt="Modern Pathology Lab">
+                    <div class="slide-overlay">
+                        <h3>Modern Laboratory</h3>
+                        <p>Equipped with latest diagnostic instruments for precise results</p>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=1200&h=450&fit=crop" alt="Lab Technician with Microscope">
+                    <div class="slide-overlay">
+                        <h3>Expert Pathologists</h3>
+                        <p>Experienced team ensuring accurate analysis of every sample</p>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=1200&h=450&fit=crop" alt="Blood Test Tubes">
+                    <div class="slide-overlay">
+                        <h3>Comprehensive Testing</h3>
+                        <p>Over 50+ types of pathology and diagnostic tests available</p>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1666214280557-f1b5022eb634?w=1200&h=450&fit=crop" alt="Doctor Consultation">
+                    <div class="slide-overlay">
+                        <h3>Patient Care</h3>
+                        <p>Personalized consultation and guidance for every patient</p>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1200&h=450&fit=crop" alt="Healthcare Family">
+                    <div class="slide-overlay">
+                        <h3>Trusted by Thousands</h3>
+                        <p>Serving families with quality diagnostics since 2016</p>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-btn carousel-btn-prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+            <button class="carousel-btn carousel-btn-next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="carousel-dots"></div>
+    </div>
+</section>
+
 <!-- Services Overview -->
 <section class="services-section" id="services">
     <div class="section-container">
@@ -111,7 +163,7 @@
     </div>
 </section>
 
-<!-- Popular Tests -->
+<!-- Popular Tests with 3D Cards -->
 {% if popular_tests %}
 <section class="popular-tests-section">
     <div class="section-container">
@@ -121,15 +173,17 @@
         </div>
         <div class="tests-grid">
             {% for test in popular_tests %}
-            <div class="test-card animate-on-scroll">
-                <div class="test-category-badge">{{ test.category.name }}</div>
-                <h3>{{ test.name }}</h3>
-                <div class="test-meta">
-                    <span><i class="fas fa-vial"></i> {{ test.sample_type }}</span>
-                    <span><i class="fas fa-clock"></i> {{ test.report_time }}</span>
+            <div class="test-card-3d">
+                <div class="test-card animate-on-scroll">
+                    <div class="test-category-badge">{{ test.category.name }}</div>
+                    <h3>{{ test.name }}</h3>
+                    <div class="test-meta">
+                        <span><i class="fas fa-vial"></i> {{ test.sample_type }}</span>
+                        <span><i class="fas fa-clock"></i> {{ test.report_time }}</span>
+                    </div>
+                    <div class="test-price">₹{{ "%.0f"|format(test.price) }}</div>
+                    <a href="{{ url_for('patient.book_test') }}" class="btn btn-primary btn-sm">Book Now</a>
                 </div>
-                <div class="test-price">₹{{ "%.0f"|format(test.price) }}</div>
-                <a href="{{ url_for('patient.book_test') }}" class="btn btn-primary btn-sm">Book Now</a>
             </div>
             {% endfor %}
         </div>

@@ -4,7 +4,7 @@ from config import Config
 from extensions import db, login_manager, migrate
 from models import User
 from error_handlers import register_error_handlers
-from seed_data import seed_database
+
 
 
 def create_app():
@@ -41,7 +41,7 @@ def create_app():
     with app.app_context():
         db.create_all()
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-        seed_database()
+
 
     return app
 
