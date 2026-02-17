@@ -1,0 +1,46 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Site Settings{% endblock %}
+{% block page_title %}Site Settings{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <div>
+        <h1><i class="fas fa-cog"></i> Site <span class="gradient-text">Settings</span></h1>
+        <p>Manage your lab's contact info, working hours, and branding.</p>
+    </div>
+</div>
+
+<div class="admin-form-card">
+    <form method="POST">
+        <div class="form-group">
+            <label for="lab_name">Lab Name</label>
+            <input type="text" id="lab_name" name="lab_name" value="{{ settings.get('lab_name', 'Life Care Pathology Lab') }}" placeholder="Life Care Pathology Lab">
+        </div>
+        <div class="form-group">
+            <label for="lab_tagline">Tagline</label>
+            <input type="text" id="lab_tagline" name="lab_tagline" value="{{ settings.get('lab_tagline', 'Trusted Diagnostic Services') }}" placeholder="Your trusted lab partner">
+        </div>
+        <div class="form-group">
+            <label for="lab_phone">Phone Number</label>
+            <input type="text" id="lab_phone" name="lab_phone" value="{{ settings.get('lab_phone', '') }}" placeholder="+91 XXXXX XXXXX">
+        </div>
+        <div class="form-group">
+            <label for="lab_whatsapp">WhatsApp Number</label>
+            <input type="text" id="lab_whatsapp" name="lab_whatsapp" value="{{ settings.get('lab_whatsapp', '') }}" placeholder="+91 XXXXX XXXXX">
+        </div>
+        <div class="form-group">
+            <label for="lab_email">Email</label>
+            <input type="email" id="lab_email" name="lab_email" value="{{ settings.get('lab_email', '') }}" placeholder="info@lifecarelab.com">
+        </div>
+        <div class="form-group">
+            <label for="lab_address">Address</label>
+            <textarea id="lab_address" name="lab_address" rows="2" placeholder="Full address">{{ settings.get('lab_address', '') }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="lab_hours">Working Hours</label>
+            <input type="text" id="lab_hours" name="lab_hours" value="{{ settings.get('lab_hours', 'Mon-Sat: 7:00 AM - 9:00 PM') }}" placeholder="Mon-Sat: 7:00 AM - 9:00 PM">
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Settings</button>
+    </form>
+</div>
+{% endblock %}

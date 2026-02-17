@@ -1,0 +1,47 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Doctor Referrals{% endblock %}
+{% block page_title %}Doctor Referrals{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <div>
+        <h1><i class="fas fa-user-md"></i> Doctor <span class="gradient-text">Referrals</span></h1>
+        <p>Track patients referred by doctors.</p>
+    </div>
+    <a href="{{ url_for('admin.add_referral') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Referral</a>
+</div>
+
+{% if referrals %}
+<div class="admin-table-card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead><tr><th>ID</th><th>Doctor</th><th>Phone</th><th>Patient</th><th>Test</th><th>Notes</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for r in referrals %}
+                <tr>
+                    <td>#{{ r.id }}</td>
+                    <td><strong>{{ r.doctor_name }}</strong></td>
+                    <td>{{ r.doctor_phone or '—' }}</td>
+                    <td>{{ r.patient_name or '—' }}</td>
+                    <td>{{ r.test_name or '—' }}</td>
+                    <td>{{ r.notes[:40] if r.notes else '—' }}{{ '...' if r.notes and r.notes|length > 40 else '' }}</td>
+                    <td>{{ r.created_at.strftime('%d %b %Y') }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('admin.delete_referral', ref_id=r.id) }}" style="display:inline" onsubmit="return confirm('Delete?')">
+                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">👨‍⚕️</div>
+    <h3>No referrals yet</h3>
+    <a href="{{ url_for('admin.add_referral') }}" class="btn btn-primary">Add Referral</a>
+</div>
+{% endif %}
+{% endblock %}

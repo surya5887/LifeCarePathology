@@ -1,0 +1,55 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}All Users{% endblock %}
+{% block page_title %}User Management{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <div>
+        <h1><i class="fas fa-users-cog"></i> User <span class="gradient-text">Management</span></h1>
+        <p>View, block/unblock, change roles, and manage all users.</p>
+    </div>
+    <div class="action-buttons">
+        <a href="{{ url_for('admin.export_patients') }}" class="btn btn-outline btn-sm"><i class="fas fa-download"></i> Export CSV</a>
+    </div>
+</div>
+
+<div class="admin-table-card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for u in users %}
+                <tr style="{{ 'opacity:0.5' if not u.is_active else '' }}">
+                    <td>#{{ u.id }}</td>
+                    <td><strong>{{ u.name }}</strong></td>
+                    <td>{{ u.email }}</td>
+                    <td>{{ u.phone }}</td>
+                    <td><span class="status-badge {{ 'status-confirmed' if u.role == 'admin' else 'status-pending' }}">{{ u.role|capitalize }}</span></td>
+                    <td><span class="status-badge {{ 'status-completed' if u.is_active else 'status-cancelled' }}">{{ 'Active' if u.is_active else 'Blocked' }}</span></td>
+                    <td>{{ u.created_at.strftime('%d %b %Y') }}</td>
+                    <td class="action-buttons">
+                        {% if u.id != current_user.id %}
+                        <form method="POST" action="{{ url_for('admin.toggle_user_active', user_id=u.id) }}" style="display:inline">
+                            <button type="submit" class="btn btn-sm {{ 'btn-danger' if u.is_active else 'btn-primary' }}" title="{{ 'Block' if u.is_active else 'Unblock' }}">
+                                <i class="fas fa-{{ 'ban' if u.is_active else 'check' }}"></i>
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('admin.toggle_user_role', user_id=u.id) }}" style="display:inline" onsubmit="return confirm('Change role?')">
+                            <button type="submit" class="btn btn-sm btn-outline" title="Toggle Role">
+                                <i class="fas fa-exchange-alt"></i>
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}" style="display:inline" onsubmit="return confirm('DELETE this user permanently?')">
+                            <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="fas fa-trash"></i></button>
+                        </form>
+                        {% else %}
+                        <span style="color:var(--admin-text-muted);font-size:12px">You</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

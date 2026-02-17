@@ -1,0 +1,47 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Activity Log{% endblock %}
+{% block page_title %}Activity Log{% endblock %}
+
+{% block content %}
+<style>
+    .log-timeline { background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius); padding: 20px; }
+    .log-item { display: flex; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--admin-border); }
+    .log-item:last-child { border-bottom: none; }
+    .log-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--admin-primary); margin-top: 6px; flex-shrink: 0; }
+    .log-content { flex: 1; }
+    .log-action { font-size: 14px; font-weight: 600; }
+    .log-details { font-size: 13px; color: var(--admin-text-muted); margin-top: 2px; }
+    .log-meta { font-size: 11px; color: var(--admin-text-muted); margin-top: 4px; display: flex; gap: 12px; }
+</style>
+
+<div class="admin-page-header">
+    <div>
+        <h1><i class="fas fa-history"></i> Activity <span class="gradient-text">Log</span></h1>
+        <p>Track all admin actions (last 100 entries).</p>
+    </div>
+</div>
+
+{% if logs %}
+<div class="log-timeline">
+    {% for log in logs %}
+    <div class="log-item">
+        <div class="log-dot"></div>
+        <div class="log-content">
+            <div class="log-action">{{ log.action }}</div>
+            {% if log.details %}<div class="log-details">{{ log.details }}</div>{% endif %}
+            <div class="log-meta">
+                <span><i class="fas fa-user"></i> {{ log.admin.name }}</span>
+                <span><i class="fas fa-clock"></i> {{ log.created_at.strftime('%d %b %Y, %I:%M %p') }}</span>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">📋</div>
+    <h3>No activity logged yet</h3>
+    <p>Admin actions will appear here as they happen.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,26 +1,19 @@
 import os
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+import csv
+import io
+from datetime import datetime, timedelta
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, Response
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from models import User, Test, TestCategory, Booking, Report, ContactEnquiry, Testimonial
-from models import Report
+from models import (User, Test, TestCategory, Booking, Report,
+                    ContactEnquiry, Testimonial, DoctorReferral,
+                    ActivityLog, SiteSettings)
 from extensions import db
-from functools import wraps
 from utils import role_required
 from file_utils import validate_pdf
+from sqlalchemy import func
 
 admin = Blueprint('admin', __name__, url_prefix='/admin')
-
-
-def admin_required(f):
-    """Decorator to restrict access to admin users only."""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or not current_user.is_admin():
-            flash('Access denied. Admin privileges required.', 'error')
-            return redirect(url_for('main.home'))
-        return f(*args, **kwargs)
-    return decorated_function
 
 
 @admin.before_request
@@ -29,7 +22,16 @@ def before_request():
     pass
 
 
-# ─── Dashboard ─────────────────────────────────────────
+def log_activity(action, details=''):
+    """Helper to log admin activity."""
+    log = ActivityLog(admin_id=current_user.id, action=action, details=details)
+    db.session.add(log)
+    db.session.commit()
+
+
+# ═══════════════════════════════════════════════════════
+#  DASHBOARD
+# ═══════════════════════════════════════════════════════
 @admin.route('/dashboard')
 @role_required('admin')
 def dashboard():
@@ -42,6 +44,16 @@ def dashboard():
 
     recent_bookings = Booking.query.order_by(Booking.created_at.desc()).limit(10).all()
 
+    # Revenue (completed bookings)
+    today = datetime.utcnow().date()
+    month_start = today.replace(day=1)
+    monthly_revenue = db.session.query(func.sum(Test.price)).join(
+        Booking, Booking.test_id == Test.id
+    ).filter(
+        Booking.status == 'completed',
+        Booking.booking_date >= month_start
+    ).scalar() or 0
+
     return render_template('admin/dashboard.html',
                            total_patients=total_patients,
                            total_tests=total_tests,
@@ -49,10 +61,13 @@ def dashboard():
                            pending_bookings=pending_bookings,
                            total_reports=total_reports,
                            unread_enquiries=unread_enquiries,
-                           recent_bookings=recent_bookings)
+                           recent_bookings=recent_bookings,
+                           monthly_revenue=monthly_revenue)
 
 
-# ─── Test Management ───────────────────────────────────
+# ═══════════════════════════════════════════════════════
+#  TEST MANAGEMENT
+# ═══════════════════════════════════════════════════════
 @admin.route('/tests')
 @role_required('admin')
 def tests():
@@ -76,16 +91,11 @@ def add_test():
             flash('Please fill in all required fields.', 'error')
             return render_template('admin/test_form.html', categories=categories, test=None)
 
-        test = Test(
-            name=name,
-            category_id=int(category_id),
-            price=float(price),
-            description=description,
-            sample_type=sample_type,
-            report_time=report_time
-        )
+        test = Test(name=name, category_id=int(category_id), price=float(price),
+                    description=description, sample_type=sample_type, report_time=report_time)
         db.session.add(test)
         db.session.commit()
+        log_activity('Added test', f'Test: {name}')
         flash(f'Test "{name}" added successfully! ✅', 'success')
         return redirect(url_for('admin.tests'))
 
@@ -108,6 +118,7 @@ def edit_test(test_id):
         test.is_active = request.form.get('is_active') == 'on'
 
         db.session.commit()
+        log_activity('Updated test', f'Test: {test.name}')
         flash(f'Test "{test.name}" updated successfully! ✅', 'success')
         return redirect(url_for('admin.tests'))
 
@@ -121,11 +132,78 @@ def delete_test(test_id):
     name = test.name
     db.session.delete(test)
     db.session.commit()
+    log_activity('Deleted test', f'Test: {name}')
     flash(f'Test "{name}" deleted. 🗑️', 'success')
     return redirect(url_for('admin.tests'))
 
 
-# ─── Appointments / Bookings ──────────────────────────
+# ═══════════════════════════════════════════════════════
+#  CATEGORY MANAGEMENT
+# ═══════════════════════════════════════════════════════
+@admin.route('/categories')
+@role_required('admin')
+def categories():
+    all_categories = TestCategory.query.all()
+    return render_template('admin/categories.html', categories=all_categories)
+
+
+@admin.route('/categories/add', methods=['GET', 'POST'])
+@role_required('admin')
+def add_category():
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        icon = request.form.get('icon', '🧪').strip()
+        description = request.form.get('description', '').strip()
+
+        if not name:
+            flash('Category name is required.', 'error')
+            return render_template('admin/category_form.html', category=None)
+
+        cat = TestCategory(name=name, icon=icon, description=description)
+        db.session.add(cat)
+        db.session.commit()
+        log_activity('Added category', f'Category: {name}')
+        flash(f'Category "{name}" added! ✅', 'success')
+        return redirect(url_for('admin.categories'))
+
+    return render_template('admin/category_form.html', category=None)
+
+
+@admin.route('/categories/edit/<int:cat_id>', methods=['GET', 'POST'])
+@role_required('admin')
+def edit_category(cat_id):
+    cat = TestCategory.query.get_or_404(cat_id)
+
+    if request.method == 'POST':
+        cat.name = request.form.get('name', '').strip()
+        cat.icon = request.form.get('icon', '🧪').strip()
+        cat.description = request.form.get('description', '').strip()
+        db.session.commit()
+        log_activity('Updated category', f'Category: {cat.name}')
+        flash(f'Category "{cat.name}" updated! ✅', 'success')
+        return redirect(url_for('admin.categories'))
+
+    return render_template('admin/category_form.html', category=cat)
+
+
+@admin.route('/categories/delete/<int:cat_id>', methods=['POST'])
+@role_required('admin')
+def delete_category(cat_id):
+    cat = TestCategory.query.get_or_404(cat_id)
+    if cat.tests:
+        flash('Cannot delete category with existing tests. Remove tests first.', 'error')
+        return redirect(url_for('admin.categories'))
+    name = cat.name
+    db.session.delete(cat)
+    db.session.commit()
+    log_activity('Deleted category', f'Category: {name}')
+    flash(f'Category "{name}" deleted. 🗑️', 'success')
+    return redirect(url_for('admin.categories'))
+
+
+# ═══════════════════════════════════════════════════════
+#  APPOINTMENTS / BOOKINGS
+# ═══════════════════════════════════════════════════════
 @admin.route('/appointments')
 @role_required('admin')
 def appointments():
@@ -147,59 +225,60 @@ def update_appointment(booking_id):
         if new_status == 'confirmed':
             booking.payment_status = 'paid'
         db.session.commit()
+        log_activity('Updated booking status', f'Booking #{booking.id} → {new_status}')
         flash(f'Booking #{booking.id} status updated to {new_status}. ✅', 'success')
     return redirect(url_for('admin.appointments'))
 
 
-# ─── Report Upload ─────────────────────────────────────
+@admin.route('/appointments/<int:booking_id>/delete', methods=['POST'])
+@role_required('admin')
+def delete_appointment(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    db.session.delete(booking)
+    db.session.commit()
+    log_activity('Deleted booking', f'Booking #{booking_id}')
+    flash(f'Booking #{booking_id} deleted. 🗑️', 'success')
+    return redirect(url_for('admin.appointments'))
+
+
+# ═══════════════════════════════════════════════════════
+#  REPORT MANAGEMENT
+# ═══════════════════════════════════════════════════════
 @admin.route('/upload-report', methods=['GET', 'POST'])
 @role_required('admin')
 def upload_report():
-
     if request.method == 'POST':
-
         patient_name = request.form.get('patient_name')
         token_number = request.form.get('token_number')
         password = request.form.get('password')
         remarks = request.form.get('remarks')
         file = request.files.get('report_file')
 
-        # Basic field validation
         if not all([patient_name, token_number, password, file]):
             flash('Please fill all fields and select a PDF file.', 'error')
             return render_template('admin/upload_report.html')
 
-        # Duplicate token check
         if Report.query.filter_by(token_number=token_number).first():
             flash('Token number already exists. Please use a unique token.', 'error')
             return render_template('admin/upload_report.html')
 
-        # Validate PDF file
         is_valid, error_msg = validate_pdf(file)
         if not is_valid:
             flash(error_msg, 'error')
             return render_template('admin/upload_report.html')
 
-        # Save file
         filename = secure_filename(f"{token_number}_{file.filename}")
         upload_dir = current_app.config['UPLOAD_FOLDER']
         os.makedirs(upload_dir, exist_ok=True)
         file_path = os.path.join(upload_dir, filename)
         file.save(file_path)
 
-        # Create report entry
-        report = Report(
-            patient_name=patient_name,
-            token_number=token_number,
-            file_path=filename,
-            remarks=remarks
-        )
-
+        report = Report(patient_name=patient_name, token_number=token_number,
+                        file_path=filename, remarks=remarks)
         report.set_password(password)
-
         db.session.add(report)
         db.session.commit()
-
+        log_activity('Uploaded report', f'Patient: {patient_name}, Token: {token_number}')
         flash('Report uploaded successfully!', 'success')
         return redirect(url_for('admin.reports'))
 
@@ -213,7 +292,26 @@ def reports():
     return render_template('admin/reports.html', reports=all_reports)
 
 
-# ─── Patient Management ───────────────────────────────
+@admin.route('/reports/<int:report_id>/delete', methods=['POST'])
+@role_required('admin')
+def delete_report(report_id):
+    report = Report.query.get_or_404(report_id)
+    # Delete file from disk
+    upload_dir = current_app.config['UPLOAD_FOLDER']
+    file_path = os.path.join(upload_dir, report.file_path)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    token = report.token_number
+    db.session.delete(report)
+    db.session.commit()
+    log_activity('Deleted report', f'Token: {token}')
+    flash(f'Report (Token: {token}) deleted. 🗑️', 'success')
+    return redirect(url_for('admin.reports'))
+
+
+# ═══════════════════════════════════════════════════════
+#  PATIENT / USER MANAGEMENT
+# ═══════════════════════════════════════════════════════
 @admin.route('/patients')
 @role_required('admin')
 def patients():
@@ -231,7 +329,180 @@ def patients():
     return render_template('admin/patients.html', patients=all_patients, search=search)
 
 
-# ─── Contact Enquiries ────────────────────────────────
+@admin.route('/users')
+@role_required('admin')
+def users():
+    all_users = User.query.order_by(User.created_at.desc()).all()
+    return render_template('admin/users.html', users=all_users)
+
+
+@admin.route('/users/<int:user_id>/toggle-active', methods=['POST'])
+@role_required('admin')
+def toggle_user_active(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash('You cannot deactivate yourself.', 'error')
+        return redirect(url_for('admin.users'))
+    user.is_active = not user.is_active
+    db.session.commit()
+    status = 'activated' if user.is_active else 'blocked'
+    log_activity(f'User {status}', f'User: {user.name} ({user.email})')
+    flash(f'User "{user.name}" has been {status}. ✅', 'success')
+    return redirect(url_for('admin.users'))
+
+
+@admin.route('/users/<int:user_id>/toggle-role', methods=['POST'])
+@role_required('admin')
+def toggle_user_role(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash('You cannot change your own role.', 'error')
+        return redirect(url_for('admin.users'))
+    user.role = 'admin' if user.role == 'patient' else 'patient'
+    db.session.commit()
+    log_activity(f'Changed user role', f'User: {user.name} → {user.role}')
+    flash(f'User "{user.name}" role changed to {user.role}. ✅', 'success')
+    return redirect(url_for('admin.users'))
+
+
+@admin.route('/users/<int:user_id>/delete', methods=['POST'])
+@role_required('admin')
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash('You cannot delete yourself.', 'error')
+        return redirect(url_for('admin.users'))
+    name = user.name
+    db.session.delete(user)
+    db.session.commit()
+    log_activity('Deleted user', f'User: {name}')
+    flash(f'User "{name}" deleted. 🗑️', 'success')
+    return redirect(url_for('admin.users'))
+
+
+# ═══════════════════════════════════════════════════════
+#  TESTIMONIAL MANAGEMENT
+# ═══════════════════════════════════════════════════════
+@admin.route('/testimonials')
+@role_required('admin')
+def testimonials():
+    all_testimonials = Testimonial.query.order_by(Testimonial.created_at.desc()).all()
+    return render_template('admin/testimonials.html', testimonials=all_testimonials)
+
+
+@admin.route('/testimonials/add', methods=['GET', 'POST'])
+@role_required('admin')
+def add_testimonial():
+    if request.method == 'POST':
+        reviewer_name = request.form.get('reviewer_name', '').strip()
+        rating = int(request.form.get('rating', 5))
+        review = request.form.get('review', '').strip()
+        is_approved = request.form.get('is_approved') == 'on'
+
+        if not all([reviewer_name, review]):
+            flash('Name and review are required.', 'error')
+            return render_template('admin/testimonial_form.html', testimonial=None)
+
+        t = Testimonial(reviewer_name=reviewer_name, rating=rating,
+                        review=review, is_approved=is_approved)
+        db.session.add(t)
+        db.session.commit()
+        log_activity('Added testimonial', f'From: {reviewer_name}')
+        flash('Testimonial added! ✅', 'success')
+        return redirect(url_for('admin.testimonials'))
+
+    return render_template('admin/testimonial_form.html', testimonial=None)
+
+
+@admin.route('/testimonials/edit/<int:t_id>', methods=['GET', 'POST'])
+@role_required('admin')
+def edit_testimonial(t_id):
+    t = Testimonial.query.get_or_404(t_id)
+
+    if request.method == 'POST':
+        t.reviewer_name = request.form.get('reviewer_name', '').strip()
+        t.rating = int(request.form.get('rating', 5))
+        t.review = request.form.get('review', '').strip()
+        t.is_approved = request.form.get('is_approved') == 'on'
+        db.session.commit()
+        log_activity('Updated testimonial', f'From: {t.reviewer_name}')
+        flash('Testimonial updated! ✅', 'success')
+        return redirect(url_for('admin.testimonials'))
+
+    return render_template('admin/testimonial_form.html', testimonial=t)
+
+
+@admin.route('/testimonials/<int:t_id>/toggle', methods=['POST'])
+@role_required('admin')
+def toggle_testimonial(t_id):
+    t = Testimonial.query.get_or_404(t_id)
+    t.is_approved = not t.is_approved
+    db.session.commit()
+    status = 'approved' if t.is_approved else 'hidden'
+    flash(f'Testimonial {status}. ✅', 'success')
+    return redirect(url_for('admin.testimonials'))
+
+
+@admin.route('/testimonials/<int:t_id>/delete', methods=['POST'])
+@role_required('admin')
+def delete_testimonial(t_id):
+    t = Testimonial.query.get_or_404(t_id)
+    db.session.delete(t)
+    db.session.commit()
+    log_activity('Deleted testimonial', f'ID: {t_id}')
+    flash('Testimonial deleted. 🗑️', 'success')
+    return redirect(url_for('admin.testimonials'))
+
+
+# ═══════════════════════════════════════════════════════
+#  DOCTOR REFERRALS
+# ═══════════════════════════════════════════════════════
+@admin.route('/referrals')
+@role_required('admin')
+def referrals():
+    all_referrals = DoctorReferral.query.order_by(DoctorReferral.created_at.desc()).all()
+    return render_template('admin/referrals.html', referrals=all_referrals)
+
+
+@admin.route('/referrals/add', methods=['GET', 'POST'])
+@role_required('admin')
+def add_referral():
+    if request.method == 'POST':
+        doctor_name = request.form.get('doctor_name', '').strip()
+        doctor_phone = request.form.get('doctor_phone', '').strip()
+        patient_name = request.form.get('patient_name', '').strip()
+        test_name = request.form.get('test_name', '').strip()
+        notes = request.form.get('notes', '').strip()
+
+        if not doctor_name:
+            flash('Doctor name is required.', 'error')
+            return render_template('admin/referral_form.html', referral=None)
+
+        ref = DoctorReferral(doctor_name=doctor_name, doctor_phone=doctor_phone,
+                             patient_name=patient_name, test_name=test_name, notes=notes)
+        db.session.add(ref)
+        db.session.commit()
+        log_activity('Added referral', f'Doctor: {doctor_name}')
+        flash('Referral added! ✅', 'success')
+        return redirect(url_for('admin.referrals'))
+
+    return render_template('admin/referral_form.html', referral=None)
+
+
+@admin.route('/referrals/<int:ref_id>/delete', methods=['POST'])
+@role_required('admin')
+def delete_referral(ref_id):
+    ref = DoctorReferral.query.get_or_404(ref_id)
+    db.session.delete(ref)
+    db.session.commit()
+    log_activity('Deleted referral', f'ID: {ref_id}')
+    flash('Referral deleted. 🗑️', 'success')
+    return redirect(url_for('admin.referrals'))
+
+
+# ═══════════════════════════════════════════════════════
+#  CONTACT ENQUIRIES
+# ═══════════════════════════════════════════════════════
 @admin.route('/enquiries')
 @role_required('admin')
 def enquiries():
@@ -246,3 +517,162 @@ def mark_read(enquiry_id):
     enquiry.is_read = True
     db.session.commit()
     return redirect(url_for('admin.enquiries'))
+
+
+@admin.route('/enquiries/<int:enquiry_id>/delete', methods=['POST'])
+@role_required('admin')
+def delete_enquiry(enquiry_id):
+    enquiry = ContactEnquiry.query.get_or_404(enquiry_id)
+    db.session.delete(enquiry)
+    db.session.commit()
+    log_activity('Deleted enquiry', f'From: {enquiry.name}')
+    flash('Enquiry deleted. 🗑️', 'success')
+    return redirect(url_for('admin.enquiries'))
+
+
+# ═══════════════════════════════════════════════════════
+#  REVENUE & ANALYTICS
+# ═══════════════════════════════════════════════════════
+@admin.route('/analytics')
+@role_required('admin')
+def analytics():
+    today = datetime.utcnow().date()
+
+    # Today's stats
+    today_bookings = Booking.query.filter(
+        func.date(Booking.booking_date) == today
+    ).count()
+    today_revenue = db.session.query(func.sum(Test.price)).join(
+        Booking, Booking.test_id == Test.id
+    ).filter(Booking.status == 'completed',
+             func.date(Booking.booking_date) == today).scalar() or 0
+
+    # This month
+    month_start = today.replace(day=1)
+    monthly_bookings = Booking.query.filter(Booking.booking_date >= month_start).count()
+    monthly_revenue = db.session.query(func.sum(Test.price)).join(
+        Booking, Booking.test_id == Test.id
+    ).filter(Booking.status == 'completed',
+             Booking.booking_date >= month_start).scalar() or 0
+
+    # Total all time
+    total_revenue = db.session.query(func.sum(Test.price)).join(
+        Booking, Booking.test_id == Test.id
+    ).filter(Booking.status == 'completed').scalar() or 0
+
+    # Top tests (most booked)
+    top_tests = db.session.query(
+        Test.name, func.count(Booking.id).label('count')
+    ).join(Booking, Booking.test_id == Test.id
+    ).group_by(Test.name).order_by(func.count(Booking.id).desc()).limit(5).all()
+
+    # Booking status breakdown
+    status_counts = db.session.query(
+        Booking.status, func.count(Booking.id)
+    ).group_by(Booking.status).all()
+
+    # Recent activity
+    recent_activity = ActivityLog.query.order_by(
+        ActivityLog.created_at.desc()
+    ).limit(20).all()
+
+    return render_template('admin/analytics.html',
+                           today_bookings=today_bookings,
+                           today_revenue=today_revenue,
+                           monthly_bookings=monthly_bookings,
+                           monthly_revenue=monthly_revenue,
+                           total_revenue=total_revenue,
+                           top_tests=top_tests,
+                           status_counts=dict(status_counts),
+                           recent_activity=recent_activity)
+
+
+# ═══════════════════════════════════════════════════════
+#  ACTIVITY LOGS
+# ═══════════════════════════════════════════════════════
+@admin.route('/activity-log')
+@role_required('admin')
+def activity_log():
+    logs = ActivityLog.query.order_by(ActivityLog.created_at.desc()).limit(100).all()
+    return render_template('admin/activity_log.html', logs=logs)
+
+
+# ═══════════════════════════════════════════════════════
+#  SITE SETTINGS
+# ═══════════════════════════════════════════════════════
+@admin.route('/settings', methods=['GET', 'POST'])
+@role_required('admin')
+def settings():
+    if request.method == 'POST':
+        keys = ['lab_name', 'lab_phone', 'lab_email', 'lab_address',
+                'lab_hours', 'lab_tagline', 'lab_whatsapp']
+        for key in keys:
+            value = request.form.get(key, '').strip()
+            setting = SiteSettings.query.filter_by(key=key).first()
+            if setting:
+                setting.value = value
+            else:
+                setting = SiteSettings(key=key, value=value)
+                db.session.add(setting)
+        db.session.commit()
+        log_activity('Updated site settings')
+        flash('Settings saved! ✅', 'success')
+        return redirect(url_for('admin.settings'))
+
+    # Load current settings
+    settings_dict = {}
+    for s in SiteSettings.query.all():
+        settings_dict[s.key] = s.value
+
+    return render_template('admin/settings.html', settings=settings_dict)
+
+
+# ═══════════════════════════════════════════════════════
+#  CSV EXPORTS
+# ═══════════════════════════════════════════════════════
+@admin.route('/export/patients')
+@role_required('admin')
+def export_patients():
+    patients = User.query.filter_by(role='patient').all()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['ID', 'Name', 'Email', 'Phone', 'Address', 'Bookings', 'Joined'])
+    for p in patients:
+        writer.writerow([p.id, p.name, p.email, p.phone, p.address,
+                         len(p.bookings), p.created_at.strftime('%Y-%m-%d')])
+    log_activity('Exported patients CSV')
+    return Response(output.getvalue(), mimetype='text/csv',
+                    headers={'Content-Disposition': 'attachment;filename=patients.csv'})
+
+
+@admin.route('/export/bookings')
+@role_required('admin')
+def export_bookings():
+    bookings = Booking.query.order_by(Booking.created_at.desc()).all()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['ID', 'Patient', 'Test', 'Date', 'Time', 'Status',
+                     'Home Collection', 'Payment', 'Created'])
+    for b in bookings:
+        writer.writerow([b.id, b.user.name, b.test.name,
+                         b.booking_date.strftime('%Y-%m-%d'), b.slot_time,
+                         b.status, 'Yes' if b.home_collection else 'No',
+                         b.payment_status, b.created_at.strftime('%Y-%m-%d')])
+    log_activity('Exported bookings CSV')
+    return Response(output.getvalue(), mimetype='text/csv',
+                    headers={'Content-Disposition': 'attachment;filename=bookings.csv'})
+
+
+@admin.route('/export/reports')
+@role_required('admin')
+def export_reports():
+    reports = Report.query.order_by(Report.uploaded_at.desc()).all()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['ID', 'Patient Name', 'Token Number', 'Remarks', 'Uploaded'])
+    for r in reports:
+        writer.writerow([r.id, r.patient_name, r.token_number,
+                         r.remarks, r.uploaded_at.strftime('%Y-%m-%d')])
+    log_activity('Exported reports CSV')
+    return Response(output.getvalue(), mimetype='text/csv',
+                    headers={'Content-Disposition': 'attachment;filename=reports.csv'})

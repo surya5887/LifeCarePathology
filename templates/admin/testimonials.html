@@ -1,0 +1,53 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Testimonials{% endblock %}
+{% block page_title %}Testimonials{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <div>
+        <h1><i class="fas fa-star"></i> <span class="gradient-text">Testimonials</span></h1>
+        <p>Manage patient reviews displayed on the homepage.</p>
+    </div>
+    <a href="{{ url_for('admin.add_testimonial') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Testimonial</a>
+</div>
+
+{% if testimonials %}
+<div class="admin-table-card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead><tr><th>ID</th><th>Reviewer</th><th>Rating</th><th>Review</th><th>Approved</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for t in testimonials %}
+                <tr style="{{ 'opacity:0.5' if not t.is_approved else '' }}">
+                    <td>#{{ t.id }}</td>
+                    <td><strong>{{ t.reviewer_name }}</strong></td>
+                    <td>{% for i in range(t.rating) %}⭐{% endfor %}</td>
+                    <td>{{ t.review[:50] }}{{ '...' if t.review|length > 50 else '' }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('admin.toggle_testimonial', t_id=t.id) }}" style="display:inline">
+                            <button type="submit" class="btn btn-sm {{ 'btn-primary' if t.is_approved else 'btn-outline' }}">
+                                {{ '✅ Approved' if t.is_approved else '❌ Hidden' }}
+                            </button>
+                        </form>
+                    </td>
+                    <td>{{ t.created_at.strftime('%d %b %Y') }}</td>
+                    <td class="action-buttons">
+                        <a href="{{ url_for('admin.edit_testimonial', t_id=t.id) }}" class="btn btn-sm btn-outline"><i class="fas fa-edit"></i></a>
+                        <form method="POST" action="{{ url_for('admin.delete_testimonial', t_id=t.id) }}" style="display:inline" onsubmit="return confirm('Delete?')">
+                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">⭐</div>
+    <h3>No testimonials yet</h3>
+    <a href="{{ url_for('admin.add_testimonial') }}" class="btn btn-primary">Add First Testimonial</a>
+</div>
+{% endif %}
+{% endblock %}

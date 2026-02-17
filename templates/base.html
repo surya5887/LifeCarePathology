@@ -31,9 +31,7 @@
                 <li><a href="{{ url_for('main.check_report') }}" class="nav-link {% if request.endpoint == 'main.check_report' %}active{% endif %}">Check Report</a></li>
                 <li><a href="{{ url_for('main.contact') }}" class="nav-link {% if request.endpoint == 'main.contact' %}active{% endif %}">Contact</a></li>
                 {% if current_user.is_authenticated %}
-                    {% if current_user.is_admin() %}
-                        <li><a href="{{ url_for('admin.dashboard') }}" class="nav-link nav-btn">Admin Panel</a></li>
-                    {% else %}
+                    {% if current_user.role == 'patient' %}
                         <li><a href="{{ url_for('patient.dashboard') }}" class="nav-link nav-btn">Dashboard</a></li>
                     {% endif %}
                     <li><a href="{{ url_for('auth.logout') }}" class="nav-link nav-btn-outline">Logout</a></li>

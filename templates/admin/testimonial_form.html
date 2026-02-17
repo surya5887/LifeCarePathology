@@ -1,0 +1,37 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}{{ 'Edit Testimonial' if testimonial else 'Add Testimonial' }}{% endblock %}
+{% block page_title %}{{ 'Edit Testimonial' if testimonial else 'Add Testimonial' }}{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <div><h1><i class="fas fa-star"></i> {{ 'Edit' if testimonial else 'Add' }} <span class="gradient-text">Testimonial</span></h1></div>
+    <a href="{{ url_for('admin.testimonials') }}" class="btn btn-outline">← Back</a>
+</div>
+<div class="admin-form-card">
+    <form method="POST">
+        <div class="form-group">
+            <label for="reviewer_name">Reviewer Name *</label>
+            <input type="text" id="reviewer_name" name="reviewer_name" value="{{ testimonial.reviewer_name if testimonial else '' }}" required>
+        </div>
+        <div class="form-group">
+            <label for="rating">Rating (1-5)</label>
+            <select id="rating" name="rating">
+                {% for i in range(5, 0, -1) %}
+                <option value="{{ i }}" {{ 'selected' if testimonial and testimonial.rating == i else '' }}>{{ i }} ⭐</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="review">Review Text *</label>
+            <textarea id="review" name="review" rows="4" required>{{ testimonial.review if testimonial else '' }}</textarea>
+        </div>
+        <div class="form-group">
+            <div class="form-check">
+                <input type="checkbox" name="is_approved" id="is_approved" {{ 'checked' if testimonial and testimonial.is_approved else '' }}>
+                <label for="is_approved">Approved (visible on website)</label>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {{ 'Update' if testimonial else 'Add' }}</button>
+    </form>
+</div>
+{% endblock %}

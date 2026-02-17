@@ -1,0 +1,46 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Categories{% endblock %}
+{% block page_title %}Test Categories{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <div>
+        <h1><i class="fas fa-tags"></i> Test <span class="gradient-text">Categories</span></h1>
+        <p>Manage test categories that group diagnostic tests.</p>
+    </div>
+    <a href="{{ url_for('admin.add_category') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Category</a>
+</div>
+
+{% if categories %}
+<div class="admin-table-card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead><tr><th>ID</th><th>Icon</th><th>Name</th><th>Description</th><th>Tests</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for cat in categories %}
+                <tr>
+                    <td>#{{ cat.id }}</td>
+                    <td style="font-size:20px">{{ cat.icon }}</td>
+                    <td><strong>{{ cat.name }}</strong></td>
+                    <td>{{ cat.description[:60] if cat.description else '—' }}{{ '...' if cat.description|length > 60 else '' }}</td>
+                    <td>{{ cat.tests|length }}</td>
+                    <td class="action-buttons">
+                        <a href="{{ url_for('admin.edit_category', cat_id=cat.id) }}" class="btn btn-sm btn-outline"><i class="fas fa-edit"></i></a>
+                        <form method="POST" action="{{ url_for('admin.delete_category', cat_id=cat.id) }}" style="display:inline" onsubmit="return confirm('Delete this category?')">
+                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">🏷️</div>
+    <h3>No categories yet</h3>
+    <a href="{{ url_for('admin.add_category') }}" class="btn btn-primary">Add First Category</a>
+</div>
+{% endif %}
+{% endblock %}

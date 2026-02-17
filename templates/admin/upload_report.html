@@ -1,55 +1,48 @@
-{% extends 'base.html' %}
-{% block title %}Upload Report — Admin{% endblock %}
+{% extends 'admin/admin_base.html' %}
+{% block title %}Upload Report{% endblock %}
+{% block page_title %}Upload Report{% endblock %}
 
 {% block content %}
-<section class="dashboard-section">
-    <div class="section-container">
-        <div class="dashboard-header">
-            <div>
-                <h1><i class="fas fa-upload"></i> Upload <span class="gradient-text">Report</span></h1>
-                <p>Upload a PDF report with a token number and password for the patient.</p>
-            </div>
-            <a href="{{ url_for('admin.reports') }}" class="btn btn-outline">← View All Reports</a>
-        </div>
-
-        <div class="booking-form-card">
-            <div class="upload-info-banner">
-                <i class="fas fa-info-circle"></i>
-                <p>The patient will use the <strong>Token Number</strong> and <strong>Password</strong> to access their report on the "Check Report" page.</p>
-            </div>
-
-            <form method="POST" action="{{ url_for('admin.upload_report') }}" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label for="patient_name">Patient Name *</label>
-                    <input type="text" id="patient_name" name="patient_name" placeholder="Enter patient's full name" required>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="token_number">Token Number * <small class="text-muted">(unique)</small></label>
-                        <input type="text" id="token_number" name="token_number" placeholder="e.g. LC-2026-001" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Report Password *</label>
-                        <input type="text" id="password" name="password" placeholder="Password for the patient" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="report_file">Report PDF File *</label>
-                    <input type="file" id="report_file" name="report_file" accept=".pdf" required class="file-input">
-                </div>
-
-                <div class="form-group">
-                    <label for="remarks">Remarks (optional)</label>
-                    <textarea id="remarks" name="remarks" rows="2" placeholder="Any notes about this report"></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-lg">
-                    <i class="fas fa-cloud-upload-alt"></i> Upload Report
-                </button>
-            </form>
-        </div>
+<div class="admin-page-header">
+    <div>
+        <h1><i class="fas fa-upload"></i> Upload <span class="gradient-text">Report</span></h1>
+        <p>Upload a PDF report with a token number and password for the patient.</p>
     </div>
-</section>
+    <a href="{{ url_for('admin.reports') }}" class="btn btn-outline">← View All Reports</a>
+</div>
+
+<div class="admin-form-card">
+    <form method="POST" action="{{ url_for('admin.upload_report') }}" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="patient_name">Patient Name *</label>
+            <input type="text" id="patient_name" name="patient_name" placeholder="Enter patient's full name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="token_number">Token Number *</label>
+            <input type="text" id="token_number" name="token_number" placeholder="e.g. LC-2026-001" required>
+            <div class="form-hint">Must be unique. Patient will use this to access their report.</div>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Report Password *</label>
+            <input type="text" id="password" name="password" placeholder="Password for the patient" required>
+            <div class="form-hint">Share this password with the patient to access their report.</div>
+        </div>
+
+        <div class="form-group">
+            <label for="report_file">Report PDF File *</label>
+            <input type="file" id="report_file" name="report_file" accept=".pdf" required>
+        </div>
+
+        <div class="form-group">
+            <label for="remarks">Remarks (optional)</label>
+            <textarea id="remarks" name="remarks" rows="2" placeholder="Any notes about this report"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-cloud-upload-alt"></i> Upload Report
+        </button>
+    </form>
+</div>
 {% endblock %}

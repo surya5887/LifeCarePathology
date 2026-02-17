@@ -1,0 +1,28 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}{{ 'Edit Category' if category else 'Add Category' }}{% endblock %}
+{% block page_title %}{{ 'Edit Category' if category else 'Add Category' }}{% endblock %}
+
+{% block content %}
+<div class="admin-page-header">
+    <div><h1><i class="fas fa-{{ 'edit' if category else 'plus' }}"></i> {{ 'Edit' if category else 'Add' }} <span class="gradient-text">Category</span></h1></div>
+    <a href="{{ url_for('admin.categories') }}" class="btn btn-outline">← Back</a>
+</div>
+<div class="admin-form-card">
+    <form method="POST">
+        <div class="form-group">
+            <label for="name">Category Name *</label>
+            <input type="text" id="name" name="name" value="{{ category.name if category else '' }}" placeholder="e.g. Blood Tests" required>
+        </div>
+        <div class="form-group">
+            <label for="icon">Icon (emoji)</label>
+            <input type="text" id="icon" name="icon" value="{{ category.icon if category else '🧪' }}" placeholder="e.g. 🩸">
+            <div class="form-hint">Use any emoji as the category icon.</div>
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="3" placeholder="Brief description">{{ category.description if category else '' }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {{ 'Update' if category else 'Add' }} Category</button>
+    </form>
+</div>
+{% endblock %}

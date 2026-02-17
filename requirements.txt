@@ -4,3 +4,4 @@ flask-login
 flask-migrate
 werkzeug
 gunicorn
+psycopg2-binary

@@ -9,18 +9,21 @@ class Config:
         "dev-secret-key-change-in-production"
     )
 
-    DATABASE_URL = os.environ.get("DATABASE_URL")
+    # Supabase PostgreSQL (Session Pooler — IPv4 compatible)
+    DATABASE_URL = os.environ.get(
+        "DATABASE_URL",
+        "postgresql://postgres.qtkrrwtorkmfhxakemjp:Anees%40983795@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
+    )
 
-    if DATABASE_URL:
-        if DATABASE_URL.startswith("postgres://"):
-            DATABASE_URL = DATABASE_URL.replace(
-                "postgres://", "postgresql://", 1
-            )
-        SQLALCHEMY_DATABASE_URI = DATABASE_URL
-    else:
-        SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(BASE_DIR, "lifecare.db")
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
+    SQLALCHEMY_DATABASE_URI = DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_recycle": 280,
+        "pool_pre_ping": True,
+    }
 
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads", "reports")
 
