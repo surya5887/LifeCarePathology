@@ -2,30 +2,8 @@
 {% block title %}Life Care Pathology Lab — Trusted Diagnostics{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="hero">
-    <div class="hero-bg">
-        <div class="hero-orb hero-orb-1"></div>
-        <div class="hero-orb hero-orb-2"></div>
-        <div class="hero-orb hero-orb-3"></div>
-    </div>
-    <div class="hero-content">
-        <div class="hero-badge">🏥 NABL Accredited Lab</div>
-        <h1 class="hero-title">Accurate Diagnostics for <span class="gradient-text">Better Health</span></h1>
-        <p class="hero-subtitle">Life Care Pathology Lab offers reliable pathology & diagnostic services with fast results, home sample collection, and online report access.</p>
-        <div class="hero-buttons">
-            <a href="{{ url_for('main.services') }}" class="btn btn-primary btn-lg">
-                View All Tests <span class="btn-arrow">→</span>
-            </a>
-            <a href="{{ url_for('main.check_report') }}" class="btn btn-outline btn-lg">
-                <i class="fas fa-file-medical"></i> Check Report
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- Image Carousel Section -->
-<section class="carousel-section">
+<!-- Image Carousel Section (TOP) -->
+<section class="carousel-section" style="padding-top: 78px;">
     <div class="carousel-wrapper">
         <div class="carousel-header">
             <span class="section-badge">Our Lab</span>
@@ -75,6 +53,54 @@
         <div class="carousel-dots"></div>
     </div>
 </section>
+
+<!-- Hero Section -->
+<section class="hero" style="padding-top: 80px; min-height: 70vh;">
+    <div class="hero-bg">
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
+    </div>
+    <div class="hero-content">
+        <div class="hero-badge">🏥 NABL Accredited Lab</div>
+        <h1 class="hero-title">Accurate Diagnostics for <span class="gradient-text">Better Health</span></h1>
+        <p class="hero-subtitle">Life Care Pathology Lab offers reliable pathology & diagnostic services with fast results, home sample collection, and online report access.</p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('main.services') }}" class="btn btn-primary btn-lg">
+                View All Tests <span class="btn-arrow">→</span>
+            </a>
+            <a href="{{ url_for('main.check_report') }}" class="btn btn-outline btn-lg">
+                <i class="fas fa-file-medical"></i> Check Report
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Horizontal Scrolling Services Strip -->
+{% if categories %}
+<section class="services-scroll-section">
+    <div class="services-scroll-header">
+        <h3>Browse Our Services</h3>
+    </div>
+    <div class="services-scroll-track" id="servicesScrollTrack">
+        {% for cat in categories %}
+        <a href="{{ url_for('main.services', category=cat.id) }}" class="scroll-service-card">
+            <span class="scroll-service-icon">{{ cat.icon }}</span>
+            <h4>{{ cat.name }}</h4>
+            <p>{{ cat.tests|length }} tests</p>
+        </a>
+        {% endfor %}
+        <!-- Duplicate for infinite scroll effect -->
+        {% for cat in categories %}
+        <a href="{{ url_for('main.services', category=cat.id) }}" class="scroll-service-card">
+            <span class="scroll-service-icon">{{ cat.icon }}</span>
+            <h4>{{ cat.name }}</h4>
+            <p>{{ cat.tests|length }} tests</p>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 
 <!-- Services Overview -->
 <section class="services-section" id="services">
@@ -133,7 +159,7 @@
             <div class="why-card animate-on-scroll">
                 <div class="why-icon"><i class="fas fa-laptop-medical"></i></div>
                 <h3>Online Reports</h3>
-                <p>Download your reports online anytime using your token number.</p>
+                <p>Download your reports online anytime using your Report ID.</p>
             </div>
         </div>
     </div>

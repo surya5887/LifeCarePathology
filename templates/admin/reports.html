@@ -3,55 +3,71 @@
 {% block page_title %}All Reports{% endblock %}
 
 {% block content %}
-<div class="admin-page-header">
+<div class="admin-content-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 28px;">
     <div>
-        <h1><i class="fas fa-file-pdf"></i> Uploaded <span class="gradient-text">Reports</span></h1>
-        <p>View all uploaded patient reports.</p>
+        <h2 style="font-size: 1.5rem; font-weight: 700;"><i class="fas fa-file-pdf" style="color: var(--admin-primary); margin-right: 8px;"></i>All Reports</h2>
+        <p style="color: var(--admin-text-muted); font-size: 0.9rem; margin-top: 4px;">{{ reports|length }} report(s) in total</p>
     </div>
-    <a href="{{ url_for('admin.upload_report') }}" class="btn btn-primary">
-        <i class="fas fa-upload"></i> Upload New Report
-    </a>
+    <div style="display: flex; gap: 10px;">
+        <a href="{{ url_for('admin.create_report') }}" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-light)); color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; border: none; text-decoration: none;">
+            <i class="fas fa-plus"></i> Create Report
+        </a>
+        <a href="{{ url_for('admin.upload_report') }}" class="btn btn-outline btn-sm" style="border: 1px solid var(--admin-border); color: var(--admin-text); padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
+            <i class="fas fa-upload"></i> Upload PDF
+        </a>
+    </div>
 </div>
 
-{% if reports %}
-<div class="admin-table-card">
-    <div class="table-responsive">
-        <table class="data-table">
+<div class="dashboard-table-card" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius); padding: 0; overflow: hidden;">
+    {% if reports %}
+    <div style="overflow-x: auto;">
+        <table class="data-table" style="width: 100%; border-collapse: collapse; min-width: 800px;">
             <thead>
-                <tr>
-                    <th>ID</th><th>Patient Name</th><th>Token Number</th>
-                    <th>Uploaded On</th><th>Remarks</th><th>File</th><th>Actions</th>
+                <tr style="background: var(--admin-surface-2);">
+                    <th style="padding: 14px 18px; text-align: left; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--admin-text-muted); border-bottom: 1px solid var(--admin-border);">Report ID</th>
+                    <th style="padding: 14px 18px; text-align: left; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--admin-text-muted); border-bottom: 1px solid var(--admin-border);">Patient</th>
+                    <th style="padding: 14px 18px; text-align: left; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--admin-text-muted); border-bottom: 1px solid var(--admin-border);">Token</th>
+                    <th style="padding: 14px 18px; text-align: left; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--admin-text-muted); border-bottom: 1px solid var(--admin-border);">Test</th>
+                    <th style="padding: 14px 18px; text-align: left; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--admin-text-muted); border-bottom: 1px solid var(--admin-border);">Date</th>
+                    <th style="padding: 14px 18px; text-align: left; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--admin-text-muted); border-bottom: 1px solid var(--admin-border);">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for r in reports %}
-                <tr>
-                    <td>#{{ r.id }}</td>
-                    <td><strong>{{ r.patient_name }}</strong></td>
-                    <td><code style="color:var(--admin-primary-light)">{{ r.token_number }}</code></td>
-                    <td>{{ r.uploaded_at.strftime('%d %b %Y, %I:%M %p') }}</td>
-                    <td>{{ r.remarks or '—' }}</td>
-                    <td>
-                        <a href="{{ url_for('main.download_report', report_id=r.id) }}" class="btn btn-sm btn-outline">
-                            <i class="fas fa-download"></i>
-                        </a>
+                {% for report in reports %}
+                <tr style="border-bottom: 1px solid var(--admin-border); transition: background 0.2s;">
+                    <td style="padding: 14px 18px;">
+                        <span style="background: rgba(99,102,241,0.15); color: var(--admin-primary-light); padding: 4px 10px; border-radius: 6px; font-size: 0.82rem; font-weight: 700;">{{ report.report_id }}</span>
                     </td>
-                    <td>
-                        <form method="POST" action="{{ url_for('admin.delete_report', report_id=r.id) }}" style="display:inline" onsubmit="return confirm('Delete this report permanently?')">
-                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                        </form>
+                    <td style="padding: 14px 18px; font-weight: 600;">{{ report.patient_name }}</td>
+                    <td style="padding: 14px 18px; color: var(--admin-text-muted); font-size: 0.9rem;">{{ report.token_number }}</td>
+                    <td style="padding: 14px 18px; color: var(--admin-text-muted); font-size: 0.9rem;">{{ report.test_name or '—' }}</td>
+                    <td style="padding: 14px 18px; color: var(--admin-text-muted); font-size: 0.85rem;">{{ report.uploaded_at.strftime('%d %b %Y') }}</td>
+                    <td style="padding: 14px 18px;">
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <a href="{{ url_for('main.download_report', report_id=report.id) }}" style="color: var(--admin-info); font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" title="Download">
+                                <i class="fas fa-download"></i> PDF
+                            </a>
+                            <form method="POST" action="{{ url_for('admin.delete_report', report_id=report.id) }}" style="display: inline;" onsubmit="return confirm('Delete this report?');">
+                                <button type="submit" style="background: none; border: none; color: var(--admin-danger); cursor: pointer; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    {% else %}
+    <div style="text-align: center; padding: 60px 20px; color: var(--admin-text-muted);">
+        <i class="fas fa-folder-open" style="font-size: 2.5rem; margin-bottom: 16px; display: block; opacity: 0.5;"></i>
+        <h3 style="font-weight: 700; margin-bottom: 8px; color: var(--admin-text);">No Reports Yet</h3>
+        <p style="margin-bottom: 20px;">Create your first report or upload a PDF to get started.</p>
+        <a href="{{ url_for('admin.create_report') }}" style="background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-light)); color: #fff; padding: 10px 24px; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fas fa-plus"></i> Create Report
+        </a>
+    </div>
+    {% endif %}
 </div>
-{% else %}
-<div class="empty-state">
-    <div class="empty-icon">📄</div>
-    <h3>No reports uploaded yet</h3>
-    <a href="{{ url_for('admin.upload_report') }}" class="btn btn-primary">Upload First Report</a>
-</div>
-{% endif %}
 {% endblock %}

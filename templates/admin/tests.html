@@ -35,6 +35,9 @@
                     <td>{{ test.report_time }}</td>
                     <td>{{ '✅' if test.is_active else '❌' }}</td>
                     <td class="action-buttons">
+                        <a href="{{ url_for('admin.test_parameters', test_id=test.id) }}" class="btn btn-sm btn-outline" title="Parameters" style="color:var(--admin-success);">
+                            <i class="fas fa-list-ol"></i>
+                        </a>
                         <a href="{{ url_for('admin.edit_test', test_id=test.id) }}" class="btn btn-sm btn-outline" title="Edit">
                             <i class="fas fa-edit"></i>
                         </a>

@@ -4,21 +4,23 @@
 {% block content %}
 <section class="page-hero">
     <div class="page-hero-content">
-        <span class="section-badge"><i class="fas fa-file-medical"></i> Report Access</span>
-        <h1 class="page-title">Check Your <span class="gradient-text">Test Report</span></h1>
-        <p class="page-subtitle">Enter your Token Number and Password to download your report.</p>
+        <span class="section-badge"><i class="fas fa-file-medical"></i> Reports</span>
+        <h1 class="page-title">Check Your <span class="gradient-text">Report</span></h1>
+        <p class="page-subtitle">Enter your Report ID (RID) or Token Number along with your password to view and download your pathology report.</p>
     </div>
 </section>
 
 <section class="report-section">
     <div class="section-container">
         <div class="report-check-container">
-            <!-- Report Form -->
-            <div class="report-form-card">
+            {% if not report %}
+            <div class="report-form-card animate-on-scroll">
                 <div class="report-form-header">
-                    <div class="report-form-icon"><i class="fas fa-search"></i></div>
+                    <div class="report-form-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
                     <h2>Find Your Report</h2>
-                    <p>Enter the token number and password provided by the lab.</p>
+                    <p>Access your test results securely</p>
                 </div>
 
                 {% if error %}
@@ -27,35 +29,42 @@
                 </div>
                 {% endif %}
 
-                <form method="POST" action="{{ url_for('main.check_report') }}" class="report-form">
+                <form method="POST" action="{{ url_for('main.check_report') }}">
                     <div class="form-group">
-                        <label for="token_number">Token Number</label>
+                        <label for="report_identifier">Report ID or Token Number</label>
                         <div class="input-icon-wrapper">
                             <i class="fas fa-hashtag"></i>
-                            <input type="text" id="token_number" name="token_number" placeholder="Enter token number (e.g. LC-2026-001)" required>
+                            <input type="text" id="report_identifier" name="report_identifier"
+                                   placeholder="e.g. RID482910 or TKN-2026-001" required>
                         </div>
+                        <p class="form-hint-text">Enter the Report ID (starts with RID) or your Token Number</p>
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
                         <div class="input-icon-wrapper">
                             <i class="fas fa-lock"></i>
-                            <input type="password" id="password" name="password" placeholder="Enter report password" required>
+                            <input type="password" id="password" name="password"
+                                   placeholder="Enter your password" required>
                         </div>
+                        <p class="form-hint-text">Password is the first 4 letters of your name in CAPS (e.g. SAHI)</p>
                     </div>
                     <button type="submit" class="btn btn-primary btn-block btn-lg">
                         <i class="fas fa-search"></i> Find Report
                     </button>
                 </form>
             </div>
-
-            <!-- Report Result -->
-            {% if report %}
-            <div class="report-result-card">
+            {% else %}
+            <!-- Report Found -->
+            <div class="report-result-card animate-on-scroll">
                 <div class="report-result-header">
                     <div class="report-result-icon"><i class="fas fa-check-circle"></i></div>
                     <h2>Report Found!</h2>
                 </div>
                 <div class="report-details">
+                    <div class="report-detail-item">
+                        <span class="label">Report ID</span>
+                        <span class="value">{{ report.report_id }}</span>
+                    </div>
                     <div class="report-detail-item">
                         <span class="label">Patient Name</span>
                         <span class="value">{{ report.patient_name }}</span>
@@ -64,9 +73,15 @@
                         <span class="label">Token Number</span>
                         <span class="value">{{ report.token_number }}</span>
                     </div>
+                    {% if report.test_name %}
+                    <div class="report-detail-item">
+                        <span class="label">Test Name</span>
+                        <span class="value">{{ report.test_name }}</span>
+                    </div>
+                    {% endif %}
                     <div class="report-detail-item">
                         <span class="label">Uploaded On</span>
-                        <span class="value">{{ report.uploaded_at.strftime('%d %B %Y, %I:%M %p') }}</span>
+                        <span class="value">{{ report.uploaded_at.strftime('%d %b %Y, %I:%M %p') }}</span>
                     </div>
                     {% if report.remarks %}
                     <div class="report-detail-item">
@@ -75,9 +90,14 @@
                     </div>
                     {% endif %}
                 </div>
-                <a href="{{ url_for('main.download_report', report_id=report.id) }}" class="btn btn-primary btn-block btn-lg">
-                    <i class="fas fa-download"></i> Download Report (PDF)
-                </a>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <a href="{{ url_for('main.download_report', report_id=report.id) }}" class="btn btn-primary btn-lg" style="flex: 1;">
+                        <i class="fas fa-download"></i> Download Report
+                    </a>
+                    <a href="{{ url_for('main.check_report') }}" class="btn btn-outline btn-lg" style="flex: 1;">
+                        <i class="fas fa-search"></i> Check Another
+                    </a>
+                </div>
             </div>
             {% endif %}
         </div>

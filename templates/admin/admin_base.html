@@ -485,6 +485,9 @@
             </a>
 
             <div class="nav-section-label">Reports</div>
+            <a href="{{ url_for('admin.create_report') }}" class="sidebar-link {% if request.endpoint == 'admin.create_report' %}active{% endif %}">
+                <i class="fas fa-file-medical"></i> Create Report
+            </a>
             <a href="{{ url_for('admin.upload_report') }}" class="sidebar-link {% if request.endpoint == 'admin.upload_report' %}active{% endif %}">
                 <i class="fas fa-upload"></i> Upload Report
             </a>

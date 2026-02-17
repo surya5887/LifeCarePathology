@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import current_user
-from models import Booking, Test, TestCategory
+from models import Booking, Test, TestCategory, Report
 from extensions import db
 from datetime import datetime
 from utils import role_required
@@ -22,12 +22,18 @@ def dashboard():
     completed = user_bookings.filter_by(status='completed').count()
     pending = user_bookings.filter_by(status='pending').count()
 
+    # Get reports for this patient (by name match)
+    user_reports = Report.query.filter(
+        Report.patient_name.ilike(f'%{current_user.name}%')
+    ).order_by(Report.uploaded_at.desc()).all()
+
     return render_template(
         'patient/dashboard.html',
         upcoming_bookings=upcoming_bookings,
         total_bookings=total_bookings,
         completed=completed,
-        pending=pending
+        pending=pending,
+        user_reports=user_reports
     )
 
 

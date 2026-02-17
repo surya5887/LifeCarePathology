@@ -4,6 +4,6 @@ __pycache__/
 *.db
 .env
 static/uploads/reports/
-migrations/
+
 *.log
 .DS_Store

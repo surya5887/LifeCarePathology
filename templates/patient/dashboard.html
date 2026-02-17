@@ -102,6 +102,46 @@
             </div>
             {% endif %}
         </div>
+
+        <!-- My Reports -->
+        <div class="dashboard-table-card" style="margin-top: 28px;">
+            <div class="table-card-header">
+                <h2><i class="fas fa-file-medical"></i> My Reports</h2>
+                <a href="{{ url_for('main.check_report') }}" class="view-all-link">Check Another →</a>
+            </div>
+            {% if user_reports %}
+            <div class="table-responsive" style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Report ID</th>
+                            <th>Test</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in user_reports %}
+                        <tr>
+                            <td><strong>{{ r.report_id }}</strong></td>
+                            <td>{{ r.test_name or 'General Report' }}</td>
+                            <td>{{ r.uploaded_at.strftime('%d %b %Y') }}</td>
+                            <td>
+                                <a href="{{ url_for('main.download_report', report_id=r.id) }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state-sm" style="text-align: center; padding: 30px 20px; color: var(--text-muted);">
+                <p>No reports available yet. When your tests are completed, reports will appear here.</p>
+            </div>
+            {% endif %}
+        </div>
     </div>
 </section>
 {% endblock %}

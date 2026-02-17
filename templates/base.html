@@ -20,10 +20,6 @@
                 <span class="logo-text">Life Care <span class="logo-highlight">Pathology</span></span>
             </a>
 
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
-                <span class="hamburger"></span>
-            </button>
-
             <ul class="nav-links" id="navLinks">
                 <li><a href="{{ url_for('main.home') }}" class="nav-link {% if request.endpoint == 'main.home' %}active{% endif %}">Home</a></li>
                 <li><a href="{{ url_for('main.about') }}" class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}">About</a></li>
@@ -39,8 +35,15 @@
                     <li><a href="{{ url_for('auth.login') }}" class="nav-link nav-btn">Login</a></li>
                 {% endif %}
             </ul>
+
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span class="hamburger"></span>
+            </button>
         </div>
     </nav>
+
+    <!-- Nav Overlay for mobile -->
+    <div class="nav-overlay" id="navOverlay"></div>
 
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -63,56 +66,78 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-grid">
-                <div class="footer-brand">
-                    <div class="footer-logo">
-                        <span class="logo-icon">🔬</span>
-                        <span>Life Care Pathology Lab Asara</span>
+        <div class="footer-wave">
+            <svg viewBox="0 0 1200 60" preserveAspectRatio="none">
+                <path d="M0,0 C300,50 900,10 1200,40 L1200,0 L0,0 Z" class="shape-fill"></path>
+            </svg>
+        </div>
+        <div class="footer-inner">
+            <div class="footer-container">
+                <div class="footer-grid">
+                    <div class="footer-brand">
+                        <div class="footer-logo">
+                            <span class="logo-icon">🔬</span>
+                            <span>Life Care Pathology Lab</span>
+                        </div>
+                        <p class="footer-desc">Your trusted partner for accurate diagnostic services. NABL accredited lab with state-of-the-art equipment serving Asara and nearby areas.</p>
+                        <div class="footer-social">
+                            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                            <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                            <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        </div>
                     </div>
-                    <p class="footer-desc">Your trusted partner for accurate diagnostic services. NABL accredited lab with state-of-the-art equipment.</p>
+                    <div class="footer-col">
+                        <h4>Quick Links</h4>
+                        <a href="{{ url_for('main.home') }}">Home</a>
+                        <a href="{{ url_for('main.about') }}">About Us</a>
+                        <a href="{{ url_for('main.services') }}">Our Services</a>
+                        <a href="{{ url_for('main.check_report') }}">Check Report</a>
+                        <a href="{{ url_for('main.contact') }}">Contact Us</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Our Services</h4>
+                        <a href="{{ url_for('main.services') }}">Blood Tests</a>
+                        <a href="{{ url_for('main.services') }}">Urine Analysis</a>
+                        <a href="{{ url_for('main.services') }}">Thyroid Profile</a>
+                        <a href="{{ url_for('main.services') }}">Diabetes Screening</a>
+                        <a href="{{ url_for('main.services') }}">Home Collection</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Contact Info</h4>
+                        <div class="footer-contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Rikshaw Stand, Asara, UP 250623</span>
+                        </div>
+                        <div class="footer-contact-item">
+                            <i class="fas fa-phone"></i>
+                            <span>+91 XXXXX XXXXX</span>
+                        </div>
+                        <div class="footer-contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>info@lifecarelab.com</span>
+                        </div>
+                        <div class="footer-contact-item">
+                            <i class="fas fa-clock"></i>
+                            <span>Mon-Sat: 7:00 AM - 9:00 PM</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="footer-col">
-                    <h4>Quick Links</h4>
-                    <a href="{{ url_for('main.home') }}">Home</a>
-                    <a href="{{ url_for('main.about') }}">About Us</a>
-                    <a href="{{ url_for('main.services') }}">Our Services</a>
-                    <a href="{{ url_for('main.check_report') }}">Check Report</a>
-                    <a href="{{ url_for('main.contact') }}">Contact Us</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Our Services</h4>
-                    <a href="{{ url_for('main.services') }}">Blood Tests</a>
-                    <a href="{{ url_for('main.services') }}">Urine Analysis</a>
-                    <a href="{{ url_for('main.services') }}">Thyroid Profile</a>
-                    <a href="{{ url_for('main.services') }}">Diabetes Screening</a>
-                    <a href="{{ url_for('main.services') }}">Home Collection</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Contact Info</h4>
-                    <div class="footer-contact-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Rikshaw Stand, Asara, UP 250623</span>
-                    </div>
-                    <div class="footer-contact-item">
-                        <i class="fas fa-phone"></i>
-                        <span>+91 XXXXX XXXXX</span>
-                    </div>
-                    <div class="footer-contact-item">
-                        <i class="fas fa-envelope"></i>
-                        <span>info@lifecarelab.com</span>
-                    </div>
-                    <div class="footer-contact-item">
-                        <i class="fas fa-clock"></i>
-                        <span>Mon-Sat: 7:00 AM - 9:00 PM</span>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 Life Care Pathology Lab. All rights reserved.</p>
+                    <div class="footer-bottom-links">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
                     </div>
                 </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Life Care Pathology Lab. All rights reserved.</p>
             </div>
         </div>
     </footer>
+
+    <!-- Back to Top -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block scripts %}{% endblock %}

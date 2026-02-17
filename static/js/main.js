@@ -1,16 +1,19 @@
 /**
- * Life Care Pathology Lab — Premium Interactive Script
- * Carousel engine, 3D tilt cards, scroll animations, counters
+ * Life Care Pathology Lab — Premium Interactive Script v2
+ * Right-side nav, carousel, 3D tilt, scroll animations, counters, horizontal scroll
  */
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ── Navbar Scroll Effect & Mobile Toggle ──
+    // ── Navbar Scroll Effect & Mobile Toggle (RIGHT SIDE) ──
     const navbar = document.getElementById('navbar');
     const navToggle = document.getElementById('navToggle');
     const navLinks = document.getElementById('navLinks');
+    const navOverlay = document.getElementById('navOverlay');
+    const backToTop = document.getElementById('backToTop');
 
     window.addEventListener('scroll', () => {
-        navbar && navbar.classList.toggle('scrolled', window.scrollY > 30);
+        if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 30);
+        if (backToTop) backToTop.classList.toggle('visible', window.scrollY > 400);
     });
 
     if (navToggle) {
@@ -26,6 +29,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 navLinks.classList.remove('active');
                 document.body.style.overflow = '';
             });
+        });
+    }
+
+    // Close on overlay click
+    if (navOverlay) {
+        navOverlay.addEventListener('click', () => {
+            if (navToggle) navToggle.classList.remove('active');
+            if (navLinks) navLinks.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
+
+    // Back to top
+    if (backToTop) {
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
@@ -95,6 +114,31 @@ document.addEventListener('DOMContentLoaded', () => {
         startAutoPlay();
     }
 
+    // ── Horizontal Services Auto-Scroll ──
+    const scrollTrack = document.getElementById('servicesScrollTrack');
+    if (scrollTrack) {
+        let scrollSpeed = 1;
+        let scrollPaused = false;
+
+        function autoScroll() {
+            if (!scrollPaused && scrollTrack.scrollWidth > scrollTrack.clientWidth) {
+                scrollTrack.scrollLeft += scrollSpeed;
+                // Reset to start when reaching halfway (where duplicates begin)
+                if (scrollTrack.scrollLeft >= scrollTrack.scrollWidth / 2) {
+                    scrollTrack.scrollLeft = 0;
+                }
+            }
+            requestAnimationFrame(autoScroll);
+        }
+
+        scrollTrack.addEventListener('mouseenter', () => { scrollPaused = true; });
+        scrollTrack.addEventListener('mouseleave', () => { scrollPaused = false; });
+        scrollTrack.addEventListener('touchstart', () => { scrollPaused = true; }, { passive: true });
+        scrollTrack.addEventListener('touchend', () => { setTimeout(() => { scrollPaused = false; }, 2000); }, { passive: true });
+
+        requestAnimationFrame(autoScroll);
+    }
+
     // ── 3D Card Tilt Effect ──
     document.querySelectorAll('.test-card').forEach(card => {
         card.addEventListener('mousemove', e => {
@@ -118,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
                 if (entry.isIntersecting) {
-                    // Stagger siblings
                     const parent = entry.target.parentElement;
                     const siblings = parent ? Array.from(parent.querySelectorAll('.animate-on-scroll')) : [entry.target];
                     const idx = siblings.indexOf(entry.target);
@@ -170,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const title = card.querySelector('h3')?.textContent.toLowerCase() || '';
                 const desc = card.querySelector('.test-desc')?.textContent.toLowerCase() || '';
                 const match = title.includes(term) || desc.includes(term);
-                card.style.display = match ? '' : 'none';
+                card.closest('.test-card-3d').style.display = match ? '' : 'none';
                 if (match) {
                     card.classList.remove('visible');
                     setTimeout(() => card.classList.add('visible'), 50);

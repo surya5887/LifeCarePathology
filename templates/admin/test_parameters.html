@@ -1,0 +1,130 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Parameters — {{ test.name }}{% endblock %}
+{% block page_title %}{{ test.name }} — Parameters{% endblock %}
+
+{% block content %}
+<style>
+    .tp-header { display: flex; justify-content: space-between; align-items: center;
+        flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+    .tp-header h2 { font-size: 16px; color: var(--admin-text); margin: 0; }
+    .tp-header .test-info { color: #94A3B8; font-size: 13px; }
+    .tp-back { color: var(--admin-primary); text-decoration: none; font-size: 13px;
+        font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    .tp-back:hover { text-decoration: underline; }
+
+    .tp-table { width: 100%; border-collapse: collapse; background: var(--admin-card-bg);
+        border-radius: 12px; overflow: hidden; }
+    .tp-table th { background: rgba(59,130,246,0.15); color: var(--admin-primary);
+        padding: 12px 16px; font-size: 11px; text-transform: uppercase;
+        letter-spacing: .5px; text-align: left; font-weight: 700; }
+    .tp-table td { padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.04);
+        font-size: 13px; vertical-align: middle; }
+    .tp-table tr:last-child td { border-bottom: none; }
+    .tp-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .tp-add-form { background: var(--admin-card-bg); border-radius: 12px; padding: 20px;
+        margin-top: 20px; }
+    .tp-add-form h3 { font-size: 14px; font-weight: 700; color: var(--admin-primary);
+        margin: 0 0 14px; display: flex; align-items: center; gap: 8px; }
+    .tp-add-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px; }
+    .tp-add-grid label { display: block; font-size: 11px; color: #94A3B8;
+        text-transform: uppercase; margin-bottom: 4px; font-weight: 600; letter-spacing: .5px; }
+    .tp-add-grid input { width: 100%; padding: 8px 12px; border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 8px; background: rgba(255,255,255,0.04); color: var(--admin-text);
+        font-size: 13px; }
+    .tp-add-grid input:focus { border-color: var(--admin-primary); outline: none; }
+
+    .btn-add-param { background: linear-gradient(135deg, var(--admin-primary), #2563EB);
+        color: #fff; border: none; padding: 10px 24px; border-radius: 8px;
+        font-weight: 700; cursor: pointer; margin-top: 14px; }
+    .btn-del { background: rgba(239,68,68,0.15); color: var(--admin-danger); border: none;
+        padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; }
+    .badge-order { background: rgba(59,130,246,0.15); color: var(--admin-primary);
+        padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .total-badge { background: var(--admin-primary); color: #fff; padding: 3px 12px;
+        border-radius: 20px; font-size: 12px; font-weight: 700; }
+</style>
+
+<div class="tp-header">
+    <div>
+        <a href="{{ url_for('admin.tests') }}" class="tp-back">
+            <i class="fas fa-arrow-left"></i> Back to Tests
+        </a>
+        <h2 style="margin-top:8px;">{{ test.name }}
+            <span class="total-badge">{{ params|length }} parameters</span>
+        </h2>
+        <span class="test-info">{{ test.category.icon }} {{ test.category.name }}
+            | {{ test.sample_type }} | {{ test.report_time }}</span>
+    </div>
+</div>
+
+{% if params %}
+<table class="tp-table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Parameter Name</th>
+            <th>Unit</th>
+            <th>Normal Range</th>
+            <th>Min</th>
+            <th>Max</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in params %}
+        <tr>
+            <td><span class="badge-order">{{ p.display_order }}</span></td>
+            <td><strong>{{ p.parameter_name }}</strong></td>
+            <td>{{ p.unit or '—' }}</td>
+            <td>{{ p.normal_range_text or '—' }}</td>
+            <td>{{ p.normal_range_min if p.normal_range_min is not none else '—' }}</td>
+            <td>{{ p.normal_range_max if p.normal_range_max is not none else '—' }}</td>
+            <td>
+                <form method="POST" action="{{ url_for('admin.delete_test_parameter', param_id=p.id) }}"
+                      onsubmit="return confirm('Delete this parameter?')" style="display:inline;">
+                    <button type="submit" class="btn-del"><i class="fas fa-trash"></i></button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div style="text-align:center; padding:40px; color:#64748B;">
+    <i class="fas fa-inbox" style="font-size:36px; margin-bottom:12px; display:block;"></i>
+    No parameters defined yet. Add some below.
+</div>
+{% endif %}
+
+<!-- Add parameter form -->
+<form method="POST" action="{{ url_for('admin.add_test_parameter', test_id=test.id) }}" class="tp-add-form">
+    <h3><i class="fas fa-plus-circle"></i> Add New Parameter</h3>
+    <div class="tp-add-grid">
+        <div>
+            <label>Parameter Name *</label>
+            <input type="text" name="parameter_name" required placeholder="e.g. Hemoglobin">
+        </div>
+        <div>
+            <label>Unit</label>
+            <input type="text" name="unit" placeholder="e.g. g/dL">
+        </div>
+        <div>
+            <label>Normal Range Text</label>
+            <input type="text" name="normal_range_text" placeholder="e.g. 12.0 - 17.5">
+        </div>
+        <div>
+            <label>Range Min</label>
+            <input type="number" name="normal_range_min" step="any" placeholder="e.g. 12.0">
+        </div>
+        <div>
+            <label>Range Max</label>
+            <input type="number" name="normal_range_max" step="any" placeholder="e.g. 17.5">
+        </div>
+    </div>
+    <button type="submit" class="btn-add-param">
+        <i class="fas fa-plus"></i> Add Parameter
+    </button>
+</form>
+{% endblock %}

@@ -5,3 +5,6 @@ flask-migrate
 werkzeug
 gunicorn
 psycopg2-binary
+reportlab
+qrcode[pil]
+pillow

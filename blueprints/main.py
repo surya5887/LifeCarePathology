@@ -66,17 +66,23 @@ def check_report():
     error = None
 
     if request.method == 'POST':
-        token = request.form.get('token_number', '').strip()
+        identifier = request.form.get('report_identifier', '').strip()
         password = request.form.get('password', '').strip()
 
-        if not token or not password:
-            error = 'Please enter both Token Number and Password.'
+        if not identifier or not password:
+            error = 'Please enter both Report ID/Token Number and Password.'
         else:
-            report_obj = Report.query.filter_by(token_number=token).first()
+            # Search by Report ID (RID format) or Token Number
+            report_obj = None
+            if identifier.upper().startswith('RID'):
+                report_obj = Report.query.filter_by(report_id=identifier.upper()).first()
+            if not report_obj:
+                report_obj = Report.query.filter_by(token_number=identifier).first()
+
             if report_obj and report_obj.check_password(password):
                 report = report_obj
             else:
-                error = 'Invalid Token Number or Password. Please check and try again.'
+                error = 'Invalid Report ID/Token Number or Password. Please check and try again.'
 
     return render_template('check_report.html', report=report, error=error)
 
@@ -87,6 +93,18 @@ def download_report(report_id):
     file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], report.file_path)
     if os.path.exists(file_path):
         return send_file(file_path, as_attachment=True,
-                         download_name=f'Report_{report.token_number}.pdf')
+                         download_name=f'Report_{report.report_id}.pdf')
+    flash('Report file not found. Please contact the lab.', 'error')
+    return redirect(url_for('main.check_report'))
+
+
+@main.route('/report/<report_id>/download')
+def download_report_by_rid(report_id):
+    """Direct download via QR code — requires report_id in URL."""
+    report = Report.query.filter_by(report_id=report_id.upper()).first_or_404()
+    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], report.file_path)
+    if os.path.exists(file_path):
+        return send_file(file_path, as_attachment=True,
+                         download_name=f'Report_{report.report_id}.pdf')
     flash('Report file not found. Please contact the lab.', 'error')
     return redirect(url_for('main.check_report'))

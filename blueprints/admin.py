@@ -1,16 +1,19 @@
 import os
 import csv
 import io
+import json
 from datetime import datetime, timedelta
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, Response
+from flask import (Blueprint, render_template, request, redirect,
+                   url_for, flash, current_app, Response, jsonify)
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from models import (User, Test, TestCategory, Booking, Report,
                     ContactEnquiry, Testimonial, DoctorReferral,
-                    ActivityLog, SiteSettings)
+                    ActivityLog, SiteSettings, TestParameter, ReportTemplate)
 from extensions import db
 from utils import role_required
 from file_utils import validate_pdf
+from report_generator import generate_report_pdf
 from sqlalchemy import func
 
 admin = Blueprint('admin', __name__, url_prefix='/admin')
@@ -249,17 +252,13 @@ def delete_appointment(booking_id):
 def upload_report():
     if request.method == 'POST':
         patient_name = request.form.get('patient_name')
-        token_number = request.form.get('token_number')
+        token_number = request.form.get('token_number', '').strip()
         password = request.form.get('password')
         remarks = request.form.get('remarks')
         file = request.files.get('report_file')
 
-        if not all([patient_name, token_number, password, file]):
-            flash('Please fill all fields and select a PDF file.', 'error')
-            return render_template('admin/upload_report.html')
-
-        if Report.query.filter_by(token_number=token_number).first():
-            flash('Token number already exists. Please use a unique token.', 'error')
+        if not all([patient_name, password, file]):
+            flash('Please fill all required fields and select a PDF file.', 'error')
             return render_template('admin/upload_report.html')
 
         is_valid, error_msg = validate_pdf(file)
@@ -267,19 +266,24 @@ def upload_report():
             flash(error_msg, 'error')
             return render_template('admin/upload_report.html')
 
-        filename = secure_filename(f"{token_number}_{file.filename}")
+        report_id = Report.generate_report_id()
+        if not token_number:
+            token_number = report_id
+
+        filename = secure_filename(f"{report_id}_{file.filename}")
         upload_dir = current_app.config['UPLOAD_FOLDER']
         os.makedirs(upload_dir, exist_ok=True)
         file_path = os.path.join(upload_dir, filename)
         file.save(file_path)
 
-        report = Report(patient_name=patient_name, token_number=token_number,
+        report = Report(report_id=report_id, patient_name=patient_name,
+                        token_number=token_number,
                         file_path=filename, remarks=remarks)
         report.set_password(password)
         db.session.add(report)
         db.session.commit()
-        log_activity('Uploaded report', f'Patient: {patient_name}, Token: {token_number}')
-        flash('Report uploaded successfully!', 'success')
+        log_activity('Uploaded report', f'Patient: {patient_name}, RID: {report_id}')
+        flash(f'Report uploaded! Report ID: {report_id} | Password: {password}', 'success')
         return redirect(url_for('admin.reports'))
 
     return render_template('admin/upload_report.html')
@@ -307,6 +311,200 @@ def delete_report(report_id):
     log_activity('Deleted report', f'Token: {token}')
     flash(f'Report (Token: {token}) deleted. 🗑️', 'success')
     return redirect(url_for('admin.reports'))
+
+
+
+# ── API: Test parameters for AJAX auto-fill ──
+@admin.route('/api/test-parameters/<int:test_id>')
+@role_required('admin')
+def api_test_parameters(test_id):
+    test = Test.query.get_or_404(test_id)
+    params = TestParameter.query.filter_by(test_id=test_id)\
+        .order_by(TestParameter.display_order).all()
+    return jsonify({
+        'test_name': test.name,
+        'sample_type': test.sample_type,
+        'parameters': [p.to_dict() for p in params]
+    })
+
+
+@admin.route('/create-report', methods=['GET', 'POST'])
+@role_required('admin')
+def create_report():
+    all_tests = Test.query.filter_by(is_active=True)\
+        .order_by(Test.name).all()
+    categories = TestCategory.query.order_by(TestCategory.name).all()
+
+    if request.method == 'POST':
+        patient_name = request.form.get('patient_name', '').strip()
+        age = request.form.get('age', '').strip()
+        gender = request.form.get('gender', '').strip()
+        doctor_name = request.form.get('doctor_name', '').strip()
+        phone = request.form.get('phone', '').strip()
+        test_id = request.form.get('test_id', '').strip()
+        test_name = request.form.get('test_name', '').strip()
+        sample_id = request.form.get('sample_id', '').strip()
+        remarks = request.form.get('remarks', '').strip()
+        sample_type = request.form.get('sample_type', 'Blood').strip()
+        collection_date = request.form.get('collection_date', '').strip()
+        report_time = request.form.get('report_time', '').strip()
+        collected_at = request.form.get('collected_at', '').strip()
+
+        if not patient_name or not test_name:
+            flash('Patient Name and Test are required.', 'error')
+            return render_template('admin/create_report.html',
+                                   tests=all_tests, categories=categories)
+
+        # Auto-generate sample_id if empty
+        if not sample_id:
+            sample_id = Report.generate_report_id()
+
+        # Collect test parameters
+        param_names = request.form.getlist('param_name[]')
+        param_values = request.form.getlist('param_value[]')
+        param_units = request.form.getlist('param_unit[]')
+        param_ranges = request.form.getlist('param_range[]')
+
+        test_results = []
+        for i in range(len(param_names)):
+            if param_names[i].strip():
+                test_results.append({
+                    'parameter': param_names[i].strip(),
+                    'value': param_values[i].strip() if i < len(param_values) else '',
+                    'unit': param_units[i].strip() if i < len(param_units) else '',
+                    'normal_range': param_ranges[i].strip() if i < len(param_ranges) else ''
+                })
+
+        # Generate Report ID and password
+        report_id = Report.generate_report_id()
+        password = Report.generate_password_from_name(patient_name)
+
+        # Report data dict
+        report_data = {
+            'report_id': report_id,
+            'patient_name': patient_name,
+            'age': age or 'N/A',
+            'gender': gender or 'N/A',
+            'doctor_name': doctor_name or 'Self',
+            'phone': phone,
+            'test_name': test_name,
+            'token_number': sample_id,
+            'sample_type': sample_type,
+            'collection_date': collection_date,
+            'report_time': report_time,
+            'collected_at': collected_at,
+            'remarks': remarks,
+            'test_results': test_results
+        }
+
+        filename = secure_filename(f"{report_id}_{sample_id}.pdf")
+        upload_dir = current_app.config['UPLOAD_FOLDER']
+        os.makedirs(upload_dir, exist_ok=True)
+        output_path = os.path.join(upload_dir, filename)
+
+        # Download URL for QR code
+        download_url = url_for('main.download_report_by_rid',
+                               report_id=report_id, _external=True)
+
+        try:
+            generate_report_pdf(report_data, output_path, download_url)
+        except Exception as e:
+            flash(f'Error generating PDF: {str(e)}', 'error')
+            return render_template('admin/create_report.html',
+                                   tests=all_tests, categories=categories)
+
+        # Save to database
+        report = Report(
+            report_id=report_id,
+            patient_name=patient_name,
+            token_number=sample_id,
+            file_path=filename,
+            remarks=remarks,
+            age=int(age) if age else None,
+            gender=gender,
+            doctor_name=doctor_name,
+            test_name=test_name
+        )
+        report.set_password(password)
+        report.set_test_results(test_results)
+        db.session.add(report)
+        db.session.commit()
+
+        log_activity('Created report',
+                     f'Patient: {patient_name}, RID: {report_id}')
+        flash(f'Report created! ID: {report_id} | Password: {password}',
+              'success')
+        return redirect(url_for('admin.report_preview',
+                                report_id=report_id))
+
+    return render_template('admin/create_report.html',
+                           tests=all_tests, categories=categories)
+
+
+@admin.route('/report/<report_id>/preview')
+@role_required('admin')
+def report_preview(report_id):
+    report = Report.query.filter_by(report_id=report_id.upper()).first_or_404()
+    test_results = report.get_test_results() if report.test_results_json else []
+    templates = ReportTemplate.query.order_by(ReportTemplate.name).all()
+    return render_template('admin/report_preview.html',
+                           report=report, test_results=test_results,
+                           templates=templates)
+
+
+# ── Test Parameter Management ──
+@admin.route('/tests/<int:test_id>/parameters')
+@role_required('admin')
+def test_parameters(test_id):
+    test = Test.query.get_or_404(test_id)
+    params = TestParameter.query.filter_by(test_id=test_id)\
+        .order_by(TestParameter.display_order).all()
+    return render_template('admin/test_parameters.html',
+                           test=test, params=params)
+
+
+@admin.route('/tests/<int:test_id>/parameters/add', methods=['POST'])
+@role_required('admin')
+def add_test_parameter(test_id):
+    test = Test.query.get_or_404(test_id)
+    name = request.form.get('parameter_name', '').strip()
+    if not name:
+        flash('Parameter name is required.', 'error')
+        return redirect(url_for('admin.test_parameters', test_id=test_id))
+
+    max_order = db.session.query(func.max(TestParameter.display_order))\
+        .filter_by(test_id=test_id).scalar() or 0
+
+    param = TestParameter(
+        test_id=test_id,
+        parameter_name=name,
+        unit=request.form.get('unit', '').strip(),
+        normal_range_text=request.form.get('normal_range_text', '').strip(),
+        normal_range_min=float(request.form.get('normal_range_min'))
+            if request.form.get('normal_range_min') else None,
+        normal_range_max=float(request.form.get('normal_range_max'))
+            if request.form.get('normal_range_max') else None,
+        display_order=max_order + 1
+    )
+    db.session.add(param)
+    db.session.commit()
+    log_activity('Added test parameter',
+                 f'{name} to {test.name}')
+    flash(f'Parameter "{name}" added.', 'success')
+    return redirect(url_for('admin.test_parameters', test_id=test_id))
+
+
+@admin.route('/test-parameter/<int:param_id>/delete', methods=['POST'])
+@role_required('admin')
+def delete_test_parameter(param_id):
+    param = TestParameter.query.get_or_404(param_id)
+    test_id = param.test_id
+    name = param.parameter_name
+    db.session.delete(param)
+    db.session.commit()
+    log_activity('Deleted test parameter', f'{name}')
+    flash(f'Parameter "{name}" deleted.', 'success')
+    return redirect(url_for('admin.test_parameters', test_id=test_id))
 
 
 # ═══════════════════════════════════════════════════════
@@ -676,3 +874,57 @@ def export_reports():
     log_activity('Exported reports CSV')
     return Response(output.getvalue(), mimetype='text/csv',
                     headers={'Content-Disposition': 'attachment;filename=reports.csv'})
+
+
+# ═══════════════════════════════════════════════════════
+#  REPORT TEMPLATE MANAGEMENT
+# ═══════════════════════════════════════════════════════
+@admin.route('/report-templates')
+@role_required('admin')
+def report_templates():
+    templates = ReportTemplate.query.order_by(ReportTemplate.created_at.desc()).all()
+    return render_template('admin/report_templates.html', templates=templates)
+
+
+@admin.route('/report-templates/upload', methods=['POST'])
+@role_required('admin')
+def upload_template():
+    name = request.form.get('name', '').strip()
+    file = request.files.get('template_file')
+    if not name or not file:
+        flash('Template name and file are required.', 'error')
+        return redirect(url_for('admin.report_templates'))
+
+    allowed = {'png', 'jpg', 'jpeg', 'webp'}
+    ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+    if ext not in allowed:
+        flash('Only image files (PNG, JPG, WEBP) are allowed.', 'error')
+        return redirect(url_for('admin.report_templates'))
+
+    tpl_dir = os.path.join(current_app.static_folder, 'images', 'templates')
+    os.makedirs(tpl_dir, exist_ok=True)
+    filename = secure_filename(f"tpl_{int(datetime.utcnow().timestamp())}_{file.filename}")
+    file.save(os.path.join(tpl_dir, filename))
+
+    tpl = ReportTemplate(name=name, file_path=filename)
+    db.session.add(tpl)
+    db.session.commit()
+    log_activity('Uploaded report template', name)
+    flash(f'Template "{name}" uploaded!', 'success')
+    return redirect(url_for('admin.report_templates'))
+
+
+@admin.route('/report-templates/<int:tpl_id>/delete', methods=['POST'])
+@role_required('admin')
+def delete_template(tpl_id):
+    tpl = ReportTemplate.query.get_or_404(tpl_id)
+    # Delete file
+    tpl_path = os.path.join(current_app.static_folder, 'images', 'templates', tpl.file_path)
+    if os.path.exists(tpl_path):
+        os.remove(tpl_path)
+    name = tpl.name
+    db.session.delete(tpl)
+    db.session.commit()
+    log_activity('Deleted report template', name)
+    flash(f'Template "{name}" deleted.', 'success')
+    return redirect(url_for('admin.report_templates'))
