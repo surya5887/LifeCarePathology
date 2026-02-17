@@ -37,10 +37,23 @@ def create_app():
 
     register_error_handlers(app)
 
-    # Create DB + upload folder + seed
+    # Create DB + upload folder + auto-seed admin
     with app.app_context():
         db.create_all()
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+        # Auto-create admin if none exists
+        if not User.query.filter_by(role='admin').first():
+            admin_user = User(
+                name='Admin',
+                email='admin@lifecare.com',
+                phone='9999999999',
+                role='admin'
+            )
+            admin_user.set_password('admin123')
+            db.session.add(admin_user)
+            db.session.commit()
+            print('✅ Default admin user created: admin@lifecare.com / admin123')
 
 
     return app
