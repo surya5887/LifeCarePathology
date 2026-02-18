@@ -16,6 +16,8 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), default='patient')  # patient / admin
     address = db.Column(db.Text, default='')
+    # profile_picture = db.Column(db.String(255), nullable=True) # Pending DB Migration
+    profile_picture = None 
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

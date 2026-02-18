@@ -10,7 +10,7 @@
                 <h2>Create Account</h2>
                 <p>Register to book tests and access your reports</p>
             </div>
-            <form method="POST" action="{{ url_for('auth.register') }}" class="auth-form">
+            <form method="POST" action="{{ url_for('auth.register') }}" class="auth-form" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="name">Full Name</label>
                     <div class="input-icon-wrapper">
@@ -30,6 +30,13 @@
                     <div class="input-icon-wrapper">
                         <i class="fas fa-phone"></i>
                         <input type="tel" id="phone" name="phone" placeholder="+91 XXXXX XXXXX" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="profile_picture">Profile Picture (Optional)</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-camera"></i>
+                        <input type="file" id="profile_picture" name="profile_picture" accept="image/*" style="padding-top: 10px;">
                     </div>
                 </div>
                 <div class="form-row">

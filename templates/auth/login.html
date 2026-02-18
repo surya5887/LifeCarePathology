@@ -10,7 +10,7 @@
                 <h2>Welcome Back</h2>
                 <p>Login to access your dashboard and bookings</p>
             </div>
-            <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form">
+            <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}" class="auth-form">
                 <div class="form-group">
                     <label for="email">Email Address</label>
                     <div class="input-icon-wrapper">

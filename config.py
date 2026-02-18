@@ -12,7 +12,7 @@ class Config:
     # Supabase PostgreSQL (Session Pooler — IPv4 compatible)
     DATABASE_URL = os.environ.get(
         "DATABASE_URL",
-        "postgresql://postgres.qtkrrwtorkmfhxakemjp:Anees%40983795@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
+        "postgresql://postgres.qtkrrwtorkmfhxakemjp:AmazingAnis7711%40@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
     )
 
     if DATABASE_URL.startswith("postgres://"):
