@@ -49,28 +49,64 @@ def create_app():
             import traceback
             return f"<h1>Error creating tables</h1><pre>{str(e)}</pre><pre>{traceback.format_exc()}</pre>"
 
-    @app.route('/seed-db')
-    def seed_db():
+    @app.route('/migrate-full')
+    def migrate_full():
         try:
-            # Force SSL mode for Supabase
-            if 'sslmode' not in app.config['SQLALCHEMY_DATABASE_URI']:
-                pass 
-
-            from seed_parameters import seed_test_parameters
-            from seed_data import seed_data
+            import psycopg2
+            from sqlalchemy import text
             
-            # Seed parameters first (less dependent)
-            try:
-                seed_test_parameters()
-            except Exception as e:
-                 return f"<h1>Error Seeding Parameters</h1><pre>{str(e)}</pre>"
-
-            # Seed data (users, bookings, etc)
-            seed_data()
-            return "Database Seeded Successfully! ✅"
+            # Source: Old DB
+            OLD_DB_URL = "postgresql://postgres.qtkrrwtorkmfhxakemjp:ANEES879176@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
+            
+            # Connect to Old DB
+            conn_old = psycopg2.connect(OLD_DB_URL)
+            cur_old = conn_old.cursor()
+            
+            # 1. Clear New DB (Target) - Order matters for FKs
+            # We use CASCADE to handle dependencies
+            db.session.execute(text("TRUNCATE TABLE users, test_parameters, bookings, contact_messages, reports CASCADE"))
+            db.session.commit()
+            
+            tables = ['users', 'test_parameters', 'bookings', 'contact_messages', 'reports']
+            log = []
+            
+            for table in tables:
+                # Fetch from Old
+                try:
+                    cur_old.execute(f"SELECT * FROM {table}")
+                    rows = cur_old.fetchall()
+                    cols = [desc[0] for desc in cur_old.description]
+                    
+                    if not rows:
+                        log.append(f"{table}: No data found.")
+                        continue
+                        
+                    # Insert into New
+                    # Construct INSERT statement dynamically
+                    col_str = ', '.join(cols)
+                    val_placeholders = ', '.join([':' + col for col in cols])
+                    sql = text(f"INSERT INTO {table} ({col_str}) VALUES ({val_placeholders})")
+                    
+                    for row in rows:
+                        row_dict = dict(zip(cols, row))
+                        # Handle potential schema mismatch (remove extra cols if any, or handle missing)
+                        # For now assume mostly identical
+                        db.session.execute(sql, row_dict)
+                    
+                    log.append(f"{table}: Migrated {len(rows)} rows.")
+                    
+                except Exception as e:
+                    log.append(f"{table} Error: {str(e)}")
+                    # Continue to next table even if one fails
+            
+            db.session.commit()
+            conn_old.close()
+            
+            return f"<h1>Migration Results</h1><pre>{'<br>'.join(log)}</pre>"
+            
         except Exception as e:
             import traceback
-            return f"<h1>Error Seeding Database</h1><pre>{str(e)}</pre><pre>{traceback.format_exc()}</pre>"
+            return f"<h1>Migration Failed</h1><pre>{str(e)}</pre><pre>{traceback.format_exc()}</pre>"
 
     # Create DB + upload folder + auto-seed admin
     with app.app_context():
