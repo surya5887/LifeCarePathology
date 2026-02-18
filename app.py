@@ -79,6 +79,19 @@ def create_app():
         except Exception as e:
             return f"Critical Debug Error: {e}"
 
+    @app.route('/update-db-schema')
+    def update_db_schema():
+        try:
+            from sqlalchemy import text
+            # Fix: Add missing profile_picture column to Old DB
+            sql = text("ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_picture VARCHAR(255);")
+            db.session.execute(sql)
+            db.session.commit()
+            return "<h1>Schema Updated ✅</h1><p>Added 'profile_picture' column to 'users' table.</p>"
+        except Exception as e:
+            import traceback
+            return f"<h1>Update Failed</h1><pre>{str(e)}</pre><pre>{traceback.format_exc()}</pre>"
+
     @app.route('/migrate-full')
     def migrate_full():
         try:
