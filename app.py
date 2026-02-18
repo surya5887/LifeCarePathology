@@ -52,14 +52,25 @@ def create_app():
     @app.route('/seed-db')
     def seed_db():
         try:
+            # Force SSL mode for Supabase
+            if 'sslmode' not in app.config['SQLALCHEMY_DATABASE_URI']:
+                pass 
+
             from seed_parameters import seed_test_parameters
             from seed_data import seed_data
             
-            seed_test_parameters()
+            # Seed parameters first (less dependent)
+            try:
+                seed_test_parameters()
+            except Exception as e:
+                 return f"<h1>Error Seeding Parameters</h1><pre>{str(e)}</pre>"
+
+            # Seed data (users, bookings, etc)
             seed_data()
             return "Database Seeded Successfully! ✅"
         except Exception as e:
-            return f"Error seeding database: {e}"
+            import traceback
+            return f"<h1>Error Seeding Database</h1><pre>{str(e)}</pre><pre>{traceback.format_exc()}</pre>"
 
     # Create DB + upload folder + auto-seed admin
     with app.app_context():
