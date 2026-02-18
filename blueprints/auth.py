@@ -21,9 +21,11 @@ def login():
 
         if user and user.check_password(password):
             login_user(user)
-            flash(f'Welcome back, {user.name}! 🎉', 'success')
             if user.is_admin():
+                flash(f'Welcome back, Anees Chaudhary! 🎉', 'success')
                 return redirect(url_for('admin.dashboard'))
+            
+            flash(f'Welcome back, {user.name}! 🎉', 'success')
             return redirect(url_for('patient.dashboard'))
         else:
             flash('Invalid email or password. Please try again.', 'error')
