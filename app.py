@@ -36,7 +36,26 @@ def create_app():
     app.register_blueprint(patient)
     app.register_blueprint(admin)
 
-    register_error_handlers(app)
+    # Temporary route to initialize DB from production environment
+    @app.route('/init-db')
+    def init_db():
+        try:
+            db.create_all()
+            return "Database Tables Created Successfully! ✅"
+        except Exception as e:
+            return f"Error creating tables: {e}"
+
+    @app.route('/seed-db')
+    def seed_db():
+        try:
+            from seed_parameters import seed_test_parameters
+            from seed_data import seed_data
+            
+            seed_test_parameters()
+            seed_data()
+            return "Database Seeded Successfully! ✅"
+        except Exception as e:
+            return f"Error seeding database: {e}"
 
     # Create DB + upload folder + auto-seed admin
     with app.app_context():

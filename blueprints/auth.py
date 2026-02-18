@@ -82,7 +82,7 @@ def register():
             flash('Email is already registered. Please login.', 'error')
             return render_template('auth/register.html')
 
-        user = User(name=name, email=email, phone=phone) # profile_picture=profile_pic_filename)
+        user = User(name=name, email=email, phone=phone, profile_picture=profile_pic_filename)
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
