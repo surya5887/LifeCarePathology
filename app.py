@@ -23,7 +23,10 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        try:
+            return User.query.get(int(user_id))
+        except Exception:
+            return None
 
     # Register blueprints
     from blueprints.auth import auth
@@ -48,6 +51,33 @@ def create_app():
         except Exception as e:
             import traceback
             return f"<h1>Error creating tables</h1><pre>{str(e)}</pre><pre>{traceback.format_exc()}</pre>"
+
+    @app.route('/debug-config')
+    def debug_config():
+        try:
+            from sqlalchemy import text
+            # Mask password in URL
+            db_url = app.config['SQLALCHEMY_DATABASE_URI']
+            safe_url = db_url.split('@')[-1] if '@' in db_url else "INVALID_URL"
+            
+            status = "Unknown"
+            error = "None"
+            
+            try:
+                db.session.execute(text("SELECT 1"))
+                status = "Connected ✅"
+            except Exception as e:
+                status = "Connection Failed ❌"
+                error = str(e)
+            
+            return f"""
+            <h1>Debug Config</h1>
+            <p><strong>Database Host:</strong> {safe_url}</p>
+            <p><strong>Connection Status:</strong> {status}</p>
+            <p><strong>Error Details:</strong> {error}</p>
+            """
+        except Exception as e:
+            return f"Critical Debug Error: {e}"
 
     @app.route('/migrate-full')
     def migrate_full():
