@@ -13,7 +13,8 @@ class Config:
     DATABASE_URL = os.environ.get(
         "DATABASE_URL",
         # Direct Connection (Better for Migrations/Init)
-        "postgresql://postgres:AmazingAnis7711%40@db.cvuvtnnpxjpjxndaqask.supabase.co:5432/postgres"
+        # Password: Cyy?Ug2DS_Zj@+q  -> URL Encoded: Cyy%3FUg2DS_Zj%40%2Bq
+        "postgresql://postgres:Cyy%3FUg2DS_Zj%40%2Bq@db.cvuvtnnpxjpjxndaqask.supabase.co:5432/postgres"
     )
 
     if DATABASE_URL.startswith("postgres://"):
