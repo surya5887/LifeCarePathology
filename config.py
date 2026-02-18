@@ -12,9 +12,8 @@ class Config:
     # Supabase PostgreSQL (Session Pooler — IPv4 compatible)
     DATABASE_URL = os.environ.get(
         "DATABASE_URL",
-        # Direct Connection (Better for Migrations/Init)
-        # Password: Cyy?Ug2DS_Zj@+q  -> URL Encoded: Cyy%3FUg2DS_Zj%40%2Bq
-        "postgresql://postgres:Cyy%3FUg2DS_Zj%40%2Bq@db.cvuvtnnpxjpjxndaqask.supabase.co:5432/postgres"
+        # Session Pooler (IPv4 Compatible - From User Screenshot)
+        "postgresql://postgres.cvuvtnnpxjpjxndaqask:Cyy%3FUg2DS_Zj%40%2Bq@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
     )
 
     if DATABASE_URL.startswith("postgres://"):
