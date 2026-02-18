@@ -514,10 +514,10 @@
 
         <div class="sidebar-footer">
             <div class="sidebar-user">
-                <div class="user-avatar">{{ 'A' if current_user.has_role('admin') else current_user.name[0]|upper }}</div>
+                <div class="user-avatar">{{ 'A' if current_user.is_admin() else current_user.name[0]|upper }}</div>
                 <div class="user-info">
-                    <div class="user-name">{{ 'Anees Chaudhary' if current_user.has_role('admin') else current_user.name }}</div>
-                    <div class="user-role">{{ 'Administrator' if current_user.has_role('admin') else 'User' }}</div>
+                    <div class="user-name">{{ 'Anees Chaudhary' if current_user.is_admin() else current_user.name }}</div>
+                    <div class="user-role">{{ 'Administrator' if current_user.is_admin() else 'User' }}</div>
                 </div>
             </div>
         </div>
