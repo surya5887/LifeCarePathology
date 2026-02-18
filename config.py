@@ -28,3 +28,13 @@ class Config:
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads", "reports")
 
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
+
+    # Email Configuration
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
+    
+    # Default Admin Email (Can be overridden by env vars)
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'anishchaudhary0078@gmail.com')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', 'bufg lbqs lrtv tixu') 
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', MAIL_USERNAME)

@@ -2,70 +2,125 @@
 {% block title %}Book a Test — Life Care Pathology Lab{% endblock %}
 
 {% block content %}
-<section class="dashboard-section">
-    <div class="section-container">
-        <div class="dashboard-header">
-            <div>
-                <h1><i class="fas fa-vial"></i> Book a <span class="gradient-text">Test</span></h1>
-                <p>Select a test, choose your preferred date and time.</p>
-            </div>
-            <a href="{{ url_for('patient.dashboard') }}" class="btn btn-outline">← Back to Dashboard</a>
-        </div>
+<style>
+    .booking-section { padding: 40px 0; background: #f8f9fa; }
+    .booking-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; max-width: 800px; margin: 0 auto; }
+    .booking-header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 30px; color: #fff; text-align: center; }
+    .booking-header h1 { font-size: 24px; margin-bottom: 5px; color: #fff; }
+    .booking-header p { opacity: 0.8; font-size: 14px; }
+    .booking-body { padding: 30px; }
+    
+    .form-section-title { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+    .form-section-title i { color: #3B82F6; }
+    
+    .slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; }
+    .slot-btn { border: 1px solid #e2e8f0; background: #fff; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: 500; }
+    .slot-btn:hover { border-color: #3B82F6; color: #3B82F6; }
+    .slot-btn.active { background: #3B82F6; color: #fff; border-color: #3B82F6; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2); }
+    .slot-btn.disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; border-color: #f1f5f9; opacity: 0.7; }
+    
+    .payment-notice { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px; margin-top: 20px; font-size: 13px; color: #92400e; display: flex; gap: 10px; align-items: start; }
+</style>
 
-        <div class="booking-form-card">
-            <form method="POST" action="{{ url_for('patient.book_test') }}" class="booking-form">
-                <div class="form-group">
-                    <label for="test_id">Select Test *</label>
-                    <select id="test_id" name="test_id" required class="form-select">
-                        <option value="">-- Choose a test --</option>
+<section class="booking-section">
+    <div class="booking-card">
+        <div class="booking-header">
+            <h1>Start Your Healthy Journey</h1>
+            <p>Fill in the details below to schedule your test appointment.</p>
+        </div>
+        
+        <div class="booking-body">
+            <form method="POST" action="{{ url_for('patient.book_test') }}" id="bookingForm">
+                
+                <!-- 1. Test Selection -->
+                <div class="form-section-title"><i class="fas fa-microscope"></i> Test Selection</div>
+                <div class="form-group mb-4">
+                    <label>Select Test *</label>
+                    <select name="test_id" required class="form-control" style="height: 50px;">
+                        <option value="">-- Helper choosing a test --</option>
                         {% for test in tests %}
-                        <option value="{{ test.id }}">{{ test.name }} — ₹{{ "%.0f"|format(test.price) }} ({{ test.category.name }})</option>
+                        <option value="{{ test.id }}">{{ test.name }} — ₹{{ "%.0f"|format(test.price) }}</option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="booking_date">Date *</label>
-                        <input type="date" id="booking_date" name="booking_date" required min="">
+                <!-- 2. Date & Time -->
+                <div class="form-section-title"><i class="fas fa-calendar-alt"></i> Date & Time</div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Date *</label>
+                        <input type="date" id="booking_date" name="booking_date" required class="form-control">
                     </div>
-                    <div class="form-group">
-                        <label for="slot_time">Time Slot *</label>
-                        <select id="slot_time" name="slot_time" required class="form-select">
-                            <option value="">-- Select time --</option>
-                            <option value="07:00 AM">07:00 AM</option>
-                            <option value="08:00 AM">08:00 AM</option>
-                            <option value="09:00 AM">09:00 AM</option>
-                            <option value="10:00 AM">10:00 AM</option>
-                            <option value="11:00 AM">11:00 AM</option>
-                            <option value="12:00 PM">12:00 PM</option>
-                            <option value="01:00 PM">01:00 PM</option>
-                            <option value="02:00 PM">02:00 PM</option>
-                            <option value="03:00 PM">03:00 PM</option>
-                            <option value="04:00 PM">04:00 PM</option>
-                            <option value="05:00 PM">05:00 PM</option>
-                            <option value="06:00 PM">06:00 PM</option>
-                            <option value="07:00 PM">07:00 PM</option>
-                            <option value="08:00 PM">08:00 PM</option>
+                </div>
+                
+                <div class="mb-4">
+                    <label>Available Time Slots *</label>
+                    <div id="slotsLoader" style="display:none; color:#666; font-size:13px; margin: 10px 0;"><i class="fas fa-spinner fa-spin"></i> Checking availability...</div>
+                    <div id="slotContainer" class="slot-grid">
+                        <div style="color:#94a3b8; font-size:13px; grid-column: 1/-1;">Please select a date first.</div>
+                    </div>
+                    <input type="hidden" name="slot_time" id="selected_slot" required>
+                    <div id="slotError" style="color:red; font-size:12px; display:none; margin-top:5px;">Please select a time slot.</div>
+                </div>
+
+                <!-- 3. Patient Details -->
+                <div class="form-section-title"><i class="fas fa-user-injured"></i> Patient Details</div>
+                <p style="font-size:12px; color:#666; margin-bottom:15px;">Who is this test for? (Fill new details if booking for someone else)</p>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Patient Name *</label>
+                        <input type="text" name="patient_name" value="{{ current_user.name }}" required class="form-control">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Phone Number *</label>
+                        <input type="tel" name="patient_phone" value="{{ current_user.phone }}" required class="form-control">
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Email (for Report)</label>
+                        <input type="email" name="patient_email" value="{{ current_user.email }}" class="form-control">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Referral *</label>
+                        <select id="referral_type" name="referral_type" class="form-control" onchange="toggleReferral()">
+                            <option value="self">Self (No Doctor)</option>
+                            <option value="doctor">Referral by Doctor</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="home_collection" id="homeCollection" onchange="toggleAddress()">
-                        <span>🏠 Home Sample Collection (We'll come to your address)</span>
-                    </label>
+                <div class="form-group mb-3" id="doctorInput" style="display:none;">
+                    <label>Doctor's Name</label>
+                    <input type="text" name="referral_doctor" class="form-control" placeholder="Dr. Name">
                 </div>
 
-                <div class="form-group" id="addressGroup" style="display: none;">
-                    <label for="collection_address">Collection Address *</label>
-                    <textarea id="collection_address" name="collection_address" rows="3" placeholder="Enter your full address for sample collection"></textarea>
+                <div class="form-group mb-4">
+                    <label>Full Address *</label>
+                    <textarea name="patient_address" rows="2" class="form-control" required placeholder="House No, Street, Locality...">{{ current_user.address }}</textarea>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" name="home_collection" id="home_collection">
+                        <label class="form-check-label" for="home_collection" style="font-size:13px; color:#3B82F6; font-weight:600;">
+                            Reqest Home Sample Collection
+                        </label>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-block btn-lg">
-                    <i class="fas fa-calendar-check"></i> Confirm Booking
-                </button>
+                <!-- Payment Notice -->
+                <div class="payment-notice">
+                    <i class="fas fa-wallet" style="margin-top:2px;"></i>
+                    <div>
+                        <strong>Payment Offline</strong><br>
+                        Currently we accept payment at the lab or during home collection via Cash/UPI. No online payment required now.
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <button type="submit" class="btn btn-primary" style="padding: 12px 40px; border-radius: 30px; font-weight:600;">Confirm Appointment</button>
+                    <p class="mt-3" style="font-size:12px; color:#666;">You will receive an email confirmation shortly.</p>
+                </div>
             </form>
         </div>
     </div>
@@ -74,13 +129,78 @@
 
 {% block scripts %}
 <script>
-    // Set minimum date to today
-    document.getElementById('booking_date').min = new Date().toISOString().split('T')[0];
+    const bookingDateInput = document.getElementById('booking_date');
+    const slotContainer = document.getElementById('slotContainer');
+    const slotsLoader = document.getElementById('slotsLoader');
+    const selectedSlotInput = document.getElementById('selected_slot');
+    
+    // Min Date = Today
+    bookingDateInput.min = new Date().toISOString().split('T')[0];
 
-    function toggleAddress() {
-        const addressGroup = document.getElementById('addressGroup');
-        const homeCollection = document.getElementById('homeCollection');
-        addressGroup.style.display = homeCollection.checked ? 'block' : 'none';
+    bookingDateInput.addEventListener('change', function() {
+        const date = this.value;
+        if (!date) return;
+
+        slotsLoader.style.display = 'block';
+        slotContainer.innerHTML = '';
+        selectedSlotInput.value = '';
+
+        // Fetch Slots API
+        fetch(`/patient/api/check-availability?date=${date}`)
+            .then(response => response.json())
+            .then(data => {
+                slotsLoader.style.display = 'none';
+                if (data.full_day_blocked) {
+                    slotContainer.innerHTML = `<div style="color:red; grid-column:1/-1; text-align:center;">${data.reason || 'This date is unavailable.'}</div>`;
+                } else {
+                    renderSlots(data.slots);
+                }
+            })
+            .catch(err => {
+                slotsLoader.style.display = 'none';
+                slotContainer.innerHTML = '<div style="color:red;">Error loading slots. Try again.</div>';
+            });
+    });
+
+    function renderSlots(slots) {
+        if (slots.length === 0) {
+            slotContainer.innerHTML = '<div style="color:#666; grid-column:1/-1;">No slots available for this date.</div>';
+            return;
+        }
+
+        slots.forEach(slot => {
+            const btn = document.createElement('div');
+            btn.className = `slot-btn ${slot.is_blocked ? 'disabled' : ''}`;
+            btn.textContent = slot.time;
+            
+            if (!slot.is_blocked) {
+                btn.onclick = () => selectSlot(btn, slot.time);
+            } else {
+                btn.title = 'Already Booked/Unavailable';
+            }
+            slotContainer.appendChild(btn);
+        });
     }
+
+    function selectSlot(el, time) {
+        document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        selectedSlotInput.value = time;
+        document.getElementById('slotError').style.display = 'none';
+    }
+
+    function toggleReferral() {
+        const type = document.getElementById('referral_type').value;
+        document.getElementById('doctorInput').style.display = type === 'doctor' ? 'block' : 'none';
+    }
+
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        if (!selectedSlotInput.value) {
+            e.preventDefault();
+            document.getElementById('slotError').style.display = 'block';
+            // Scroll to slot selection
+            document.getElementById('slotContainer').scrollIntoView({behavior: 'smooth'});
+        }
+    });
 </script>
 {% endblock %}

@@ -8,3 +8,4 @@ psycopg2-binary
 reportlab
 qrcode[pil]
 pillow
+Flask-Mail

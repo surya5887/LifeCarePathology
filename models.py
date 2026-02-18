@@ -102,10 +102,34 @@ class Booking(db.Model):
     test_id = db.Column(db.Integer, db.ForeignKey('tests.id'), nullable=False)
     booking_date = db.Column(db.Date, nullable=False)
     slot_time = db.Column(db.String(20), nullable=False)
-    status = db.Column(db.String(20), default='pending')
-    home_collection = db.Column(db.Boolean, default=False)
-    collection_address = db.Column(db.Text, default='')
+    status = db.Column(db.String(20), default='pending') # pending, confirmed, completed, cancelled
+    
+    # Enhanced Patient Details (Snapshotted at booking time)
+    patient_name = db.Column(db.String(100), nullable=True)
+    patient_phone = db.Column(db.String(20), nullable=True)
+    patient_email = db.Column(db.String(120), nullable=True)
+    patient_address = db.Column(db.Text, default='')
+    
+    # Referral & Payment
+    referral_type = db.Column(db.String(20), default='self') # self, doctor
+    referral_doctor = db.Column(db.String(100), default='')
+    payment_mode = db.Column(db.String(20), default='Offline') # Cash/Offline
     payment_status = db.Column(db.String(20), default='pending')
+
+    home_collection = db.Column(db.Boolean, default=False)
+    collection_address = db.Column(db.Text, default='') # Keeping for backwards compatibility if needed, or alias to patient_address
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class BlockedSlot(db.Model):
+    """Model to manage availability (Admin Blocks)."""
+    __tablename__ = 'blocked_slots'
+
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, nullable=False)
+    time_slot = db.Column(db.String(20), nullable=True) # If NULL, block entire day
+    reason = db.Column(db.String(200), default='Unavailable')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
