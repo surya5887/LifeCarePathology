@@ -40,7 +40,11 @@ def create_app():
     # Create DB + upload folder + auto-seed admin
     with app.app_context():
         db.create_all()
-        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+        try:
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+        except OSError:
+            print("WARNING: Could not create upload folder (Read-only filesystem?)")
+
 
         # Auto-create admin if none exists
         if not User.query.filter_by(role='admin').first():
