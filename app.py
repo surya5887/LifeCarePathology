@@ -85,8 +85,11 @@ def create_app():
             import psycopg2
             from sqlalchemy import text
             
-            # Source: Old DB
-            OLD_DB_URL = "postgresql://postgres.qtkrrwtorkmfhxakemjp:ANEES879176@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
+            # Source: Old DB (Direct Connection for Reliability)
+            # Host: db.qtkrrwtorkmfhxakemjp.supabase.co
+            # User: postgres (Standard)
+            # Password: ANEES879176
+            OLD_DB_URL = "postgresql://postgres:ANEES879176@db.qtkrrwtorkmfhxakemjp.supabase.co:5432/postgres"
             
             # Connect to Old DB
             conn_old = psycopg2.connect(OLD_DB_URL)
