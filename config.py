@@ -12,8 +12,8 @@ class Config:
     # Supabase PostgreSQL (Session Pooler — IPv4 compatible)
     DATABASE_URL = os.environ.get(
         "DATABASE_URL",
-        # New Project Pooler URL (Session Mode)
-        "postgresql://postgres.cvuvtnnpxjpjxndaqask:AmazingAnis7711%40@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+        # Direct Connection (Better for Migrations/Init)
+        "postgresql://postgres:AmazingAnis7711%40@db.cvuvtnnpxjpjxndaqask.supabase.co:5432/postgres"
     )
 
     if DATABASE_URL.startswith("postgres://"):

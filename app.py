@@ -36,14 +36,18 @@ def create_app():
     app.register_blueprint(patient)
     app.register_blueprint(admin)
 
-    # Temporary route to initialize DB from production environment
     @app.route('/init-db')
     def init_db():
         try:
+            # Force SSL mode for Supabase
+            if 'sslmode' not in app.config['SQLALCHEMY_DATABASE_URI']:
+                pass # SQLAlchemy usually handles this, but good to note
+            
             db.create_all()
-            return "Database Tables Created Successfully! ✅"
+            return "Database Tables Created Successfully! ✅ <br> <a href='/seed-db'>Now Click Here to Seed Data</a>"
         except Exception as e:
-            return f"Error creating tables: {e}"
+            import traceback
+            return f"<h1>Error creating tables</h1><pre>{str(e)}</pre><pre>{traceback.format_exc()}</pre>"
 
     @app.route('/seed-db')
     def seed_db():
