@@ -110,25 +110,28 @@ def create_app():
 
     # Create DB + upload folder + auto-seed admin
     with app.app_context():
-        db.create_all()
         try:
-            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-        except OSError:
-            print("WARNING: Could not create upload folder (Read-only filesystem?)")
+            db.create_all()
+            try:
+                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+            except OSError:
+                print("WARNING: Could not create upload folder (Read-only filesystem?)")
 
-
-        # Auto-create admin if none exists
-        if not User.query.filter_by(role='admin').first():
-            admin_user = User(
-                name='Admin',
-                email='admin@lifecare.com',
-                phone='9999999999',
-                role='admin'
-            )
-            admin_user.set_password('admin123')
-            db.session.add(admin_user)
-            db.session.commit()
-            print('✅ Default admin user created: admin@lifecare.com / admin123')
+            # Auto-create admin if none exists
+            if not User.query.filter_by(role='admin').first():
+                admin_user = User(
+                    name='Admin',
+                    email='admin@lifecare.com',
+                    phone='9999999999',
+                    role='admin'
+                )
+                admin_user.set_password('admin123')
+                db.session.add(admin_user)
+                db.session.commit()
+                print('✅ Default admin user created: admin@lifecare.com / admin123')
+        except Exception as e:
+            print(f"⚠️ Startup Database Connection Failed: {e}")
+            # We do NOT raise the error, so the app can still start and show debug pages
 
 
     return app
