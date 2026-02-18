@@ -12,9 +12,9 @@ class Config:
     # Supabase PostgreSQL (Session Pooler — IPv4 compatible)
     DATABASE_URL = os.environ.get(
         "DATABASE_URL",
-        # Session Pooler (IPv4 Compatible) - Required for Vercel IPv6 issues
-        # User: postgres.project_ref
-        "postgresql://postgres.cvuvtnnpxjpjxndaqask:Cyy%3FUg2DS_Zj%40%2Bq@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+        # Old Database (Restored Request)
+        # Using Session Pooler for Vercel IPv4 Compatibility
+        "postgresql://postgres.qtkrrwtorkmfhxakemjp:ANEES879176@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
     )
 
     if DATABASE_URL.startswith("postgres://"):
