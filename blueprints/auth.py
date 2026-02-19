@@ -200,6 +200,21 @@ def logout():
     return redirect(url_for('main.home'))
 
 
+# --- TEMPORARY DEBUG: Remove after testing ---
+@auth.route('/auth/debug')
+def oauth_debug():
+    import os
+    gid = os.environ.get('GOOGLE_CLIENT_ID', '(not set)')
+    gsecret = os.environ.get('GOOGLE_CLIENT_SECRET', '(not set)')
+    config_gid = current_app.config.get('GOOGLE_CLIENT_ID', '(not in config)')
+    return jsonify({
+        'env_GOOGLE_CLIENT_ID': gid[:15] + '...' if len(gid) > 15 else gid,
+        'env_GOOGLE_CLIENT_SECRET': gsecret[:8] + '...' if len(gsecret) > 8 else gsecret,
+        'config_GOOGLE_CLIENT_ID': config_gid[:15] + '...' if len(config_gid) > 15 else config_gid,
+        'registered_providers': list(_registered_providers),
+    })
+
+
 # ============================================================
 #                    OAUTH SOCIAL LOGIN
 # ============================================================
