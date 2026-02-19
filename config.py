@@ -1,4 +1,5 @@
 import os
+from sqlalchemy.pool import NullPool
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -13,8 +14,8 @@ class Config:
     DATABASE_URL = os.environ.get(
         "DATABASE_URL",
         # Old Database (Restored Request)
-        # Using Session Pooler for Vercel IPv4 Compatibility
-        "postgresql://postgres.qtkrrwtorkmfhxakemjp:ANEES879176@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
+        # Using Transaction Pooler (Port 6543) for Serverless/Vercel
+        "postgresql://postgres.qtkrrwtorkmfhxakemjp:ANEES879176@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres"
     )
 
     if DATABASE_URL.startswith("postgres://"):
@@ -25,6 +26,10 @@ class Config:
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_recycle": 280,
         "pool_pre_ping": True,
+        "poolclass": NullPool, # Disable client-side pooling for serverless
+        "connect_args": {
+            "connect_timeout": 10
+        }
     }
 
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads", "reports")
