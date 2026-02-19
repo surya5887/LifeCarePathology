@@ -71,7 +71,9 @@ def send_otp():
 
     except Exception as e:
         print(f"OTP Error: {e}")
-        return jsonify({'success': False, 'message': 'Internal Server Error'}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': f'Server Error: {str(e)}'}), 500
 
 
 @auth.route('/verify-otp', methods=['POST'])
