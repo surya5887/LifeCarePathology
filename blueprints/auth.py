@@ -88,8 +88,7 @@ def send_otp():
         if User.query.filter_by(email=email).first():
             return jsonify({'success': False, 'message': 'Email is already registered. Please login.'}), 400
 
-        # Generate OTP (Using inline function)
-        # from utils.otp_util import generate_otp, send_otp_email # REMOVED to prevent Import Errors
+        # Generate OTP
         otp = generate_otp()
         
         # Store in Session (Temporary)
