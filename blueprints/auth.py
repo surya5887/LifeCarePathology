@@ -176,8 +176,8 @@ def register():
             flash('Passwords do not match.', 'error')
             return render_template('auth/register.html')
 
-        if len(password) < 6:
-            flash('Password must be at least 6 characters.', 'error')
+        if len(password) < 8:
+            flash('Password must be at least 8 characters.', 'error')
             return render_template('auth/register.html')
 
         if User.query.filter_by(email=email).first():
