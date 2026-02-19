@@ -212,6 +212,53 @@ from authlib.integrations.flask_client import OAuth
 oauth = OAuth()
 _registered_providers = set()  # Track which providers are actually configured
 
+
+# --- DATABASE MIGRATION HELPER (Run once) ---
+@auth.route('/db-migrate-oauth')
+def db_migrate_oauth():
+    from sqlalchemy import text
+    results = []
+    try:
+        # 1. Add oauth_provider
+        try:
+            db.session.execute(text("ALTER TABLE users ADD COLUMN oauth_provider VARCHAR(20)"))
+            db.session.commit()
+            results.append("Added oauth_provider column")
+        except Exception as e:
+            db.session.rollback()
+            results.append(f"oauth_provider column likely exists ({str(e)})")
+
+        # 2. Add oauth_id
+        try:
+            db.session.execute(text("ALTER TABLE users ADD COLUMN oauth_id VARCHAR(200)"))
+            db.session.commit()
+            results.append("Added oauth_id column")
+        except Exception as e:
+            db.session.rollback()
+            results.append(f"oauth_id column likely exists ({str(e)})")
+
+        # 3. Make phone nullable
+        try:
+            db.session.execute(text("ALTER TABLE users ALTER COLUMN phone DROP NOT NULL"))
+            db.session.commit()
+            results.append("Made phone nullable")
+        except Exception as e:
+            db.session.rollback()
+            results.append(f"Phone alter failed: {str(e)}")
+
+        # 4. Make password_hash nullable
+        try:
+            db.session.execute(text("ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL"))
+            db.session.commit()
+            results.append("Made password_hash nullable")
+        except Exception as e:
+            db.session.rollback()
+            results.append(f"Password alter failed: {str(e)}")
+            
+        return jsonify(results)
+    except Exception as e:
+        return f"Migration Error: {str(e)}"
+
 def init_oauth(app):
     """Initialize OAuth with the Flask app."""
     oauth.init_app(app)
