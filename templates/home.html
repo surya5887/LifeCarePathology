@@ -61,16 +61,19 @@
         <div class="hero-orb hero-orb-2"></div>
         <div class="hero-orb hero-orb-3"></div>
     </div>
+    
     <div class="hero-content">
+        <div class="hero-buttons">
+            <a href="{{ url_for('main.check_report') }}" class="btn btn-outline btn-lg">
+                <i class="fas fa-file-medical"></i> Download Report
+            </a>
+        </div>
         <div class="hero-badge">🏥 NABL Accredited Lab</div>
         <h1 class="hero-title">Accurate Diagnostics for <span class="gradient-text">Better Health</span></h1>
         <p class="hero-subtitle">Life Care Pathology Lab offers reliable pathology & diagnostic services with fast results, home sample collection, and online report access.</p>
         <div class="hero-buttons">
             <a href="{{ url_for('main.services') }}" class="btn btn-primary btn-lg">
                 View All Tests <span class="btn-arrow">→</span>
-            </a>
-            <a href="{{ url_for('main.check_report') }}" class="btn btn-outline btn-lg">
-                <i class="fas fa-file-medical"></i> Check Report
             </a>
         </div>
     </div>
