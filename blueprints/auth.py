@@ -286,19 +286,7 @@ def init_oauth(app):
     else:
         print("⚠️ Google OAuth not configured (GOOGLE_CLIENT_ID missing)")
 
-    # Facebook
-    if app.config.get('FACEBOOK_CLIENT_ID'):
-        oauth.register(
-            name='facebook',
-            client_id=app.config['FACEBOOK_CLIENT_ID'],
-            client_secret=app.config['FACEBOOK_CLIENT_SECRET'],
-            access_token_url='https://graph.facebook.com/v18.0/oauth/access_token',
-            authorize_url='https://www.facebook.com/v18.0/dialog/oauth',
-            api_base_url='https://graph.facebook.com/v18.0/',
-            client_kwargs={'scope': 'email public_profile'},
-        )
-        _registered_providers.add('facebook')
-        print("✅ Facebook OAuth registered")
+
 
 
 def _handle_oauth_user(provider, oauth_id, email, name, picture=None):
@@ -389,72 +377,4 @@ def instagram_login():
     if 'instagram' not in _registered_providers:
         flash('Instagram login is not configured.', 'error')
         return redirect(url_for('auth.login'))
-    redirect_uri = url_for('auth.instagram_callback', _external=True)
-    if redirect_uri.startswith('http://'):
-        redirect_uri = redirect_uri.replace('http://', 'https://', 1)
-    return oauth.instagram.authorize_redirect(redirect_uri)
 
-
-@auth.route('/auth/instagram/callback')
-def instagram_callback():
-    try:
-        token = oauth.instagram.authorize_access_token()
-        user_info = oauth.instagram.get('me?fields=id,username,account_type').json()
-        
-        # Instagram Basic Display doesn't return email, so we use username as placeholder or require extra step
-        # For simplicity, we'll prefix with instagram_
-        username = user_info.get('username')
-        oauth_id = user_info.get('id')
-        email = f"{username}@instagram.user" # Placeholder as email is not available
-        
-        if not oauth_id:
-             raise Exception("Could not retrieve user info from Instagram")
-
-        _handle_oauth_user('instagram', oauth_id, email, username)
-        return redirect(url_for('patient.dashboard'))
-    except Exception as e:
-        flash(f'Instagram login failed: {str(e)}', 'error')
-        return redirect(url_for('auth.login'))
-
-
-# --- Facebook OAuth Routes ---
-@auth.route('/auth/facebook')
-def facebook_login():
-    if 'facebook' not in _registered_providers:
-        flash('Facebook login is not configured.', 'error')
-        return redirect(url_for('auth.login'))
-    redirect_uri = url_for('auth.facebook_callback', _external=True)
-    if redirect_uri.startswith('http://'):
-        redirect_uri = redirect_uri.replace('http://', 'https://', 1)
-    return oauth.facebook.authorize_redirect(redirect_uri)
-
-
-@auth.route('/auth/facebook/callback')
-def facebook_callback():
-    try:
-        token = oauth.facebook.authorize_access_token()
-        # Request picture specifically
-        user_info = oauth.facebook.get('me?fields=id,name,email,picture.type(large)').json()
-        
-        email = user_info.get('email')
-        name = user_info.get('name', '')
-        oauth_id = user_info.get('id')
-        
-        # Facebook picture structure is nested
-        picture = ''
-        if 'picture' in user_info and 'data' in user_info['picture']:
-            picture = user_info['picture']['data'].get('url', '')
-
-        if not email:
-             flash('Could not retrieve email from Facebook.', 'error')
-             return redirect(url_for('auth.login'))
-        
-        _handle_oauth_user('facebook', oauth_id, email, name, picture)
-        return redirect(url_for('patient.dashboard'))
-
-    except Exception as e:
-        print(f"Facebook OAuth Error: {e}")
-        import traceback
-        traceback.print_exc()
-        flash('Facebook login failed. Please try again.', 'error')
-        return redirect(url_for('auth.login'))
