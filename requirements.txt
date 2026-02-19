@@ -2,12 +2,10 @@ flask
 flask-sqlalchemy
 flask-login
 flask-migrate
-Werkzeug<3.0.0
+werkzeug
 gunicorn
 psycopg2-binary
 reportlab
 qrcode[pil]
 pillow
 Flask-Mail
-email-validator
-blinker
