@@ -9,3 +9,5 @@ reportlab
 qrcode[pil]
 pillow
 Flask-Mail
+authlib
+requests

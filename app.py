@@ -39,6 +39,10 @@ def create_app():
     app.register_blueprint(patient)
     app.register_blueprint(admin)
 
+    # Initialize OAuth
+    from blueprints.auth import init_oauth
+    init_oauth(app)
+
     # Create DB + upload folder + auto-seed admin
     with app.app_context():
         try:

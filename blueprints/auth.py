@@ -21,7 +21,7 @@ def login():
 
         user = User.query.filter_by(email=email).first()
 
-        if user and user.check_password(password):
+        if user and user.password_hash and user.check_password(password):
             login_user(user)
             
             # Smart Redirect
@@ -198,3 +198,188 @@ def logout():
     logout_user()
     flash('You have been logged out.', 'info')
     return redirect(url_for('main.home'))
+
+
+# ============================================================
+#                    OAUTH SOCIAL LOGIN
+# ============================================================
+from authlib.integrations.flask_client import OAuth
+
+oauth = OAuth()
+
+def init_oauth(app):
+    """Initialize OAuth with the Flask app."""
+    oauth.init_app(app)
+
+    # Google
+    if app.config.get('GOOGLE_CLIENT_ID'):
+        oauth.register(
+            name='google',
+            client_id=app.config['GOOGLE_CLIENT_ID'],
+            client_secret=app.config['GOOGLE_CLIENT_SECRET'],
+            server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+            client_kwargs={'scope': 'openid email profile'},
+        )
+
+    # Microsoft / Outlook
+    if app.config.get('MICROSOFT_CLIENT_ID'):
+        oauth.register(
+            name='microsoft',
+            client_id=app.config['MICROSOFT_CLIENT_ID'],
+            client_secret=app.config['MICROSOFT_CLIENT_SECRET'],
+            server_metadata_url='https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration',
+            client_kwargs={'scope': 'openid email profile'},
+        )
+
+    # Facebook
+    if app.config.get('FACEBOOK_CLIENT_ID'):
+        oauth.register(
+            name='facebook',
+            client_id=app.config['FACEBOOK_CLIENT_ID'],
+            client_secret=app.config['FACEBOOK_CLIENT_SECRET'],
+            access_token_url='https://graph.facebook.com/v18.0/oauth/access_token',
+            authorize_url='https://www.facebook.com/v18.0/dialog/oauth',
+            api_base_url='https://graph.facebook.com/v18.0/',
+            client_kwargs={'scope': 'email public_profile'},
+        )
+
+
+def _handle_oauth_user(provider, oauth_id, email, name):
+    """Find or create user from OAuth data, then log them in."""
+    # 1. Check by oauth_id
+    user = User.query.filter_by(oauth_provider=provider, oauth_id=str(oauth_id)).first()
+
+    if not user:
+        # 2. Check by email — link existing account
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.oauth_provider = provider
+            user.oauth_id = str(oauth_id)
+            db.session.commit()
+        else:
+            # 3. Create new user
+            user = User(
+                name=name or email.split('@')[0],
+                email=email,
+                phone='',
+                oauth_provider=provider,
+                oauth_id=str(oauth_id),
+                role='patient'
+            )
+            db.session.add(user)
+            db.session.commit()
+
+    login_user(user)
+    flash(f'Welcome, {user.name}! 🎉', 'success')
+
+    if user.is_admin():
+        return redirect(url_for('admin.dashboard'))
+    return redirect(url_for('patient.dashboard'))
+
+
+# --- Google OAuth Routes ---
+@auth.route('/auth/google')
+def google_login():
+    if not hasattr(oauth, 'google') or not oauth.google:
+        flash('Google login is not configured.', 'error')
+        return redirect(url_for('auth.login'))
+    redirect_uri = url_for('auth.google_callback', _external=True)
+    return oauth.google.authorize_redirect(redirect_uri)
+
+
+@auth.route('/auth/google/callback')
+def google_callback():
+    try:
+        token = oauth.google.authorize_access_token()
+        user_info = token.get('userinfo')
+        if not user_info:
+            user_info = oauth.google.userinfo()
+
+        email = user_info.get('email')
+        name = user_info.get('name', '')
+        oauth_id = user_info.get('sub')
+
+        if not email:
+            flash('Could not get email from Google.', 'error')
+            return redirect(url_for('auth.login'))
+
+        return _handle_oauth_user('google', oauth_id, email, name)
+
+    except Exception as e:
+        print(f"Google OAuth Error: {e}")
+        import traceback
+        traceback.print_exc()
+        flash('Google login failed. Please try again.', 'error')
+        return redirect(url_for('auth.login'))
+
+
+# --- Microsoft OAuth Routes ---
+@auth.route('/auth/microsoft')
+def microsoft_login():
+    if not hasattr(oauth, 'microsoft') or not oauth.microsoft:
+        flash('Microsoft login is not configured.', 'error')
+        return redirect(url_for('auth.login'))
+    redirect_uri = url_for('auth.microsoft_callback', _external=True)
+    return oauth.microsoft.authorize_redirect(redirect_uri)
+
+
+@auth.route('/auth/microsoft/callback')
+def microsoft_callback():
+    try:
+        token = oauth.microsoft.authorize_access_token()
+        user_info = token.get('userinfo')
+        if not user_info:
+            user_info = oauth.microsoft.userinfo()
+
+        email = user_info.get('email') or user_info.get('preferred_username')
+        name = user_info.get('name', '')
+        oauth_id = user_info.get('sub') or user_info.get('oid')
+
+        if not email:
+            flash('Could not get email from Microsoft.', 'error')
+            return redirect(url_for('auth.login'))
+
+        return _handle_oauth_user('microsoft', oauth_id, email, name)
+
+    except Exception as e:
+        print(f"Microsoft OAuth Error: {e}")
+        import traceback
+        traceback.print_exc()
+        flash('Microsoft login failed. Please try again.', 'error')
+        return redirect(url_for('auth.login'))
+
+
+# --- Facebook OAuth Routes ---
+@auth.route('/auth/facebook')
+def facebook_login():
+    if not hasattr(oauth, 'facebook') or not oauth.facebook:
+        flash('Facebook login is not configured.', 'error')
+        return redirect(url_for('auth.login'))
+    redirect_uri = url_for('auth.facebook_callback', _external=True)
+    return oauth.facebook.authorize_redirect(redirect_uri)
+
+
+@auth.route('/auth/facebook/callback')
+def facebook_callback():
+    try:
+        token = oauth.facebook.authorize_access_token()
+        resp = oauth.facebook.get('me?fields=id,name,email')
+        user_info = resp.json()
+
+        email = user_info.get('email')
+        name = user_info.get('name', '')
+        oauth_id = user_info.get('id')
+
+        if not email:
+            flash('Could not get email from Facebook. Please ensure email permission is granted.', 'error')
+            return redirect(url_for('auth.login'))
+
+        return _handle_oauth_user('facebook', oauth_id, email, name)
+
+    except Exception as e:
+        print(f"Facebook OAuth Error: {e}")
+        import traceback
+        traceback.print_exc()
+        flash('Facebook login failed. Please try again.', 'error')
+        return redirect(url_for('auth.login'))
+

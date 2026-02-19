@@ -12,8 +12,10 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    phone = db.Column(db.String(15), nullable=False)
-    password_hash = db.Column(db.String(256), nullable=False)
+    phone = db.Column(db.String(15), nullable=True, default='')
+    password_hash = db.Column(db.String(256), nullable=True)
+    oauth_provider = db.Column(db.String(20), nullable=True)  # google, microsoft, facebook
+    oauth_id = db.Column(db.String(200), nullable=True)
     role = db.Column(db.String(20), default='patient')  # patient / admin
     address = db.Column(db.Text, default='')
     is_active = db.Column(db.Boolean, default=True)
