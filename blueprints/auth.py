@@ -206,6 +206,7 @@ def logout():
 from authlib.integrations.flask_client import OAuth
 
 oauth = OAuth()
+_registered_providers = set()  # Track which providers are actually configured
 
 def init_oauth(app):
     """Initialize OAuth with the Flask app."""
@@ -220,6 +221,10 @@ def init_oauth(app):
             server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
             client_kwargs={'scope': 'openid email profile'},
         )
+        _registered_providers.add('google')
+        print(f"✅ Google OAuth registered with client_id: {app.config['GOOGLE_CLIENT_ID'][:20]}...")
+    else:
+        print("⚠️ Google OAuth not configured (GOOGLE_CLIENT_ID missing)")
 
     # Microsoft / Outlook
     if app.config.get('MICROSOFT_CLIENT_ID'):
@@ -230,6 +235,8 @@ def init_oauth(app):
             server_metadata_url='https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration',
             client_kwargs={'scope': 'openid email profile'},
         )
+        _registered_providers.add('microsoft')
+        print("✅ Microsoft OAuth registered")
 
     # Facebook
     if app.config.get('FACEBOOK_CLIENT_ID'):
@@ -242,6 +249,8 @@ def init_oauth(app):
             api_base_url='https://graph.facebook.com/v18.0/',
             client_kwargs={'scope': 'email public_profile'},
         )
+        _registered_providers.add('facebook')
+        print("✅ Facebook OAuth registered")
 
 
 def _handle_oauth_user(provider, oauth_id, email, name):
@@ -280,7 +289,7 @@ def _handle_oauth_user(provider, oauth_id, email, name):
 # --- Google OAuth Routes ---
 @auth.route('/auth/google')
 def google_login():
-    if not hasattr(oauth, 'google') or not oauth.google:
+    if 'google' not in _registered_providers:
         flash('Google login is not configured.', 'error')
         return redirect(url_for('auth.login'))
     redirect_uri = url_for('auth.google_callback', _external=True)
@@ -316,7 +325,7 @@ def google_callback():
 # --- Microsoft OAuth Routes ---
 @auth.route('/auth/microsoft')
 def microsoft_login():
-    if not hasattr(oauth, 'microsoft') or not oauth.microsoft:
+    if 'microsoft' not in _registered_providers:
         flash('Microsoft login is not configured.', 'error')
         return redirect(url_for('auth.login'))
     redirect_uri = url_for('auth.microsoft_callback', _external=True)
@@ -352,7 +361,7 @@ def microsoft_callback():
 # --- Facebook OAuth Routes ---
 @auth.route('/auth/facebook')
 def facebook_login():
-    if not hasattr(oauth, 'facebook') or not oauth.facebook:
+    if 'facebook' not in _registered_providers:
         flash('Facebook login is not configured.', 'error')
         return redirect(url_for('auth.login'))
     redirect_uri = url_for('auth.facebook_callback', _external=True)
