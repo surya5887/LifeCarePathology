@@ -255,6 +255,15 @@ def db_migrate_oauth():
             db.session.rollback()
             results.append(f"Password alter failed: {str(e)}")
             
+        # 5. Add profile_pic
+        try:
+            db.session.execute(text("ALTER TABLE users ADD COLUMN profile_pic VARCHAR(300)"))
+            db.session.commit()
+            results.append("Added profile_pic column")
+        except Exception as e:
+            db.session.rollback()
+            results.append(f"profile_pic column likely exists ({str(e)})")
+            
         return jsonify(results)
     except Exception as e:
         return f"Migration Error: {str(e)}"
@@ -277,22 +286,6 @@ def init_oauth(app):
     else:
         print("⚠️ Google OAuth not configured (GOOGLE_CLIENT_ID missing)")
 
-    # Instagram
-    if app.config.get('INSTAGRAM_CLIENT_ID'):
-        oauth.register(
-            name='instagram',
-            client_id=app.config['INSTAGRAM_CLIENT_ID'],
-            client_secret=app.config['INSTAGRAM_CLIENT_SECRET'],
-            access_token_url='https://api.instagram.com/oauth/access_token',
-            access_token_params=None,
-            authorize_url='https://api.instagram.com/oauth/authorize',
-            authorize_params=None,
-            api_base_url='https://graph.instagram.com/',
-            client_kwargs={'scope': 'user_profile,user_media'},
-        )
-        _registered_providers.add('instagram')
-        print("✅ Instagram OAuth registered")
-
     # Facebook
     if app.config.get('FACEBOOK_CLIENT_ID'):
         oauth.register(
@@ -308,7 +301,7 @@ def init_oauth(app):
         print("✅ Facebook OAuth registered")
 
 
-def _handle_oauth_user(provider, oauth_id, email, name):
+def _handle_oauth_user(provider, oauth_id, email, name, picture=None):
     """Find or create user from OAuth data, then log them in."""
     # 1. Check by oauth_id
     user = User.query.filter_by(oauth_provider=provider, oauth_id=str(oauth_id)).first()
@@ -317,8 +310,11 @@ def _handle_oauth_user(provider, oauth_id, email, name):
         # 2. Check by email — link existing account
         user = User.query.filter_by(email=email).first()
         if user:
+            # Link existing account
             user.oauth_provider = provider
             user.oauth_id = str(oauth_id)
+            if picture and not user.profile_pic:
+                user.profile_pic = picture
             db.session.commit()
         else:
             # 3. Create new user
@@ -328,9 +324,15 @@ def _handle_oauth_user(provider, oauth_id, email, name):
                 phone='',
                 oauth_provider=provider,
                 oauth_id=str(oauth_id),
+                profile_pic=picture,
                 role='patient'
             )
             db.session.add(user)
+            db.session.commit()
+    else:
+        # Update profile pic if new one available and different
+        if picture and user.profile_pic != picture:
+            user.profile_pic = picture
             db.session.commit()
 
     login_user(user)
@@ -364,12 +366,14 @@ def google_callback():
         email = user_info.get('email')
         name = user_info.get('name', '')
         oauth_id = user_info.get('sub')
+        picture = user_info.get('picture', '')
 
         if not email:
-            flash('Could not get email from Google.', 'error')
+            flash('Could not retrieve email from Google.', 'error')
             return redirect(url_for('auth.login'))
 
-        return _handle_oauth_user('google', oauth_id, email, name)
+        _handle_oauth_user('google', oauth_id, email, name, picture)
+        return redirect(url_for('patient.dashboard'))
 
     except Exception as e:
         print(f"Google OAuth Error: {e}")
@@ -429,18 +433,24 @@ def facebook_login():
 def facebook_callback():
     try:
         token = oauth.facebook.authorize_access_token()
-        resp = oauth.facebook.get('me?fields=id,name,email')
-        user_info = resp.json()
-
+        # Request picture specifically
+        user_info = oauth.facebook.get('me?fields=id,name,email,picture.type(large)').json()
+        
         email = user_info.get('email')
         name = user_info.get('name', '')
         oauth_id = user_info.get('id')
+        
+        # Facebook picture structure is nested
+        picture = ''
+        if 'picture' in user_info and 'data' in user_info['picture']:
+            picture = user_info['picture']['data'].get('url', '')
 
         if not email:
-            flash('Could not get email from Facebook. Please ensure email permission is granted.', 'error')
-            return redirect(url_for('auth.login'))
-
-        return _handle_oauth_user('facebook', oauth_id, email, name)
+             flash('Could not retrieve email from Facebook.', 'error')
+             return redirect(url_for('auth.login'))
+        
+        _handle_oauth_user('facebook', oauth_id, email, name, picture)
+        return redirect(url_for('patient.dashboard'))
 
     except Exception as e:
         print(f"Facebook OAuth Error: {e}")
@@ -448,4 +458,3 @@ def facebook_callback():
         traceback.print_exc()
         flash('Facebook login failed. Please try again.', 'error')
         return redirect(url_for('auth.login'))
-

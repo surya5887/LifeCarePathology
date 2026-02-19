@@ -16,6 +16,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=True)
     oauth_provider = db.Column(db.String(20), nullable=True)  # google, microsoft, facebook
     oauth_id = db.Column(db.String(200), nullable=True)
+    profile_pic = db.Column(db.String(300), nullable=True) # Profile picture URL from OAuth
     role = db.Column(db.String(20), default='patient')  # patient / admin
     address = db.Column(db.Text, default='')
     is_active = db.Column(db.Boolean, default=True)
