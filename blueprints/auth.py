@@ -53,25 +53,6 @@ def register():
         password = request.form.get('password', '')
         confirm_password = request.form.get('confirm_password', '')
         
-        # Profile Picture Upload
-        # Profile Picture Upload
-        profile_pic_filename = None
-        if 'profile_picture' in request.files:
-            file = request.files['profile_picture']
-            if file and file.filename != '':
-                try:
-                    filename = secure_filename(file.filename)
-                    # Create unique filename: email_filename
-                    unique_filename = f"{email.split('@')[0]}_{filename}"
-                    save_path = os.path.join(current_app.root_path, 'static', 'uploads', 'profiles')
-                    os.makedirs(save_path, exist_ok=True)
-                    file.save(os.path.join(save_path, unique_filename))
-                    profile_pic_filename = f"uploads/profiles/{unique_filename}"
-                except Exception as e:
-                    print(f"⚠️ Profile Picture Upload Failed (Vercel Read-Only?): {e}")
-                    # Continue registration without profile picture
-                    pass
-
         # Validation
         if not all([name, email, phone, password]):
             flash('Please fill in all fields.', 'error')
@@ -85,10 +66,11 @@ def register():
             flash('Password must be at least 6 characters.', 'error')
             return render_template('auth/register.html')
 
+        if User.query.filter_by(email=email).first():
             flash('Email is already registered. Please login.', 'error')
             return render_template('auth/register.html')
 
-        user = User(name=name, email=email, phone=phone, profile_picture=profile_pic_filename)
+        user = User(name=name, email=email, phone=phone)
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
