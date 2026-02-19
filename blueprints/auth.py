@@ -200,19 +200,8 @@ def logout():
     return redirect(url_for('main.home'))
 
 
-# --- TEMPORARY DEBUG: Remove after testing ---
-@auth.route('/auth/debug')
-def oauth_debug():
-    import os
-    gid = os.environ.get('GOOGLE_CLIENT_ID', '(not set)')
-    gsecret = os.environ.get('GOOGLE_CLIENT_SECRET', '(not set)')
-    config_gid = current_app.config.get('GOOGLE_CLIENT_ID', '(not in config)')
-    return jsonify({
-        'env_GOOGLE_CLIENT_ID': gid[:15] + '...' if len(gid) > 15 else gid,
-        'env_GOOGLE_CLIENT_SECRET': gsecret[:8] + '...' if len(gsecret) > 8 else gsecret,
-        'config_GOOGLE_CLIENT_ID': config_gid[:15] + '...' if len(config_gid) > 15 else config_gid,
-        'registered_providers': list(_registered_providers),
-    })
+    # Remove debug route
+
 
 
 # ============================================================
@@ -308,6 +297,8 @@ def google_login():
         flash('Google login is not configured.', 'error')
         return redirect(url_for('auth.login'))
     redirect_uri = url_for('auth.google_callback', _external=True)
+    if redirect_uri.startswith('http://'):
+        redirect_uri = redirect_uri.replace('http://', 'https://', 1)
     return oauth.google.authorize_redirect(redirect_uri)
 
 
@@ -333,7 +324,7 @@ def google_callback():
         print(f"Google OAuth Error: {e}")
         import traceback
         traceback.print_exc()
-        flash('Google login failed. Please try again.', 'error')
+        flash(f'Google login failed: {str(e)}', 'error')
         return redirect(url_for('auth.login'))
 
 
@@ -344,6 +335,8 @@ def microsoft_login():
         flash('Microsoft login is not configured.', 'error')
         return redirect(url_for('auth.login'))
     redirect_uri = url_for('auth.microsoft_callback', _external=True)
+    if redirect_uri.startswith('http://'):
+        redirect_uri = redirect_uri.replace('http://', 'https://', 1)
     return oauth.microsoft.authorize_redirect(redirect_uri)
 
 
@@ -380,6 +373,8 @@ def facebook_login():
         flash('Facebook login is not configured.', 'error')
         return redirect(url_for('auth.login'))
     redirect_uri = url_for('auth.facebook_callback', _external=True)
+    if redirect_uri.startswith('http://'):
+        redirect_uri = redirect_uri.replace('http://', 'https://', 1)
     return oauth.facebook.authorize_redirect(redirect_uri)
 
 
