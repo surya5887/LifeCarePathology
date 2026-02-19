@@ -54,17 +54,23 @@ def register():
         confirm_password = request.form.get('confirm_password', '')
         
         # Profile Picture Upload
+        # Profile Picture Upload
         profile_pic_filename = None
         if 'profile_picture' in request.files:
             file = request.files['profile_picture']
             if file and file.filename != '':
-                filename = secure_filename(file.filename)
-                # Create unique filename: email_filename
-                unique_filename = f"{email.split('@')[0]}_{filename}"
-                save_path = os.path.join(current_app.root_path, 'static', 'uploads', 'profiles')
-                os.makedirs(save_path, exist_ok=True)
-                file.save(os.path.join(save_path, unique_filename))
-                profile_pic_filename = f"uploads/profiles/{unique_filename}"
+                try:
+                    filename = secure_filename(file.filename)
+                    # Create unique filename: email_filename
+                    unique_filename = f"{email.split('@')[0]}_{filename}"
+                    save_path = os.path.join(current_app.root_path, 'static', 'uploads', 'profiles')
+                    os.makedirs(save_path, exist_ok=True)
+                    file.save(os.path.join(save_path, unique_filename))
+                    profile_pic_filename = f"uploads/profiles/{unique_filename}"
+                except Exception as e:
+                    print(f"⚠️ Profile Picture Upload Failed (Vercel Read-Only?): {e}")
+                    # Continue registration without profile picture
+                    pass
 
         # Validation
         if not all([name, email, phone, password]):
