@@ -308,7 +308,8 @@
         </div>
     </div>
 </section>
-                // ====== Toast Notification System ======
+<script>
+    // ====== Toast Notification System ======
                 function showToast(message, type = 'info', duration = 4000) {
                     const container = document.getElementById('toastContainer');
                     const toast = document.createElement('div');
@@ -480,12 +481,7 @@
                     }, 1000);
                 }
             </script>
-            <div class="auth-footer">
-                <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
-            </div>
-        </div>
-    </div>
-</section>
+
 {% endblock %}
 
 {% block scripts %}
