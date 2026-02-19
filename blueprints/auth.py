@@ -277,17 +277,21 @@ def init_oauth(app):
     else:
         print("⚠️ Google OAuth not configured (GOOGLE_CLIENT_ID missing)")
 
-    # Microsoft / Outlook
-    if app.config.get('MICROSOFT_CLIENT_ID'):
+    # Instagram
+    if app.config.get('INSTAGRAM_CLIENT_ID'):
         oauth.register(
-            name='microsoft',
-            client_id=app.config['MICROSOFT_CLIENT_ID'],
-            client_secret=app.config['MICROSOFT_CLIENT_SECRET'],
-            server_metadata_url='https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration',
-            client_kwargs={'scope': 'openid email profile'},
+            name='instagram',
+            client_id=app.config['INSTAGRAM_CLIENT_ID'],
+            client_secret=app.config['INSTAGRAM_CLIENT_SECRET'],
+            access_token_url='https://api.instagram.com/oauth/access_token',
+            access_token_params=None,
+            authorize_url='https://api.instagram.com/oauth/authorize',
+            authorize_params=None,
+            api_base_url='https://graph.instagram.com/',
+            client_kwargs={'scope': 'user_profile,user_media'},
         )
-        _registered_providers.add('microsoft')
-        print("✅ Microsoft OAuth registered")
+        _registered_providers.add('instagram')
+        print("✅ Instagram OAuth registered")
 
     # Facebook
     if app.config.get('FACEBOOK_CLIENT_ID'):
@@ -375,41 +379,37 @@ def google_callback():
         return redirect(url_for('auth.login'))
 
 
-# --- Microsoft OAuth Routes ---
-@auth.route('/auth/microsoft')
-def microsoft_login():
-    if 'microsoft' not in _registered_providers:
-        flash('Microsoft login is not configured.', 'error')
+# --- Instagram OAuth Routes ---
+@auth.route('/auth/instagram')
+def instagram_login():
+    if 'instagram' not in _registered_providers:
+        flash('Instagram login is not configured.', 'error')
         return redirect(url_for('auth.login'))
-    redirect_uri = url_for('auth.microsoft_callback', _external=True)
+    redirect_uri = url_for('auth.instagram_callback', _external=True)
     if redirect_uri.startswith('http://'):
         redirect_uri = redirect_uri.replace('http://', 'https://', 1)
-    return oauth.microsoft.authorize_redirect(redirect_uri)
+    return oauth.instagram.authorize_redirect(redirect_uri)
 
 
-@auth.route('/auth/microsoft/callback')
-def microsoft_callback():
+@auth.route('/auth/instagram/callback')
+def instagram_callback():
     try:
-        token = oauth.microsoft.authorize_access_token()
-        user_info = token.get('userinfo')
-        if not user_info:
-            user_info = oauth.microsoft.userinfo()
+        token = oauth.instagram.authorize_access_token()
+        user_info = oauth.instagram.get('me?fields=id,username,account_type').json()
+        
+        # Instagram Basic Display doesn't return email, so we use username as placeholder or require extra step
+        # For simplicity, we'll prefix with instagram_
+        username = user_info.get('username')
+        oauth_id = user_info.get('id')
+        email = f"{username}@instagram.user" # Placeholder as email is not available
+        
+        if not oauth_id:
+             raise Exception("Could not retrieve user info from Instagram")
 
-        email = user_info.get('email') or user_info.get('preferred_username')
-        name = user_info.get('name', '')
-        oauth_id = user_info.get('sub') or user_info.get('oid')
-
-        if not email:
-            flash('Could not get email from Microsoft.', 'error')
-            return redirect(url_for('auth.login'))
-
-        return _handle_oauth_user('microsoft', oauth_id, email, name)
-
+        _handle_oauth_user('instagram', oauth_id, email, username)
+        return redirect(url_for('patient.dashboard'))
     except Exception as e:
-        print(f"Microsoft OAuth Error: {e}")
-        import traceback
-        traceback.print_exc()
-        flash('Microsoft login failed. Please try again.', 'error')
+        flash(f'Instagram login failed: {str(e)}', 'error')
         return redirect(url_for('auth.login'))
 
 
