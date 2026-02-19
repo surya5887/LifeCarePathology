@@ -39,6 +39,24 @@ def create_app():
     app.register_blueprint(patient)
     app.register_blueprint(admin)
 
+    @app.route('/test-email')
+    def test_email():
+        try:
+            from flask_mail import Message
+            from extensions import mail
+            
+            msg = Message(
+                "Test Email from LifeCare",
+                recipients=['anishchaudhary0078@gmail.com'],  # Sending to self to test
+                body="If you receive this, email configuration is working!"
+            )
+            mail.send(msg)
+            return "<h1>Email Sent Successfully! ✅</h1><p>Check your inbox.</p>"
+        except Exception as e:
+            import traceback
+            return f"<h1>Email Failed ❌</h1><pre>{str(e)}</pre><pre>{traceback.format_exc()}</pre>"
+
+
     # Create DB + upload folder + auto-seed admin
     with app.app_context():
         try:
