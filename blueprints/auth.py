@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, session, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from models import User
@@ -41,6 +41,69 @@ def login():
     return render_template('auth/login.html')
 
 
+@auth.route('/send-otp', methods=['POST'])
+def send_otp():
+    try:
+        data = request.get_json()
+        email = data.get('email', '').strip()
+
+        if not email:
+            return jsonify({'success': False, 'message': 'Email is required.'}), 400
+
+        # Check if email already exists
+        if User.query.filter_by(email=email).first():
+            return jsonify({'success': False, 'message': 'Email is already registered. Please login.'}), 400
+
+        # Generate OTP
+        from utils.otp_util import generate_otp, send_otp_email
+        otp = generate_otp()
+        
+        # Store in Session (Temporary)
+        session['otp'] = otp
+        session['otp_email'] = email
+        session['email_verified'] = False
+
+        # Send Email
+        if send_otp_email(email, otp):
+            return jsonify({'success': True, 'message': 'OTP sent successfully!'})
+        else:
+            return jsonify({'success': False, 'message': 'Failed to send OTP. Check email.'}), 500
+
+    except Exception as e:
+        print(f"OTP Error: {e}")
+        return jsonify({'success': False, 'message': 'Internal Server Error'}), 500
+
+
+@auth.route('/verify-otp', methods=['POST'])
+def verify_otp():
+    try:
+        data = request.get_json()
+        email = data.get('email', '').strip()
+        user_otp = data.get('otp', '').strip()
+
+        if not email or not user_otp:
+            return jsonify({'success': False, 'message': 'Email and OTP are required.'}), 400
+
+        # Verify against Session
+        session_otp = session.get('otp')
+        session_email = session.get('otp_email')
+
+        if not session_otp or not session_email:
+            return jsonify({'success': False, 'message': 'OTP expired. Please request a new one.'}), 400
+
+        if email != session_email:
+             return jsonify({'success': False, 'message': 'Email mismatch.'}), 400
+
+        if user_otp == session_otp:
+            session['email_verified'] = True
+            return jsonify({'success': True, 'message': 'Email verified successfully!'})
+        else:
+            return jsonify({'success': False, 'message': 'Invalid OTP.'}), 400
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': 'Internal Server Error'}), 500
+
+
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -69,11 +132,21 @@ def register():
         if User.query.filter_by(email=email).first():
             flash('Email is already registered. Please login.', 'error')
             return render_template('auth/register.html')
+            
+        # OTP VERIFICATION CHECK
+        if not session.get('email_verified') or session.get('otp_email') != email:
+             flash('Please verify your email via OTP first.', 'error')
+             return render_template('auth/register.html')
 
         user = User(name=name, email=email, phone=phone)
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
+        
+        # Clean session
+        session.pop('otp', None)
+        session.pop('otp_email', None)
+        session.pop('email_verified', None)
         
         # Auto-Login
         login_user(user)
