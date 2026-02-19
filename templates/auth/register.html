@@ -308,183 +308,184 @@
         </div>
     </div>
 </section>
-<script>
-    // ====== Toast Notification System ======
-                function showToast(message, type = 'info', duration = 4000) {
-                    const container = document.getElementById('toastContainer');
-                    const toast = document.createElement('div');
-                    toast.className = `toast-msg ${type}`;
 
-                    const icons = {
-                        success: 'fa-check-circle',
-                        error: 'fa-exclamation-circle',
-                        info: 'fa-info-circle',
-                        warning: 'fa-exclamation-triangle'
-                    };
-
-                    toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${message}`;
-                    container.appendChild(toast);
-
-                    setTimeout(() => {
-                        toast.style.animation = 'slideOut 0.3s ease forwards';
-                        setTimeout(() => toast.remove(), 300);
-                    }, duration);
-                }
-
-                // ====== Send OTP ======
-                function sendOtp() {
-                    const email = document.getElementById('email').value.trim();
-                    const btn = document.getElementById('sendOtpBtn');
-                    const help = document.getElementById('emailHelp');
-
-                    if (!email || !email.includes('@') || !email.includes('.')) {
-                        showToast('Please enter a valid email address.', 'warning');
-                        help.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Enter a valid email address.';
-                        help.className = 'status-msg error';
-                        return;
-                    }
-
-                    // Loading state
-                    btn.disabled = true;
-                    btn.classList.add('sending');
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-                    help.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending OTP to your email...';
-                    help.className = 'status-msg info';
-
-                    fetch("{{ url_for('auth.send_otp') }}", {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: email })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Show OTP Section
-                            const otpSection = document.getElementById('otpSection');
-                            otpSection.classList.add('show');
-                            document.getElementById('otp').focus();
-
-                            help.innerHTML = '<i class="fas fa-check-circle"></i> OTP sent! Check your inbox.';
-                            help.className = 'status-msg success';
-
-                            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Sent';
-                            btn.classList.remove('sending');
-
-                            showToast('OTP sent to ' + email + ' ✉️', 'success');
-                            startTimer(60);
-                        } else {
-                            help.innerHTML = '<i class="fas fa-times-circle"></i> ' + data.message;
-                            help.className = 'status-msg error';
-                            btn.disabled = false;
-                            btn.classList.remove('sending');
-                            btn.innerHTML = '<i class="fas fa-shield-alt"></i> Verify';
-                            showToast(data.message, 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        help.innerHTML = '<i class="fas fa-times-circle"></i> Network error. Please try again.';
-                        help.className = 'status-msg error';
-                        btn.disabled = false;
-                        btn.classList.remove('sending');
-                        btn.innerHTML = '<i class="fas fa-shield-alt"></i> Verify';
-                        showToast('Network error. Please try again.', 'error');
-                    });
-                }
-
-                // ====== Verify OTP ======
-                function verifyOtp() {
-                    const email = document.getElementById('email').value.trim();
-                    const otp = document.getElementById('otp').value.trim();
-                    const submitBtnOtp = document.getElementById('otpSubmitBtn');
-
-                    if (otp.length !== 6) {
-                        showToast('Please enter a valid 6-digit OTP.', 'warning');
-                        return;
-                    }
-
-                    submitBtnOtp.disabled = true;
-                    submitBtnOtp.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
-
-                    fetch("{{ url_for('auth.verify_otp') }}", {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: email, otp: otp })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // ✅ SUCCESS — Beautiful UI Transition
-                            document.getElementById('otpSection').classList.remove('show');
-                            document.getElementById('otpSection').style.display = 'none';
-
-                            // Lock email input
-                            const emailInput = document.getElementById('email');
-                            emailInput.readOnly = true;
-                            document.getElementById('emailGroup').classList.add('email-verified');
-
-                            // Update verify button
-                            const btn = document.getElementById('sendOtpBtn');
-                            btn.innerHTML = '<i class="fas fa-check"></i> Verified';
-                            btn.classList.add('verified');
-                            btn.disabled = true;
-
-                            // Show verified badge
-                            const help = document.getElementById('emailHelp');
-                            help.innerHTML = '<span class="verified-badge" style="color: #10b981; font-weight: 600;"><i class="fas fa-check-circle"></i> Email has been verified</span>';
-                            help.className = 'status-msg';
-
-                            // Enable Submit
-                            const submitBtn = document.getElementById('submitBtn');
-                            submitBtn.disabled = false;
-                            submitBtn.style.opacity = '1';
-                            submitBtn.style.cursor = 'pointer';
-
-                            showToast('Email verified successfully! ✅', 'success', 5000);
-                        } else {
-                            submitBtnOtp.disabled = false;
-                            submitBtnOtp.innerHTML = '<i class="fas fa-check-circle"></i> Verify';
-                            showToast(data.message, 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        submitBtnOtp.disabled = false;
-                        submitBtnOtp.innerHTML = '<i class="fas fa-check-circle"></i> Verify';
-                        showToast('Verification failed. Try again.', 'error');
-                    });
-                }
-
-                // ====== Timer ======
-                let timerInterval = null;
-                function startTimer(duration) {
-                    if (timerInterval) clearInterval(timerInterval);
-                    let timer = duration;
-                    const display = document.getElementById('timerText');
-                    const timerWrap = document.getElementById('otpTimer');
-                    const resendLink = document.getElementById('resendLink');
-
-                    resendLink.style.display = 'none';
-                    timerWrap.style.display = 'flex';
-
-                    timerInterval = setInterval(function () {
-                        display.textContent = timer + 's';
-
-                        if (--timer < 0) {
-                            clearInterval(timerInterval);
-                            timerWrap.style.display = 'none';
-                            resendLink.style.display = 'inline-flex';
-
-                            document.getElementById('sendOtpBtn').disabled = false;
-                            document.getElementById('sendOtpBtn').innerHTML = '<i class="fas fa-redo"></i> Resend';
-                        }
-                    }, 1000);
-                }
-            </script>
 
 {% endblock %}
 
 {% block scripts %}
+    <script>
+        // ====== Toast Notification System ======
+        function showToast(message, type = 'info', duration = 4000) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast-msg ${type}`;
+
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                info: 'fa-info-circle',
+                warning: 'fa-exclamation-triangle'
+            };
+
+            toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${message}`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // ====== Send OTP ======
+        function sendOtp() {
+            const email = document.getElementById('email').value.trim();
+            const btn = document.getElementById('sendOtpBtn');
+            const help = document.getElementById('emailHelp');
+
+            if (!email || !email.includes('@') || !email.includes('.')) {
+                showToast('Please enter a valid email address.', 'warning');
+                help.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Enter a valid email address.';
+                help.className = 'status-msg error';
+                return;
+            }
+
+            // Loading state
+            btn.disabled = true;
+            btn.classList.add('sending');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            help.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending OTP to your email...';
+            help.className = 'status-msg info';
+
+            fetch("{{ url_for('auth.send_otp') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show OTP Section
+                    const otpSection = document.getElementById('otpSection');
+                    otpSection.classList.add('show');
+                    document.getElementById('otp').focus();
+
+                    help.innerHTML = '<i class="fas fa-check-circle"></i> OTP sent! Check your inbox.';
+                    help.className = 'status-msg success';
+
+                    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Sent';
+                    btn.classList.remove('sending');
+
+                    showToast('OTP sent to ' + email + ' ✉️', 'success');
+                    startTimer(60);
+                } else {
+                    help.innerHTML = '<i class="fas fa-times-circle"></i> ' + data.message;
+                    help.className = 'status-msg error';
+                    btn.disabled = false;
+                    btn.classList.remove('sending');
+                    btn.innerHTML = '<i class="fas fa-shield-alt"></i> Verify';
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                help.innerHTML = '<i class="fas fa-times-circle"></i> Network error. Please try again.';
+                help.className = 'status-msg error';
+                btn.disabled = false;
+                btn.classList.remove('sending');
+                btn.innerHTML = '<i class="fas fa-shield-alt"></i> Verify';
+                showToast('Network error. Please try again.', 'error');
+            });
+        }
+
+        // ====== Verify OTP ======
+        function verifyOtp() {
+            const email = document.getElementById('email').value.trim();
+            const otp = document.getElementById('otp').value.trim();
+            const submitBtnOtp = document.getElementById('otpSubmitBtn');
+
+            if (otp.length !== 6) {
+                showToast('Please enter a valid 6-digit OTP.', 'warning');
+                return;
+            }
+
+            submitBtnOtp.disabled = true;
+            submitBtnOtp.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+
+            fetch("{{ url_for('auth.verify_otp') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, otp: otp })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // ✅ SUCCESS — Beautiful UI Transition
+                    document.getElementById('otpSection').classList.remove('show');
+                    document.getElementById('otpSection').style.display = 'none';
+
+                    // Lock email input
+                    const emailInput = document.getElementById('email');
+                    emailInput.readOnly = true;
+                    document.getElementById('emailGroup').classList.add('email-verified');
+
+                    // Update verify button
+                    const btn = document.getElementById('sendOtpBtn');
+                    btn.innerHTML = '<i class="fas fa-check"></i> Verified';
+                    btn.classList.add('verified');
+                    btn.disabled = true;
+
+                    // Show verified badge
+                    const help = document.getElementById('emailHelp');
+                    help.innerHTML = '<span class="verified-badge" style="color: #10b981; font-weight: 600;"><i class="fas fa-check-circle"></i> Email has been verified</span>';
+                    help.className = 'status-msg';
+
+                    // Enable Submit
+                    const submitBtn = document.getElementById('submitBtn');
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.style.cursor = 'pointer';
+
+                    showToast('Email verified successfully! ✅', 'success', 5000);
+                } else {
+                    submitBtnOtp.disabled = false;
+                    submitBtnOtp.innerHTML = '<i class="fas fa-check-circle"></i> Verify';
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                submitBtnOtp.disabled = false;
+                submitBtnOtp.innerHTML = '<i class="fas fa-check-circle"></i> Verify';
+                showToast('Verification failed. Try again.', 'error');
+            });
+        }
+
+        // ====== Timer ======
+        let timerInterval = null;
+        function startTimer(duration) {
+            if (timerInterval) clearInterval(timerInterval);
+            let timer = duration;
+            const display = document.getElementById('timerText');
+            const timerWrap = document.getElementById('otpTimer');
+            const resendLink = document.getElementById('resendLink');
+
+            resendLink.style.display = 'none';
+            timerWrap.style.display = 'flex';
+
+            timerInterval = setInterval(function () {
+                display.textContent = timer + 's';
+
+                if (--timer < 0) {
+                    clearInterval(timerInterval);
+                    timerWrap.style.display = 'none';
+                    resendLink.style.display = 'inline-flex';
+
+                    document.getElementById('sendOtpBtn').disabled = false;
+                    document.getElementById('sendOtpBtn').innerHTML = '<i class="fas fa-redo"></i> Resend';
+                }
+            }, 1000);
+        }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
     <script>
         // Initialize International Telephone Input
