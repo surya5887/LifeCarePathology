@@ -17,7 +17,7 @@
         <div class="nav-container">
             <a href="{{ url_for('main.home') }}" class="nav-logo">
                 <span class="logo-icon">🔬</span>
-                <span class="logo-text">Life Care <span class="logo-highlight">Pathology</span></span>
+                <span class="logo-text">Life Care <span class="logo-highlight">Pathology Lab</span><span class="logo-sub">Asara</span></span>
             </a>
 
             <ul class="nav-links" id="navLinks">
@@ -37,22 +37,22 @@
                                 <span style="font-size: 16px; font-weight: bold; color: var(--primary);">{{ current_user.name[0]|upper }}</span>
                             </div>
                         </a>
-                        <div class="user-dropdown-menu" id="userDropdownMenu" style="display: none; position: absolute; top: 110%; right: 0; background: #fff; min-width: 180px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 10px; padding: 10px 0; z-index: 1000; border: 1px solid rgba(0,0,0,0.05);">
-                            <div style="padding: 10px 20px; border-bottom: 1px solid #eee; margin-bottom: 5px;">
-                                <p style="font-size: 14px; font-weight: 700; color: var(--dark); margin: 0;">{{ current_user.name }}</p>
-                                <p style="font-size: 12px; color: #888; margin: 0;">{{ current_user.email }}</p>
+                        <div class="user-dropdown-menu" id="userDropdownMenu" style="display: none; position: absolute; top: 110%; right: 0; background: #1a1a24; min-width: 180px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border-radius: 10px; padding: 10px 0; z-index: 1000; border: 1px solid rgba(255,255,255,0.08);">
+                            <div style="padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 5px;">
+                                <p style="font-size: 14px; font-weight: 700; color: #fff; margin: 0;">{{ current_user.name }}</p>
+                                <p style="font-size: 12px; color: #9ca3af; margin: 0;">{{ current_user.email }}</p>
                             </div>
                             {% if current_user.is_admin() %}
-                                <a href="{{ url_for('admin.dashboard') }}" style="display: block; padding: 8px 20px; color: var(--dark); text-decoration: none; font-size: 14px; transition: 0.2s;">Admin Panel</a>
+                                <a href="{{ url_for('admin.dashboard') }}" style="display: block; padding: 8px 20px; color: #e0e0e8; text-decoration: none; font-size: 14px; transition: 0.2s;">Admin Panel</a>
                             {% else %}
-                                <a href="{{ url_for('patient.dashboard') }}" style="display: block; padding: 8px 20px; color: var(--dark); text-decoration: none; font-size: 14px; transition: 0.2s;">My Dashboard</a>
+                                <a href="{{ url_for('patient.dashboard') }}" style="display: block; padding: 8px 20px; color: #e0e0e8; text-decoration: none; font-size: 14px; transition: 0.2s;">My Dashboard</a>
                             {% endif %}
                             <a href="{{ url_for('auth.logout') }}" style="display: block; padding: 8px 20px; color: #ef4444; text-decoration: none; font-size: 14px; transition: 0.2s;">Logout</a>
                         </div>
                     </li>
 
                     <style>
-                        .user-dropdown-menu a:hover { background: #f9fafb; color: var(--primary) !important; padding-left: 24px !important; }
+                        .user-dropdown-menu a:hover { background: rgba(255,193,7,0.1); color: var(--primary) !important; padding-left: 24px !important; }
                     </style>
                     <script>
                         document.getElementById('userDropdownToggle').addEventListener('click', function(e) {
@@ -100,6 +100,22 @@
     <main class="main-content">
         {% block content %}{% endblock %}
     </main>
+
+    <!-- Health Tips Ticker -->
+    <div class="tips-ticker">
+        <div class="tips-ticker-track">
+            <span><i class="fas fa-heartbeat"></i> Regular health checkups can detect diseases early</span>
+            <span><i class="fas fa-apple-alt"></i> A balanced diet boosts your immune system</span>
+            <span><i class="fas fa-tint"></i> Stay hydrated — drink 8 glasses of water daily</span>
+            <span><i class="fas fa-walking"></i> 30 minutes of daily exercise keeps you fit</span>
+            <span><i class="fas fa-bed"></i> Quality sleep is essential for good health</span>
+            <span><i class="fas fa-heartbeat"></i> Regular health checkups can detect diseases early</span>
+            <span><i class="fas fa-apple-alt"></i> A balanced diet boosts your immune system</span>
+            <span><i class="fas fa-tint"></i> Stay hydrated — drink 8 glasses of water daily</span>
+            <span><i class="fas fa-walking"></i> 30 minutes of daily exercise keeps you fit</span>
+            <span><i class="fas fa-bed"></i> Quality sleep is essential for good health</span>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
@@ -187,6 +203,11 @@
             </div>
         </div>
     </footer>
+
+    <!-- WhatsApp Floating Button -->
+    <a href="https://wa.me/919837957711" target="_blank" class="whatsapp-float" aria-label="Chat on WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
 
     <!-- Back to Top -->
     <button class="back-to-top" id="backToTop" aria-label="Back to top">
