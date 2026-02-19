@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Login with OTP - LifeCare Pathology Lab{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="auth-header">
+                <h2>Login with OTP</h2>
+                <p>Login securely without a password</p>
+            </div>
+            
+            <form method="POST" action="{{ url_for('auth.verify_otp_login') }}" class="auth-form" id="otpLoginForm">
+                
+                <!-- Step 1: Email -->
+                <div class="form-group" id="emailGroup">
+                    <label for="email">Email Address</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                    </div>
+                    <button type="button" id="sendOtpBtn" class="btn btn-secondary btn-block" style="margin-top: 15px;" onclick="sendLoginOtp()">
+                        <i class="fas fa-paper-plane"></i> Send OTP
+                    </button>
+                </div>
+
+                <!-- Step 2: OTP (Hidden) -->
+                <div id="otpGroup" style="display: none;">
+                    <div class="form-group">
+                        <label for="otp">Enter Verification Code</label>
+                        <div class="input-icon-wrapper">
+                            <i class="fas fa-key"></i>
+                            <input type="text" id="otp" name="otp" placeholder="Enter 6-digit code" maxlength="6" style="letter-spacing: 5px; font-weight: bold; text-align: center;">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        <i class="fas fa-sign-in-alt"></i> Login Securely
+                    </button>
+                    
+                    <div style="text-align: center; margin-top: 10px;">
+                         <a href="javascript:void(0)" onclick="sendLoginOtp()" style="font-size: 14px; color: #3b82f6;">Resend Code</a>
+                    </div>
+                </div>
+
+            </form>
+
+            <div class="auth-footer">
+                <p>Want to use password? <a href="{{ url_for('auth.login') }}">Login here</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    async function sendLoginOtp() {
+        const email = document.getElementById('email').value;
+        const btn = document.getElementById('sendOtpBtn');
+        
+        if(!email) {
+            showToast('Please enter your email address.', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+        try {
+            const response = await fetch("{{ url_for('auth.send_otp') }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: email, purpose: 'Login' })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                showToast(data.message, 'success');
+                document.getElementById('otpGroup').style.display = 'block';
+                document.getElementById('email').readOnly = true;
+                btn.style.display = 'none';
+            } else {
+                showToast(data.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Something went wrong. Please try again.', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
+        }
+    }
+</script>
+{% endblock %}

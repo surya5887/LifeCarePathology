@@ -16,10 +16,11 @@ def login():
         return redirect(url_for('patient.dashboard'))
 
     if request.method == 'POST':
-        email = request.form.get('email', '').strip()
+        login_id = request.form.get('login_id', '').strip()
         password = request.form.get('password', '')
 
-        user = User.query.filter_by(email=email).first()
+        # Check for Email OR Phone
+        user = User.query.filter((User.email == login_id) | (User.phone == login_id)).first()
 
         if user and user.password_hash and user.check_password(password):
             login_user(user)
@@ -30,13 +31,13 @@ def login():
                  return redirect(next_page)
 
             if user.is_admin():
-                flash(f'Welcome back, Anees Chaudhary! 🎉', 'success')
+                flash(f'Welcome back, {user.name.split()[0]}! 🎉', 'success') # Simplified name display
                 return redirect(url_for('admin.dashboard'))
             
             flash(f'Welcome back, {user.name}! 🎉', 'success')
             return redirect(url_for('patient.dashboard'))
         else:
-            flash('Invalid email or password. Please try again.', 'error')
+            flash('Invalid email/phone or password. Please try again.', 'error')
 
     return render_template('auth/login.html')
 
@@ -47,20 +48,27 @@ def generate_otp(length=6):
     import string
     return ''.join(random.choices(string.digits, k=length))
 
-def send_otp_email(to_email, otp):
+def send_otp_email(to_email, otp, purpose="Registration"):
     try:
         from flask_mail import Message
         from extensions import mail
         
+        subject_map = {
+            "Registration": "Verify Account - LifeCare Pathology",
+            "Login": "Login OTP - LifeCare Pathology",
+            "Reset": "Reset Password - LifeCare Pathology"
+        }
+        subject = subject_map.get(purpose, "Verification Code")
+
         msg = Message(
-            subject="Your Verification Code - LifeCare Pathology",
+            subject=subject,
             recipients=[to_email],
-            body=f"Your verification code is: {otp}\n\nThis code is valid for 10 minutes.",
+            body=f"Your {purpose} verification code is: {otp}\n\nValid for 10 minutes.",
             html=f"""
             <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; max-width: 500px;">
                 <h2 style="color: #FFC107;">LifeCare Pathology Lab</h2>
                 <p>Hello,</p>
-                <p>Please use the verification code below to complete your registration:</p>
+                <p>Use the code below for <strong>{purpose}</strong>:</p>
                 <div style="background: #f8f9fa; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; border-radius: 5px; margin: 20px 0;">
                     {otp}
                 </div>
@@ -80,27 +88,35 @@ def send_otp():
     try:
         data = request.get_json()
         email = data.get('email', '').strip()
+        purpose = data.get('purpose', 'Registration') # Registration, Login, Reset
 
         if not email:
             return jsonify({'success': False, 'message': 'Email is required.'}), 400
 
-        # Check if email already exists
-        if User.query.filter_by(email=email).first():
-            return jsonify({'success': False, 'message': 'Email is already registered. Please login.'}), 400
+        user = User.query.filter_by(email=email).first()
+
+        # Contextual Validation
+        if purpose == 'Registration':
+            if user:
+                return jsonify({'success': False, 'message': 'Email already registered. Login instead.'}), 400
+        elif purpose in ['Login', 'Reset']:
+            if not user:
+                return jsonify({'success': False, 'message': 'Email not found. Please register first.'}), 404
 
         # Generate OTP
         otp = generate_otp()
         
-        # Store in Session (Temporary)
+        # Store in Session
         session['otp'] = otp
         session['otp_email'] = email
+        session['otp_purpose'] = purpose
         session['email_verified'] = False
 
         # Send Email
-        if send_otp_email(email, otp):
+        if send_otp_email(email, otp, purpose):
             return jsonify({'success': True, 'message': 'OTP sent successfully!'})
         else:
-            return jsonify({'success': False, 'message': 'Failed to send OTP. Check email.'}), 500
+            return jsonify({'success': False, 'message': 'Failed to send OTP.'}), 500
 
     except Exception as e:
         print(f"OTP Error: {e}")
@@ -371,10 +387,82 @@ def google_callback():
         return redirect(url_for('auth.login'))
 
 
-# --- Instagram OAuth Routes ---
-@auth.route('/auth/instagram')
-def instagram_login():
-    if 'instagram' not in _registered_providers:
-        flash('Instagram login is not configured.', 'error')
-        return redirect(url_for('auth.login'))
+# ============================================================
+#                    PASSWORD RESET & OTP LOGIN
+# ============================================================
+
+@auth.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if current_user.is_authenticated:
+        return redirect(url_for('patient.dashboard'))
+    return render_template('auth/forgot_password.html')
+
+@auth.route('/reset-password', methods=['GET', 'POST'])
+def reset_password():
+    if current_user.is_authenticated:
+        return redirect(url_for('patient.dashboard'))
+
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        otp = request.form.get('otp', '').strip()
+        new_password = request.form.get('password', '')
+
+        # Session Checks
+        if not session.get('otp') or session.get('otp_email') != email or session.get('otp_purpose') != 'Reset':
+             flash('Invalid or expired OTP session. Please try again.', 'error')
+             return redirect(url_for('auth.forgot_password'))
+
+        if otp != session['otp']:
+             flash('Invalid OTP.', 'error')
+             return render_template('auth/reset_password.html', email=email)
+
+        # Update Password
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.set_password(new_password)
+            db.session.commit()
+            
+            # Clear session
+            session.pop('otp', None)
+            session.pop('otp_email', None)
+            session.pop('otp_purpose', None)
+
+            flash('Password reset successful! Please login.', 'success')
+            return redirect(url_for('auth.login'))
+        else:
+             flash('User not found.', 'error')
+
+    email = request.args.get('email', '')
+    return render_template('auth/reset_password.html', email=email)
+
+
+@auth.route('/otp-login', methods=['GET', 'POST'])
+def otp_login():
+    if current_user.is_authenticated:
+        return redirect(url_for('patient.dashboard'))
+    return render_template('auth/otp_login.html')
+
+@auth.route('/verify-otp-login', methods=['POST'])
+def verify_otp_login():
+    email = request.form.get('email', '').strip()
+    otp = request.form.get('otp', '').strip()
+
+    if not session.get('otp') or session.get('otp_email') != email or session.get('otp_purpose') != 'Login':
+            flash('Invalid or expired OTP session.', 'error')
+            return redirect(url_for('auth.otp_login'))
+    
+    if otp == session['otp']:
+        user = User.query.filter_by(email=email).first()
+        if user:
+            login_user(user)
+            # Clear session
+            session.pop('otp', None)
+            session.pop('otp_email', None)
+            session.pop('otp_purpose', None)
+            
+            flash(f'Welcome back, {user.name}! 🎉', 'success')
+            return redirect(url_for('patient.dashboard'))
+    
+    flash('Invalid OTP.', 'error')
+    return redirect(url_for('auth.otp_login', email=email))
 

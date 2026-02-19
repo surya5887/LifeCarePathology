@@ -12,14 +12,17 @@
             </div>
             <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}" class="auth-form">
                 <div class="form-group">
-                    <label for="email">Email Address</label>
+                    <label for="login_id">Email or Phone Number</label>
                     <div class="input-icon-wrapper">
-                        <i class="fas fa-envelope"></i>
-                        <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                        <i class="fas fa-user-circle"></i>
+                        <input type="text" id="login_id" name="login_id" placeholder="Enter your registered email or phone" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label for="password">Password</label>
+                        <a href="{{ url_for('auth.forgot_password') }}" style="font-size: 13px; color: #3b82f6; text-decoration: none;">Forgot Password?</a>
+                    </div>
                     <div class="input-icon-wrapper">
                         <i class="fas fa-lock"></i>
                         <input type="password" id="password" name="password" placeholder="Enter your password" required>
@@ -28,6 +31,12 @@
                 <button type="submit" class="btn btn-primary btn-block btn-lg">
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="{{ url_for('auth.otp_login') }}" style="font-size: 14px; color: #a855f7; font-weight: 500; text-decoration: none;">
+                        <i class="fas fa-magic"></i> Login with OTP (Passwordless)
+                    </a>
+                </div>
             </form>
 
             <!-- Social Auth -->
@@ -43,9 +52,12 @@
 
             </div>
 
-            <div class="auth-footer">
-                <p>Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a></p>
-            </div>
+                <div class="register-promo" style="margin-top: 20px; text-align: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <p style="margin-bottom: 15px; color: #9ca3af; font-size: 14px;">Don't have an account yet?</p>
+                    <a href="{{ url_for('auth.register') }}" style="display: block; width: 100%; padding: 12px; border: 1px solid #3b82f6; color: #3b82f6; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s;" onmouseover="this.style.background='#3b82f6'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#3b82f6'">
+                        Create New Account
+                    </a>
+                </div>
         </div>
     </div>
 </section>
