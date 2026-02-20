@@ -263,6 +263,12 @@ body.light-theme .nav-toggle:hover {
     text-transform: capitalize;
 }
 
+@media (max-width: 768px) {
+    .nav-user-dropdown {
+        display: none !important;
+    }
+}
+
 .dropdown-menu {
     position: absolute;
     top: calc(100% + 12px);
@@ -289,8 +295,29 @@ body.light-theme .nav-toggle:hover {
     border-top: 1px solid var(--border-color);
     transform: rotate(45deg);
 }
-.nav-user-dropdown:hover .dropdown-menu {
+.nav-user-dropdown.active .dropdown-menu {
     display: block;
+}
+
+/* Sidebar Profile Links */
+.sidebar-profile-link {
+    color: var(--text-primary) !important;
+    font-size: 0.85rem !important;
+    text-decoration: none;
+    padding: 8px 10px !important;
+    margin: 2px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+.sidebar-profile-link:hover {
+    background: rgba(255, 193, 7, 0.1); /* light primary tint */
+    color: var(--primary) !important;
+}
+.sidebar-profile-link:hover i {
+    color: var(--primary) !important;
 }
 .dropdown-item {
     display: flex;
@@ -418,7 +445,7 @@ body.light-theme .nav-toggle:hover {
 .btn:hover .btn-arrow { transform: translateX(4px); }
 
 /* === IMAGE CAROUSEL === */
-.carousel-section { padding: 0; overflow: hidden; background: linear-gradient(180deg, #0a0a0f 0%, #0f0f18 100%); }
+.carousel-section { padding: 0; overflow: hidden; background: var(--bg-main); }
 .carousel-wrapper { position: relative; max-width: 1200px; margin: 0 auto; padding: 60px 24px; }
 .carousel-header { text-align: center; margin-bottom: 40px; }
 .carousel-header h2 { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 800; color: var(--dark); }
@@ -1251,3 +1278,42 @@ body.light-theme .brand-search input { background: #f8fafc; border-color: #e2e8f
     .testimonial-text { font-size: 0.75rem; }
 }
 
+/* === User Profile Dropdown (Desktop) === */
+.nav-user-dropdown { position: relative; display: inline-block; }
+.nav-user-btn {
+    display: flex; align-items: center; gap: 12px;
+    padding: 6px 14px 6px 6px; background: var(--bg-card);
+    border: 1px solid var(--border-color); border-radius: 50px;
+    cursor: pointer; transition: var(--transition); user-select: none;
+}
+.nav-user-btn:hover, .nav-user-dropdown.active .nav-user-btn { border-color: var(--primary); background: rgba(255, 193, 7, 0.05); }
+.nav-avatar {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--primary);
+    color: #000; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1rem; overflow: hidden;
+}
+.nav-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.nav-user-info-text { display: flex; flex-direction: column; }
+.nav-user-name { font-weight: 700; font-size: 0.85rem; color: var(--text-primary); line-height: 1.2; }
+.nav-user-role { font-size: 0.7rem; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+.nav-user-dropdown .dropdown-menu {
+    position: absolute; top: calc(100% + 10px); right: 0; width: 220px;
+    background: var(--bg-main); border: 1px solid var(--border-color);
+    border-radius: var(--radius-md); box-shadow: var(--shadow-xl);
+    padding: 12px 0; opacity: 0; visibility: hidden; transform: translateY(10px);
+    transition: all 0.2s ease-out; z-index: 100;
+}
+.nav-user-dropdown.active .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+.dropdown-item {
+    display: flex; align-items: center; gap: 12px; padding: 10px 20px;
+    color: var(--text-primary); text-decoration: none; font-size: 0.9rem;
+    font-weight: 500; transition: var(--transition);
+}
+.dropdown-item i { color: var(--text-secondary); font-size: 1rem; width: 20px; text-align: center; }
+.dropdown-item:hover { background: rgba(255, 255, 255, 0.03); color: var(--primary); }
+.dropdown-item:hover i { color: var(--primary); }
+.dropdown-divider { height: 1px; background: var(--border-color); margin: 8px 0; }
+
+@media (max-width: 768px) {
+    .nav-user-dropdown { display: none !important; }
+}

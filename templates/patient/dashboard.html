@@ -14,52 +14,182 @@
             </a>
         </div>
 
+        <!-- Custom Dashboard Styles for Premium Look -->
+        <style>
+            .premium-stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                gap: 24px;
+                margin-bottom: 40px;
+            }
+            .premium-stat-card {
+                background: var(--bg-card);
+                border: 1px solid var(--border-color);
+                border-radius: 16px;
+                padding: 24px;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+            .premium-stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            }
+            /* Add subtle gradient glow behind the card */
+            .premium-stat-card::before {
+                content: '';
+                position: absolute;
+                top: -50px;
+                right: -50px;
+                width: 150px;
+                height: 150px;
+                border-radius: 50%;
+                opacity: 0.1;
+                pointer-events: none;
+                z-index: 0;
+            }
+            .stat-icon-wrapper {
+                width: 60px;
+                height: 60px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.8rem;
+                z-index: 1;
+            }
+            .stat-content {
+                z-index: 1;
+            }
+            .stat-content h3 {
+                font-size: 2.2rem;
+                font-weight: 800;
+                color: var(--text-primary);
+                margin: 0 0 4px 0;
+                line-height: 1;
+            }
+            .stat-content p {
+                font-size: 0.9rem;
+                color: var(--text-secondary);
+                margin: 0;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            /* Specific Card Themes */
+            .card-total::before { background: radial-gradient(#3b82f6, transparent); }
+            .card-total .stat-icon-wrapper { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+            
+            .card-pending::before { background: radial-gradient(#f59e0b, transparent); }
+            .card-pending .stat-icon-wrapper { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+            
+            .card-completed::before { background: radial-gradient(#10b981, transparent); }
+            .card-completed .stat-icon-wrapper { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+
+            /* Premium Quick Actions */
+            .premium-actions-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin-bottom: 40px;
+            }
+            .premium-action-btn {
+                background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+                border: 1px solid var(--border-color);
+                backdrop-filter: blur(10px);
+                border-radius: 16px;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                gap: 12px;
+                text-decoration: none;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .premium-action-btn i {
+                font-size: 2rem;
+                margin-bottom: 8px;
+                transition: transform 0.3s ease;
+            }
+            .premium-action-btn span {
+                color: var(--text-primary);
+                font-weight: 600;
+                font-size: 1rem;
+            }
+            .premium-action-btn:hover {
+                border-color: var(--primary);
+                background: rgba(255, 193, 7, 0.05);
+                transform: translateY(-4px);
+            }
+            .premium-action-btn:hover i {
+                transform: scale(1.1);
+            }
+            /* Colors for action icons */
+            .btn-book i { color: #f43f5e; }
+            .btn-list i { color: #8b5cf6; }
+            .btn-report i { color: #0ea5e9; }
+            .btn-profile i { color: #14b8a6; }
+        </style>
+
         <!-- Stats Cards -->
-        <div class="dashboard-stats">
-            <div class="dash-stat-card">
-                <div class="dash-stat-icon" style="background: rgba(0, 119, 182, 0.1); color: #0077B6;">
+        <div class="premium-stats-grid">
+            <div class="premium-stat-card card-total">
+                <div class="stat-icon-wrapper">
                     <i class="fas fa-clipboard-list"></i>
                 </div>
-                <div class="dash-stat-info">
+                <div class="stat-content">
                     <h3>{{ total_bookings }}</h3>
                     <p>Total Bookings</p>
                 </div>
             </div>
-            <div class="dash-stat-card">
-                <div class="dash-stat-icon" style="background: rgba(255, 165, 0, 0.1); color: #FFA500;">
+            <div class="premium-stat-card card-pending">
+                <div class="stat-icon-wrapper">
                     <i class="fas fa-hourglass-half"></i>
                 </div>
-                <div class="dash-stat-info">
+                <div class="stat-content">
                     <h3>{{ pending }}</h3>
                     <p>Pending</p>
                 </div>
             </div>
-            <div class="dash-stat-card">
-                <div class="dash-stat-icon" style="background: rgba(0, 180, 216, 0.1); color: #00B4D8;">
+            <div class="premium-stat-card card-completed">
+                <div class="stat-icon-wrapper">
                     <i class="fas fa-check-circle"></i>
                 </div>
-                <div class="dash-stat-info">
+                <div class="stat-content">
                     <h3>{{ completed }}</h3>
                     <p>Completed</p>
                 </div>
             </div>
         </div>
 
+        <!-- Section Title for Actions -->
+        <div style="margin-bottom: 20px;">
+            <h2 style="font-size: 1.4rem; color: var(--text-primary); display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-bolt" style="color: var(--primary);"></i> Quick Actions
+            </h2>
+        </div>
+
         <!-- Quick Actions -->
-        <div class="quick-actions">
-            <a href="{{ url_for('patient.book_test') }}" class="quick-action-card">
+        <div class="premium-actions-grid">
+            <a href="{{ url_for('patient.book_test') }}" class="premium-action-btn btn-book">
                 <i class="fas fa-vial"></i>
                 <span>Book a Test</span>
             </a>
-            <a href="{{ url_for('patient.my_bookings') }}" class="quick-action-card">
+            <a href="{{ url_for('patient.my_bookings') }}" class="premium-action-btn btn-list">
                 <i class="fas fa-list"></i>
                 <span>My Bookings</span>
             </a>
-            <a href="{{ url_for('main.check_report') }}" class="quick-action-card">
+            <a href="{{ url_for('main.check_report') }}" class="premium-action-btn btn-report">
                 <i class="fas fa-file-medical"></i>
                 <span>Check Report</span>
             </a>
-            <a href="{{ url_for('patient.profile') }}" class="quick-action-card">
+            <a href="{{ url_for('patient.profile') }}" class="premium-action-btn btn-profile">
                 <i class="fas fa-user-edit"></i>
                 <span>Edit Profile</span>
             </a>

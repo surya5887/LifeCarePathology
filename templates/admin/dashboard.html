@@ -30,55 +30,55 @@
 
 <!-- Stats Grid -->
 <div class="admin-stats-grid">
-    <div class="admin-stat-card stat-patients">
+    <a href="{{ url_for('admin.patients') }}" class="admin-stat-card stat-patients" style="text-decoration: none; color: inherit;">
         <div class="admin-stat-icon"><i class="fas fa-users"></i></div>
         <div class="admin-stat-info">
             <h3>{{ total_patients }}</h3>
             <p>Total Patients</p>
         </div>
-    </div>
-    <div class="admin-stat-card stat-tests">
+    </a>
+    <a href="{{ url_for('admin.tests') }}" class="admin-stat-card stat-tests" style="text-decoration: none; color: inherit;">
         <div class="admin-stat-icon"><i class="fas fa-vial"></i></div>
         <div class="admin-stat-info">
             <h3>{{ total_tests }}</h3>
             <p>Total Tests</p>
         </div>
-    </div>
-    <div class="admin-stat-card stat-bookings">
+    </a>
+    <a href="{{ url_for('admin.appointments') }}" class="admin-stat-card stat-bookings" style="text-decoration: none; color: inherit;">
         <div class="admin-stat-icon"><i class="fas fa-calendar-check"></i></div>
         <div class="admin-stat-info">
             <h3>{{ total_bookings }}</h3>
             <p>Total Bookings</p>
         </div>
-    </div>
-    <div class="admin-stat-card stat-pending">
+    </a>
+    <a href="{{ url_for('admin.appointments', status='pending') }}" class="admin-stat-card stat-pending" style="text-decoration: none; color: inherit;">
         <div class="admin-stat-icon"><i class="fas fa-hourglass-half"></i></div>
         <div class="admin-stat-info">
             <h3>{{ pending_bookings }}</h3>
             <p>Pending</p>
         </div>
-    </div>
-    <div class="admin-stat-card stat-reports">
+    </a>
+    <a href="{{ url_for('admin.reports') }}" class="admin-stat-card stat-reports" style="text-decoration: none; color: inherit;">
         <div class="admin-stat-icon"><i class="fas fa-file-pdf"></i></div>
         <div class="admin-stat-info">
             <h3>{{ total_reports }}</h3>
             <p>Reports</p>
         </div>
-    </div>
-    <div class="admin-stat-card stat-enquiries">
+    </a>
+    <a href="{{ url_for('admin.enquiries') }}" class="admin-stat-card stat-enquiries" style="text-decoration: none; color: inherit;">
         <div class="admin-stat-icon"><i class="fas fa-envelope"></i></div>
         <div class="admin-stat-info">
             <h3>{{ unread_enquiries }}</h3>
             <p>Unread Enquiries</p>
         </div>
-    </div>
-    <div class="admin-stat-card" style="border-color:rgba(34,197,94,0.3)">
+    </a>
+    <a href="{{ url_for('admin.analytics') }}" class="admin-stat-card" style="border-color:rgba(34,197,94,0.3); text-decoration: none; color: inherit;">
         <div class="admin-stat-icon" style="background:rgba(34,197,94,0.15);color:var(--admin-success)"><i class="fas fa-rupee-sign"></i></div>
         <div class="admin-stat-info">
             <h3 style="color:var(--admin-success)">₹{{ "%.0f"|format(monthly_revenue) }}</h3>
             <p>Monthly Revenue</p>
         </div>
-    </div>
+    </a>
 </div>
 
 <!-- Quick Links -->
@@ -135,7 +135,17 @@
                     <td>{{ b.test.name }}</td>
                     <td>{{ b.booking_date.strftime('%d %b %Y') }}</td>
                     <td>{{ b.slot_time }}</td>
-                    <td><span class="status-badge status-{{ b.status }}">{{ b.status|capitalize }}</span></td>
+                    <td>
+                        <span class="status-badge status-{{ b.status }}">{{ b.status|capitalize }}</span>
+                        {% if b.status == 'pending' %}
+                        <form action="{{ url_for('admin.update_appointment', booking_id=b.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Confirm this booking?');">
+                            <input type="hidden" name="status" value="confirmed">
+                            <button type="submit" class="btn btn-sm" style="background: var(--admin-success); color: white; border: none; padding: 3px 8px; font-size: 0.75rem; border-radius: 4px; cursor: pointer; margin-left: 6px; vertical-align: middle; transition: transform 0.2s;" title="Confirm Booking" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
                     <td>{{ '✅' if b.home_collection else '—' }}</td>
                 </tr>
                 {% endfor %}

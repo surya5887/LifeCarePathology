@@ -173,6 +173,18 @@
                         <i class="fas fa-check-circle" style="color:var(--success); font-size:0.8rem;"></i>
                         <span style="font-size:0.75rem; color:#fff; font-weight:600;">Verified Account</span>
                     </div>
+                    
+                    <!-- Profile Management Links (Moved here from menu) -->
+                    <div style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                        <a href="{% if current_user.role == 'admin' %}{{ url_for('admin.dashboard') }}{% else %}{{ url_for('patient.dashboard') }}{% endif %}" 
+                           class="sidebar-profile-link">
+                            <i class="fas fa-user-circle" style="color:var(--text-secondary); width:16px; transition: var(--transition);"></i> View My Profile
+                        </a>
+                        <a href="{{ url_for('patient.profile') }}#edit" 
+                           class="sidebar-profile-link">
+                            <i class="fas fa-user-edit" style="color:var(--text-secondary); width:16px; transition: var(--transition);"></i> Edit Profile
+                        </a>
+                    </div>
                 </div>
             {% else %}
                  <div style="margin-top:16px;">
@@ -183,6 +195,26 @@
 
         <!-- Menu Links -->
         <div class="sidebar-menu">
+            <!-- Sidebar Search Box -->
+            <div style="padding: 10px 20px 20px;">
+                <form action="{{ url_for('main.services') }}" method="GET" style="position: relative;">
+                    <input type="text" name="q" placeholder="Search tests, profiles..." required
+                           style="width: 100%; border-radius: 50px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); padding: 10px 15px 10px 35px; color: var(--text-primary); outline: none; transition: var(--transition); font-size: 0.85rem;">
+                    <button type="submit" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer;">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <!-- Make sure search background turns dark on focus so white text is visible -->
+                    <style>
+                        .sidebar-menu input[type="text"]:focus {
+                            border-color: var(--primary) !important;
+                            background: rgba(0,0,0,0.5) !important;
+                            color: #fff !important;
+                            box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2) !important;
+                        }
+                    </style>
+                </form>
+            </div>
+
             <a href="{{ url_for('main.home') }}" class="sidebar-link">
                 <i class="fas fa-home"></i> Home
             </a>
@@ -207,12 +239,6 @@
                         <i class="fas fa-chart-line"></i> My Dashboard
                     </a>
                 {% endif %}
-                <a href="{{ url_for('patient.profile') }}" class="sidebar-link">
-                    <i class="fas fa-user-circle"></i> Your Profile
-                </a>
-                <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color:var(--danger);">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
             {% endif %}
              <div class="sidebar-divider"></div>
             <a href="{{ url_for('main.about') }}" class="sidebar-link">
@@ -226,6 +252,13 @@
             </a>
             
              <div class="sidebar-divider"></div>
+             
+             {% if current_user.is_authenticated %}
+                <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color:var(--danger); font-weight: 700;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+             {% endif %}
+
              <!-- Theme Toggle in Mobile -->
              <div class="sidebar-link" id="mobileThemeToggle" style="cursor:pointer;">
                 <i class="fas fa-moon"></i> Dark Mode

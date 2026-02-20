@@ -95,10 +95,10 @@
 
 <div class="preview-actions">
     <div class="act-left">
-        <a href="{{ url_for(''admin.reports'') }}" class="btn-act btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+        <a href="{{ url_for('admin.reports') }}" class="btn-act btn-back"><i class="fas fa-arrow-left"></i> Back</a>
         <button class="btn-act btn-print" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
         {% if report.file_path %}
-        <a href="{{ url_for(''main.download_report'', report_id=report.id) }}" class="btn-act btn-dl"><i class="fas fa-file-pdf"></i> Download PDF</a>
+        <a href="{{ url_for('main.download_report', report_id=report.id) }}" class="btn-act btn-dl"><i class="fas fa-file-pdf"></i> Download PDF</a>
         {% endif %}
     </div>
     <div class="report-meta">
@@ -109,7 +109,7 @@
 <div class="tpl-section">
     <div class="tpl-header">
         <span>Select Print Background</span>
-        <a href="{{ url_for(''admin.report_templates'') }}" style="color:var(--admin-primary); text-decoration:none;">Manage Templates &rarr;</a>
+        <a href="{{ url_for('admin.report_templates') }}" style="color:var(--admin-primary); text-decoration:none;">Manage Templates &rarr;</a>
     </div>
     <div class="tpl-thumbs">
         <div class="tpl-item active" onclick="setTemplate('''', this)">

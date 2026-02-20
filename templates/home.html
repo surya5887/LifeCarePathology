@@ -18,8 +18,22 @@
         <!-- Desktop Right: Search + Actions -->
         <div class="brand-desktop-right">
             <div class="brand-search">
-                <input type="text" placeholder="Search for tests, packages...">
-                <i class="fas fa-search"></i>
+                <form action="{{ url_for('main.services') }}" method="GET" style="display:flex; align-items:center; width:100%;">
+                    <input type="text" name="q" placeholder="Search for tests, packages..." required>
+                    <button type="submit" style="background:none; border:none; color:var(--text-secondary); cursor:pointer;">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <style>
+                        /* Fix contrast issue: Ensure text is white and visible when focused on the dark background */
+                        .brand-search input:focus {
+                            color: #ffffff !important; 
+                        }
+                        /* Ensure the placeholder also remains visible on focus */
+                        .brand-search input:focus::placeholder {
+                            color: #94a3b8 !important;
+                        }
+                    </style>
+                </form>
             </div>
             <div class="brand-actions">
                 <a href="{{ url_for('main.check_report') }}" class="action-btn btn-yellow">
@@ -47,7 +61,7 @@
 
 {% block content %}
 <!-- Image Carousel Section (TOP) -->
-<section class="carousel-section" style="padding-top: 78px;">
+<section class="carousel-section" style="padding-top: 0px;">
     <div class="carousel-wrapper">
         <div class="carousel-header">
             <span class="section-badge">Our Lab</span>
@@ -107,17 +121,15 @@
     </div>
     
     <div class="hero-content">
-        <div class="hero-buttons">
-            <a href="{{ url_for('main.check_report') }}" class="btn btn-outline btn-lg">
-                <i class="fas fa-file-medical"></i> Download Report
-            </a>
-        </div>
         <div class="hero-badge">🏥 NABL Accredited Lab</div>
         <h1 class="hero-title">Accurate Diagnostics for <span class="gradient-text">Better Health</span></h1>
         <p class="hero-subtitle">Life Care Pathology Lab offers reliable pathology & diagnostic services with fast results, home sample collection, and online report access.</p>
         <div class="hero-buttons">
             <a href="{{ url_for('main.services') }}" class="btn btn-primary btn-lg">
                 View All Tests <span class="btn-arrow">→</span>
+            </a>
+            <a href="{{ url_for('main.check_report') }}" class="btn btn-outline btn-lg">
+                <i class="fas fa-file-medical"></i> Download Report
             </a>
         </div>
     </div>

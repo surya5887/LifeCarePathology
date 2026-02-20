@@ -301,4 +301,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 5000);
     });
 
+    // ── Desktop Profile Dropdown Click Toggle ──
+    const userDropdown = document.querySelector('.nav-user-dropdown');
+    if (userDropdown) {
+        const userBtn = userDropdown.querySelector('.nav-user-btn') || userDropdown;
+        userBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userDropdown.classList.toggle('active');
+        });
+        document.addEventListener('click', function(e) {
+            if (!userDropdown.contains(e.target)) {
+                userDropdown.classList.remove('active');
+            }
+        });
+    }
+
 });
