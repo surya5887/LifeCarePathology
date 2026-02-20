@@ -90,13 +90,15 @@
         font-size: 20px;
         font-weight: 700;
         letter-spacing: 8px;
-        background: #fff;
-        color: #1f2937;
+        background: #fff !important;
+        color: #1f2937 !important;
         transition: all 0.3s ease;
         outline: none;
     }
     .otp-input:focus {
         border-color: #f59e0b;
+        background: #fff !important;
+        color: #1f2937 !important;
         box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
     }
     .otp-submit-btn {
@@ -163,7 +165,8 @@
     }
 
     /* Email Verified State */
-    .email-verified .input-icon-wrapper input {
+    .email-verified .input-icon-wrapper input,
+    .email-verified .input-icon-wrapper input:focus {
         border-color: #10b981 !important;
         background-color: #ecfdf5 !important;
         color: #065f46 !important;
