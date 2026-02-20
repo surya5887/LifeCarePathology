@@ -472,6 +472,9 @@
             <a href="{{ url_for('admin.appointments') }}" class="sidebar-link {% if request.endpoint == 'admin.appointments' %}active{% endif %}">
                 <i class="fas fa-calendar-check"></i> Appointments
             </a>
+            <a href="{{ url_for('admin.availability') }}" class="sidebar-link {% if request.endpoint == 'admin.availability' %}active{% endif %}">
+                <i class="fas fa-calendar-times"></i> Availability
+            </a>
 
             <div class="nav-section-label">People</div>
             <a href="{{ url_for('admin.patients') }}" class="sidebar-link {% if request.endpoint == 'admin.patients' %}active{% endif %}">

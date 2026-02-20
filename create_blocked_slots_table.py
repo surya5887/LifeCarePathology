@@ -27,9 +27,20 @@ def run_migration():
         conn.autocommit = True
         cursor = conn.cursor()
 
-        print("Attempting to add profile_pic column to users table...")
-        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_pic VARCHAR(300)")
-        print("Successfully added profile_pic column (or it already existed).")
+        print("Attempting to create blocked_slots table...")
+        
+        create_table_query = """
+        CREATE TABLE IF NOT EXISTS blocked_slots (
+            id SERIAL PRIMARY KEY,
+            date DATE NOT NULL,
+            time_slot VARCHAR(20),
+            reason VARCHAR(200) DEFAULT 'Unavailable',
+            created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT (now() AT TIME ZONE 'utc')
+        );
+        """
+        
+        cursor.execute(create_table_query)
+        print("Successfully created blocked_slots table (or it already existed).")
         
         cursor.close()
         conn.close()

@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 # URL from config.py
 DATABASE_URL = "postgresql://postgres.qtkrrwtorkmfhxakemjp:ANEES879176@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres"
 
-def run_migration():
+def verify_tables():
     try:
         # Parse URL
         result = urlparse(DATABASE_URL)
@@ -15,8 +15,6 @@ def run_migration():
         hostname = result.hostname
         port = result.port
 
-        print(f"Connecting to {hostname}:{port} as {username}...")
-        
         conn = psycopg2.connect(
             database=database,
             user=username,
@@ -24,18 +22,34 @@ def run_migration():
             host=hostname,
             port=port
         )
-        conn.autocommit = True
         cursor = conn.cursor()
 
-        print("Attempting to add profile_pic column to users table...")
-        cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_pic VARCHAR(300)")
-        print("Successfully added profile_pic column (or it already existed).")
+        print("Checking tables in database...")
+        cursor.execute("""
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public'
+            ORDER BY table_name;
+        """)
         
+        tables = cursor.fetchall()
+        print("\nExisting Tables:")
+        found_blocked_slots = False
+        for table in tables:
+            print(f"- {table[0]}")
+            if table[0] == 'blocked_slots':
+                found_blocked_slots = True
+        
+        if found_blocked_slots:
+            print("\n✅ SUCCESS: 'blocked_slots' table found!")
+        else:
+            print("\n❌ FAILURE: 'blocked_slots' table NOT found!")
+
         cursor.close()
         conn.close()
 
     except Exception as e:
-        print(f"Error during migration: {e}")
+        print(f"Error: {e}")
 
 if __name__ == "__main__":
-    run_migration()
+    verify_tables()

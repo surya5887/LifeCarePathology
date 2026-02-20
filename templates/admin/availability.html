@@ -1,83 +1,104 @@
-{% extends 'admin/admin_base.html' %}
-
-{% block title %}Manage Availability{% endblock %}
-{% block page_title %}Availability Management{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Availability Management — Admin{% endblock %}
 
 {% block content %}
-<div class="admin-card">
-    <div class="card-header">
-        <h3>Block Dates & Time Slots</h3>
-    </div>
-    <div class="card-body">
-        <form action="{{ url_for('admin.availability') }}" method="POST" class="admin-form">
-            <div class="form-group">
-                <label>Date to Block</label>
-                <input type="date" name="date" required class="form-control">
+<section class="dashboard-section">
+    <div class="section-container">
+        <div class="dashboard-header">
+            <div>
+                <h1><i class="fas fa-calendar-alt"></i> Availability <span class="gradient-text">Management</span></h1>
+                <p>Block dates and time slots to prevent bookings.</p>
             </div>
-            
-            <div class="form-group">
-                <label>Time Slot (Optional)</label>
-                <select name="time_slot" class="form-control">
-                    <option value="">Block Entire Day</option>
-                    {% for hour in range(7, 21) %}
-                        {% set ampm = 'AM' if hour < 12 else 'PM' %}
-                        {% set h = hour if hour <= 12 else hour - 12 %}
-                        <option value="{{ '%02d' % hour }}:00">{{ h }}:00 {{ ampm }}</option>
-                        <option value="{{ '%02d' % hour }}:30">{{ h }}:30 {{ ampm }}</option>
-                    {% endfor %}
-                </select>
-                <small>Leave empty to block the whole day.</small>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline">← Back to Dashboard</a>
+        </div>
+
+        <div class="row">
+            <!-- Form Card -->
+            <div class="col-md-5">
+                <div class="dashboard-card">
+                    <h3>Block Availability</h3>
+                    <form method="POST" action="{{ url_for('admin.availability') }}">
+                        <div class="form-group">
+                            <label for="date">Select Date</label>
+                            <input type="date" id="date" name="date" required min="{{ today }}" class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="time_slot">Time Slot</label>
+                            <select id="time_slot" name="time_slot">
+                                <option value="all">Block Entire Day</option>
+                                <option value="08:00 AM - 09:00 AM">08:00 AM - 09:00 AM</option>
+                                <option value="09:00 AM - 10:00 AM">09:00 AM - 10:00 AM</option>
+                                <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
+                                <option value="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</option>
+                                <option value="12:00 PM - 01:00 PM">12:00 PM - 01:00 PM</option>
+                                <option value="01:00 PM - 02:00 PM">01:00 PM - 02:00 PM</option>
+                                <option value="02:00 PM - 03:00 PM">02:00 PM - 03:00 PM</option>
+                                <option value="03:00 PM - 04:00 PM">03:00 PM - 04:00 PM</option>
+                                <option value="04:00 PM - 05:00 PM">04:00 PM - 05:00 PM</option>
+                                <option value="05:00 PM - 06:00 PM">05:00 PM - 06:00 PM</option>
+                                <option value="06:00 PM - 07:00 PM">06:00 PM - 07:00 PM</option>
+                                <option value="07:00 PM - 08:00 PM">07:00 PM - 08:00 PM</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reason">Reason (Optional)</label>
+                            <input type="text" id="reason" name="reason" placeholder="e.g. Doctor Unavailable" class="form-control">
+                        </div>
+
+                        <button type="submit" class="btn btn-danger" style="width:100%;">
+                            <i class="fas fa-ban"></i> Block Slot
+                        </button>
+                    </form>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label>Reason</label>
-                <input type="text" name="reason" placeholder="e.g. Holiday, Doctor Unavailable" class="form-control">
+            <!-- List Card -->
+            <div class="col-md-7">
+                <div class="dashboard-card">
+                    <h3>Blocked Slots</h3>
+                    {% if blocked_slots %}
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Slot</th>
+                                        <th>Reason</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for block in blocked_slots %}
+                                    <tr>
+                                        <td>{{ block.date.strftime('%d %b, %Y') }}</td>
+                                        <td>
+                                            {% if block.time_slot %}
+                                                <span class="status-badge status-pending">{{ block.time_slot }}</span>
+                                            {% else %}
+                                                <span class="status-badge status-cancelled">Full Day</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ block.reason or 'N/A' }}</td>
+                                        <td>
+                                            <form action="{{ url_for('admin.delete_blocked_slot', block_id=block.id) }}" method="POST" onsubmit="return confirm('Unblock this slot?');">
+                                                <button type="submit" class="btn-icon btn-delete" title="Unblock">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="no-data">No upcoming blocked slots.</p>
+                    {% endif %}
+                </div>
             </div>
-
-            <button type="submit" class="btn btn-primary">Block Slot</button>
-        </form>
+        </div>
     </div>
-</div>
-
-<div class="admin-card" style="margin-top: 30px;">
-    <div class="card-header">
-        <h3>Blocked Slots</h3>
-    </div>
-    <div class="card-body">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Time Slot</th>
-                    <th>Reason</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for slot in blocked_slots %}
-                <tr>
-                    <td>{{ slot.date.strftime('%d %b, %Y') }}</td>
-                    <td>
-                        {% if slot.time_slot %}
-                            <span class="badge badge-warning">{{ slot.time_slot }}</span>
-                        {% else %}
-                            <span class="badge badge-danger">Full Day</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ slot.reason }}</td>
-                    <td>
-                        <form action="{{ url_for('admin.delete_blocked_slot', id=slot.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Unblock this slot?');">
-                            <button type="submit" class="btn-icon delete"><i class="fas fa-trash"></i></button>
-                        </form>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="4" style="text-align:center;">No blocked slots found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+</section>
 {% endblock %}

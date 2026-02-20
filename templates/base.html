@@ -13,79 +13,180 @@
     {% block head %}{% endblock %}
 </head>
 <body>
-    <!-- Navigation -->
+    <!-- 1. TOP RED BAR -->
+    <div class="top-bar-red">
+        <div class="top-contact">
+            <i class="fas fa-phone-alt"></i> +91 9058275073
+        </div>
+        <div class="top-right-menu">
+            <span>Support</span>
+            <span>|</span>
+            <span>Contact Us <i class="fas fa-caret-down"></i></span>
+        </div>
+    </div>
+
+    <!-- 2. MAIN NAVBAR -->
     <nav class="navbar" id="navbar">
         <div class="nav-container">
-            <a href="{{ url_for('main.home') }}" class="nav-logo">
-                <span class="logo-icon">🔬</span>
-                <span class="logo-text">Life Care <span class="logo-highlight">Pathology Lab</span><span class="logo-sub">Asara</span></span>
-            </a>
-
-            <ul class="nav-links" id="navLinks">
-                <li><a href="{{ url_for('main.home') }}" class="nav-link {% if request.endpoint == 'main.home' %}active{% endif %}">Home</a></li>
-                <li><a href="{{ url_for('main.about') }}" class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}">About</a></li>
-                <li><a href="{{ url_for('main.services') }}" class="nav-link {% if request.endpoint == 'main.services' %}active{% endif %}">Services</a></li>
-                <li><a href="{{ url_for('main.check_report') }}" class="nav-link {% if request.endpoint == 'main.check_report' %}active{% endif %}">Check Report</a></li>
-                <li><a href="{{ url_for('main.contact') }}" class="nav-link {% if request.endpoint == 'main.contact' %}active{% endif %}">Contact</a></li>
-                {% if current_user.is_authenticated %}
-                    {% if current_user.role == 'patient' %}
-                        <li><a href="{{ url_for('patient.dashboard') }}" class="nav-link nav-btn">Dashboard</a></li>
-                    {% endif %}
-                    
-                    <li class="nav-user-dropdown" style="position: relative; margin-left: 10px;">
-                        <a href="#" class="nav-user-avatar" id="userDropdownToggle" style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none;">
-                            <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 2px solid var(--primary); background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
-                                {% if current_user.profile_pic %}
-                                    <img src="{{ current_user.profile_pic }}" alt="{{ current_user.name }}" style="width: 100%; height: 100%; object-fit: cover;">
-                                {% else %}
-                                    <span style="font-size: 16px; font-weight: bold; color: var(--primary);">{{ current_user.name[0]|upper }}</span>
-                                {% endif %}
-                            </div>
-                        </a>
-                        <div class="user-dropdown-menu" id="userDropdownMenu" style="display: none; position: absolute; top: 110%; right: 0; background: #1a1a24; min-width: 180px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border-radius: 10px; padding: 10px 0; z-index: 1000; border: 1px solid rgba(255,255,255,0.08);">
-                            <div style="padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 5px;">
-                                <p style="font-size: 14px; font-weight: 700; color: #fff; margin: 0;">{{ current_user.name }}</p>
-                                <p style="font-size: 12px; color: #9ca3af; margin: 0;">{{ current_user.email }}</p>
-                            </div>
-                            {% if current_user.is_admin() %}
-                                <a href="{{ url_for('admin.dashboard') }}" style="display: block; padding: 8px 20px; color: #e0e0e8; text-decoration: none; font-size: 14px; transition: 0.2s;">Admin Panel</a>
-                            {% else %}
-                                <a href="{{ url_for('patient.dashboard') }}" style="display: block; padding: 8px 20px; color: #e0e0e8; text-decoration: none; font-size: 14px; transition: 0.2s;">My Dashboard</a>
-                            {% endif %}
-                            <a href="{{ url_for('auth.logout') }}" style="display: block; padding: 8px 20px; color: #ef4444; text-decoration: none; font-size: 14px; transition: 0.2s;">Logout</a>
-                        </div>
-                    </li>
-
-                    <style>
-                        .user-dropdown-menu a:hover { background: rgba(255,193,7,0.1); color: var(--primary) !important; padding-left: 24px !important; }
-                    </style>
-                    <script>
-                        document.getElementById('userDropdownToggle').addEventListener('click', function(e) {
-                            e.preventDefault();
-                            var menu = document.getElementById('userDropdownMenu');
-                            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-                        });
-                        document.addEventListener('click', function(e) {
-                            var toggle = document.getElementById('userDropdownToggle');
-                            var menu = document.getElementById('userDropdownMenu');
-                            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
-                                menu.style.display = 'none';
-                            }
-                        });
-                    </script>
-                {% else %}
-                    <li><a href="{{ url_for('auth.login') }}" class="nav-link nav-btn">Login</a></li>
-                {% endif %}
-            </ul>
-
+            <!-- Mobile Toggle (Left) -->
             <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
                 <span class="hamburger"></span>
             </button>
+
+            <!-- Left: Logo & Links -->
+            <div class="nav-left">
+                <a href="{{ url_for('main.home') }}" class="nav-logo-mobile" style="display:none; align-items:center; gap:8px;">
+                     <span style="font-size:1.5rem;">🔬</span>
+                     <span style="font-weight:800; color:#fff;">Life Care</span>
+                </a>
+
+                <!-- Desktop Nav Links -->
+                <div class="nav-links">
+                    <a href="{{ url_for('main.home') }}" class="nav-link {% if request.endpoint == 'main.home' %}active{% endif %}">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                    <a href="{{ url_for('main.about') }}" class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}">About Us</a>
+                    
+                    <div class="dropdown" style="position:relative; display:inline-block;">
+                        <a href="{{ url_for('main.services') }}" class="nav-link {% if request.endpoint == 'main.services' %}active{% endif %}">
+                            Test & Services <i class="fas fa-caret-down"></i>
+                        </a>
+                        <!-- Dropdown content would go here -->
+                    </div>
+
+                    <a href="{{ url_for('main.contact') }}" class="nav-link {% if request.endpoint == 'main.contact' %}active{% endif %}">Appointment</a>
+                </div>
+            </div>
+
+            <!-- Right: Tools & Auth -->
+            <div class="nav-right">
+                <!-- Theme Toggle -->
+                <div class="theme-toggle-group">
+                    <button class="theme-btn" id="themeDark" title="Dark Mode"><i class="fas fa-moon"></i></button>
+                    <button class="theme-btn active" id="themeLight" title="Light Mode"><i class="fas fa-sun"></i></button>
+                </div>
+
+                <!-- Phones -->
+                <div class="nav-phones">
+                    <span>+91 9058275073</span>
+                    <span>+91 8923291708</span>
+                </div>
+
+                <!-- Sign In -->
+                {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('auth.login') }}" class="sign-in-btn">
+                        <i class="fas fa-user-circle"></i> Sign In
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('patient.dashboard') }}" class="sign-in-btn" style="background:var(--success); color:#fff;">
+                        <i class="fas fa-user"></i> Dashboard
+                    </a>
+                {% endif %}
+            </div>
         </div>
     </nav>
 
-    <!-- Nav Overlay for mobile -->
-    <div class="nav-overlay" id="navOverlay"></div>
+    <!-- 3. BRAND HEADER (University Style) -->
+    <header class="brand-header">
+        <div class="section-container" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <div class="brand-info">
+                <div class="brand-logo-large">
+                    <span style="font-size: 3.5rem;">🔬</span>
+                </div>
+                <div class="brand-text">
+                    <h1>Life Care Pathology Lab</h1>
+                    <span>ASARA</span>
+                </div>
+            </div>
+
+            <div class="brand-search">
+                <input type="text" placeholder="Search for tests, packages...">
+                <i class="fas fa-search"></i>
+            </div>
+
+            <div class="brand-actions">
+                <a href="{{ url_for('main.check_report') }}" class="action-btn btn-yellow">
+                    <i class="fas fa-file-download"></i> Download Report
+                </a>
+                <a href="{{ url_for('main.services') }}" class="action-btn btn-blue">
+                    <i class="fas fa-vial"></i> Test
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- TELEGRAM STYLE SIDEBAR (Mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside class="telegram-sidebar" id="telegramSidebar">
+        <!-- User Profile Header -->
+        <div class="sidebar-header">
+            <div class="sidebar-user-profile">
+                <div class="sidebar-avatar">
+                   {% if current_user.is_authenticated and current_user.profile_pic %}
+                        <img src="{{ current_user.profile_pic }}" alt="Profile">
+                   {% else %}
+                        <div class="sidebar-avatar-placeholder">
+                            <i class="fas fa-user"></i>
+                        </div>
+                   {% endif %}
+                </div>
+                <div class="sidebar-user-info">
+                    {% if current_user.is_authenticated %}
+                        <h3>{{ current_user.name }}</h3>
+                        <p>{{ current_user.email }}</p>
+                    {% else %}
+                        <h3>Guest User</h3>
+                        <p>Sign in to access features</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if current_user.is_authenticated %}
+                <div style="margin-top:16px; display:flex; gap:10px;">
+                    <a href="{{ url_for('patient.profile') }}" style="font-size:0.85rem; color:var(--primary); font-weight:600;">Edit Profile</a>
+                </div>
+            {% else %}
+                 <div style="margin-top:16px;">
+                    <a href="{{ url_for('auth.login') }}" style="display:block; padding:8px 0; color:var(--primary); font-weight:700;">Login / Sign Up</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Menu Links -->
+        <div class="sidebar-menu">
+            <a href="{{ url_for('main.home') }}" class="sidebar-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="{{ url_for('main.services') }}" class="sidebar-link">
+                <i class="fas fa-microscope"></i> Book Home Collection
+            </a>
+            <a href="{{ url_for('main.check_report') }}" class="sidebar-link">
+                <i class="fas fa-file-medical-alt"></i> Download Reports
+            </a>
+             <div class="sidebar-divider"></div>
+            <a href="{{ url_for('main.about') }}" class="sidebar-link">
+                <i class="fas fa-info-circle"></i> About Us
+            </a>
+            <a href="{{ url_for('main.contact') }}" class="sidebar-link">
+                <i class="fas fa-headset"></i> Contact Support
+            </a>
+            
+             <div class="sidebar-divider"></div>
+             <!-- Theme Toggle in Mobile -->
+             <div class="sidebar-link" id="mobileThemeToggle" style="cursor:pointer;">
+                <i class="fas fa-moon"></i> Dark Mode
+             </div>
+
+             <!-- Developer Info (Mobile Stacked) -->
+             <div class="sidebar-footer-info">
+                <div class="dev-info-stacked">
+                    <span>Designed & Developed by</span>
+                    <strong>Anees Chaudhary Asara</strong>
+                    <span>+91 9837957711</span>
+                </div>
+             </div>
+        </div>
+    </aside>
 
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -141,18 +242,17 @@
                         <div class="footer-social">
                             <a href="#" aria-label="Facebook" class="social-facebook"><i class="fab fa-facebook-f"></i></a>
                             <a href="#" aria-label="Instagram" class="social-instagram"><i class="fab fa-instagram"></i></a>
-                            <a href="https://wa.me/919837957711" aria-label="WhatsApp" class="social-whatsapp"><i class="fab fa-whatsapp"></i></a>
+                            <a href="https://wa.me/919058275073" aria-label="WhatsApp" class="social-whatsapp"><i class="fab fa-whatsapp"></i></a>
                             <a href="#" aria-label="YouTube" class="social-youtube"><i class="fab fa-youtube"></i></a>
-                            <a href="#" aria-label="Twitter" class="social-twitter"><i class="fab fa-twitter"></i></a>
                         </div>
                     </div>
                     <div class="footer-col">
                         <h4>Quick Links</h4>
                         <a href="{{ url_for('main.home') }}">Home</a>
                         <a href="{{ url_for('main.about') }}">About Us</a>
-                        <a href="{{ url_for('main.services') }}">Our Services</a>
-                        <a href="{{ url_for('main.check_report') }}">Check Report</a>
-                        <a href="{{ url_for('main.contact') }}">Contact Us</a>
+                        <a href="{{ url_for('main.services') }}">Test & Services</a>
+                        <a href="{{ url_for('main.check_report') }}">Download Report</a>
+                        <a href="{{ url_for('main.contact') }}">Appointment</a>
                     </div>
                     <div class="footer-col">
                         <h4>Our Services</h4>
@@ -166,25 +266,25 @@
                         <h4>Contact Info</h4>
                         <div class="footer-contact-item">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>Rikshaw Stand, Asara, UP 250623</span>
+                            <span>Near Rikshaw Stand Asara, Baraut, Baghpat, Uttar Pradesh, Pin - 250623</span>
                         </div>
                         <div class="footer-contact-item">
                             <i class="fas fa-phone"></i>
-                            <span>+91 XXXXX XXXXX</span>
+                            <span>+91 9058275073</span>
+                        </div>
+                        <div class="footer-contact-item">
+                            <i class="fas fa-phone-alt"></i>
+                            <span>+91 8923291708</span>
                         </div>
                         <div class="footer-contact-item">
                             <i class="fas fa-envelope"></i>
                             <span>info@lifecarelab.com</span>
                         </div>
-                        <div class="footer-contact-item">
-                            <i class="fas fa-clock"></i>
-                            <span>Mon-Sat: 7:00 AM - 9:00 PM</span>
-                        </div>
                     </div>
                 </div>
                 <div class="footer-bottom">
                     <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:15px;">
                             <p>&copy; 2026 Life Care Pathology Lab. All rights reserved.</p>
                             <div class="footer-bottom-links">
                                 <a href="#">Privacy Policy</a>
@@ -192,11 +292,19 @@
                             </div>
                         </div>
                         
-                        <!-- Developer Credit -->
-                        <div class="developer-credit">
-                            <span class="dev-label">Designed & Developed by</span>
-                            <strong class="dev-name">Anees Chaudhary</strong>
-                            <a href="tel:+919837957711" class="dev-phone"><i class="fas fa-phone-alt"></i> +91 9837957711</a>
+                        <!-- Developer Credit (Responsive) -->
+                        <div class="developer-credit-responsive" style="text-align:center; padding-top:10px;">
+                            <!-- Desktop View (Single Line) -->
+                            <span class="d-none d-md-block" style="color:#9CA3AF; font-size:0.9rem;">
+                                Designed & Developed by <strong style="color:var(--primary);">Anees Chaudhary Asara</strong> <span style="margin-left:8px;">+91 9837957711</span>
+                            </span>
+                            
+                            <!-- Mobile View (Stacked) -->
+                            <div class="d-block d-md-none" style="display:flex; flex-direction:column; gap:4px; font-size:0.85rem; color:#9CA3AF;">
+                                <span>Designed & Developed by</span>
+                                <strong style="color:var(--primary); font-size:1rem;">Anees Chaudhary Asara</strong>
+                                <span>+91 9837957711</span>
+                            </div>
                         </div>
                     </div>
                 </div>

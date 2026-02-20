@@ -4,40 +4,108 @@
  */
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ── Navbar Scroll Effect & Mobile Toggle (RIGHT SIDE) ──
-    const navbar = document.getElementById('navbar');
+    // ── Telegram Sidebar Toggle (Mobile) ──
     const navToggle = document.getElementById('navToggle');
-    const navLinks = document.getElementById('navLinks');
-    const navOverlay = document.getElementById('navOverlay');
-    const backToTop = document.getElementById('backToTop');
+    const sidebar = document.getElementById('telegramSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const body = document.body;
 
-    window.addEventListener('scroll', () => {
-        if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 30);
-        if (backToTop) backToTop.classList.toggle('visible', window.scrollY > 400);
-    });
+    function toggleSidebar(show) {
+        if (show) {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+            body.style.overflow = 'hidden';
+        } else {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            body.style.overflow = '';
+        }
+    }
 
     if (navToggle) {
-        navToggle.addEventListener('click', () => {
-            navToggle.classList.toggle('active');
-            navLinks.classList.toggle('active');
-            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
-        });
-        // Close on link click
-        navLinks.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                navToggle.classList.remove('active');
-                navLinks.classList.remove('active');
-                document.body.style.overflow = '';
-            });
+        navToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleSidebar(true);
         });
     }
 
-    // Close on overlay click
-    if (navOverlay) {
-        navOverlay.addEventListener('click', () => {
-            if (navToggle) navToggle.classList.remove('active');
-            if (navLinks) navLinks.classList.remove('active');
-            document.body.style.overflow = '';
+    if (overlay) {
+        overlay.addEventListener('click', () => toggleSidebar(false));
+    }
+
+    // Close sidebar on link click
+    document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.addEventListener('click', () => toggleSidebar(false));
+    });
+
+    // ── Theme Toggle (Persist) ──
+    const btnDark = document.getElementById('themeDark');
+    const btnLight = document.getElementById('themeLight');
+    const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+
+    // 1. Check LocalStorage or Default
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    applyTheme(savedTheme);
+
+    function applyTheme(theme) {
+        const root = document.documentElement;
+        if (theme === 'dark') {
+            // DARK MODE (University Style)
+            root.style.setProperty('--bg-main', '#0f172a');
+            root.style.setProperty('--bg-card', '#1e293b');
+            root.style.setProperty('--bg-glass', 'rgba(15, 23, 42, 0.85)');
+            root.style.setProperty('--bg-sidebar', '#1e293b');
+            
+            root.style.setProperty('--text-primary', '#F8FAFC');
+            root.style.setProperty('--text-secondary', '#94A3B8');
+            
+            root.style.setProperty('--border-color', 'rgba(255,255,255,0.08)');
+            root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)');
+            
+            if(btnDark) { btnDark.classList.add('active'); btnLight.classList.remove('active'); }
+        } else {
+            // LIGHT MODE (Professional Clean)
+            root.style.setProperty('--bg-main', '#F1F5F9'); // Light Blue-Grey
+            root.style.setProperty('--bg-card', '#FFFFFF');
+            root.style.setProperty('--bg-glass', 'rgba(255, 255, 255, 0.9)');
+            root.style.setProperty('--bg-sidebar', '#FFFFFF');
+            
+            root.style.setProperty('--text-primary', '#0f172a'); // Dark Blue Text
+            root.style.setProperty('--text-secondary', '#64748B'); // Muted Blue-Grey
+            
+            root.style.setProperty('--border-color', 'rgba(0,0,0,0.08)');
+            root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #E2E8F0 0%, #F8FAFC 100%)');
+            
+            if(btnLight) { btnLight.classList.add('active'); btnDark.classList.remove('active'); }
+        }
+        localStorage.setItem('theme', theme);
+        
+        // Update Mobile Icon/Text if exists
+        const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+        if (mobileThemeToggle) {
+             const icon = mobileThemeToggle.querySelector('i');
+             if (icon) {
+                 icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+             }
+             // Optional: Update text if it exists
+             // mobileThemeToggle.innerHTML = ... 
+        }
+    }
+
+    if (btnDark) btnDark.addEventListener('click', () => applyTheme('dark'));
+    if (btnLight) btnLight.addEventListener('click', () => applyTheme('light'));
+
+    // Mobile Toggle (One button switches)
+    if (mobileThemeToggle) {
+        mobileThemeToggle.addEventListener('click', () => {
+            const current = localStorage.getItem('theme') || 'dark';
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+            
+            // Update Icon
+            const icon = mobileThemeToggle.querySelector('i');
+            icon.className = newTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+            mobileThemeToggle.innerHTML = `<i class="${icon.className}"></i> ${newTheme === 'dark' ? 'Dark Mode' : 'Light Mode'}`;
         });
     }
 

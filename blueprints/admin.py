@@ -205,6 +205,60 @@ def delete_category(cat_id):
 
 
 # ═══════════════════════════════════════════════════════
+#  AVAILABILITY MANAGEMENT
+# ═══════════════════════════════════════════════════════
+@admin.route('/availability', methods=['GET', 'POST'])
+@role_required('admin')
+def availability():
+    if request.method == 'POST':
+        date_str = request.form.get('date')
+        time_slot = request.form.get('time_slot')
+        reason = request.form.get('reason', 'Unavailable')
+
+        if not date_str:
+            flash('Date is required.', 'error')
+            return redirect(url_for('admin.availability'))
+
+        try:
+            date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+            if time_slot == 'all':
+                time_slot = None  # Block entire day
+            
+            # Check duplicate
+            exists = BlockedSlot.query.filter_by(date=date_obj, time_slot=time_slot).first()
+            if exists:
+                flash('This slot/date is already blocked.', 'error')
+            else:
+                block = BlockedSlot(date=date_obj, time_slot=time_slot, reason=reason)
+                db.session.add(block)
+                db.session.commit()
+                log_activity('Blocked availability', f'Date: {date_str}, Slot: {time_slot or "Full Day"}')
+                flash('Availability blocked successfully. ✅', 'success')
+        except ValueError:
+            flash('Invalid date format.', 'error')
+
+        return redirect(url_for('admin.availability'))
+
+    # GET: Show upcoming blocked slots
+    today = datetime.utcnow().date()
+    blocked_slots = BlockedSlot.query.filter(BlockedSlot.date >= today)\
+        .order_by(BlockedSlot.date, BlockedSlot.time_slot).all()
+    
+    return render_template('admin/availability.html', blocked_slots=blocked_slots, today=today)
+
+
+@admin.route('/availability/<int:block_id>/delete', methods=['POST'])
+@role_required('admin')
+def delete_blocked_slot(block_id):
+    block = BlockedSlot.query.get_or_404(block_id)
+    db.session.delete(block)
+    db.session.commit()
+    log_activity('Unblocked availability', f'Date: {block.date}, Slot: {block.time_slot}')
+    flash('Slot unblocked successfully. ✅', 'success')
+    return redirect(url_for('admin.availability'))
+
+
+# ═══════════════════════════════════════════════════════
 #  APPOINTMENTS / BOOKINGS
 # ═══════════════════════════════════════════════════════
 @admin.route('/appointments')
