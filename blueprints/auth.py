@@ -16,7 +16,8 @@ def login():
         return redirect(url_for('patient.dashboard'))
 
     if request.method == 'POST':
-        login_id = request.form.get('login_id', '').strip()
+        # Support both 'login_id' (legacy) and 'email' (current template)
+        login_id = request.form.get('email', request.form.get('login_id', '')).strip()
         password = request.form.get('password', '')
 
         # Check for Email OR Phone

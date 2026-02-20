@@ -57,7 +57,7 @@ def create_app():
                 admin_user = User(
                     name='Admin',
                     email='admin@lifecare.com',
-                    phone='9999999999',
+                    phone='',
                     role='admin'
                 )
                 admin_user.set_password('admin123')
