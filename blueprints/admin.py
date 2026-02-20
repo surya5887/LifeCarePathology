@@ -849,67 +849,7 @@ def activity_log():
     return render_template('admin/activity_log.html', logs=logs)
 
 
-# ═══════════════════════════════════════════════════════
-#  SITE SETTINGS
-# ═══════════════════════════════════════════════════════
 
-# ... (Site settings routes handling would go here, omitting for brevity if not requested yet)
-
-
-# ═══════════════════════════════════════════════════════
-#  AVAILABILITY MANAGEMENT
-# ═══════════════════════════════════════════════════════
-@admin.route('/availability', methods=['GET', 'POST'])
-@role_required('admin')
-def availability():
-    if request.method == 'POST':
-        date_str = request.form.get('date')
-        time_slot = request.form.get('time_slot')
-        reason = request.form.get('reason', '').strip()
-
-        if not date_str:
-            flash('Date is required.', 'error')
-            return redirect(url_for('admin.availability'))
-
-        try:
-            date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
-        except ValueError:
-            flash('Invalid date format.', 'error')
-            return redirect(url_for('admin.availability'))
-
-        if not time_slot:
-            time_slot = None  # Full day block
-
-        # Check dupes
-        existing = BlockedSlot.query.filter_by(date=date_obj, time_slot=time_slot).first()
-        if existing:
-            flash('This slot is already blocked.', 'warning')
-        else:
-            block = BlockedSlot(date=date_obj, time_slot=time_slot, reason=reason)
-            db.session.add(block)
-            db.session.commit()
-            log_activity('Blocked slot', f'{date_str} {time_slot or "(Full Day)"}')
-            flash('Slot blocked successfully.', 'success')
-        
-        return redirect(url_for('admin.availability'))
-
-    # GET
-    today = datetime.utcnow().date()
-    blocked_slots = BlockedSlot.query.filter(BlockedSlot.date >= today)\
-        .order_by(BlockedSlot.date, BlockedSlot.time_slot).all()
-    
-    return render_template('admin/availability.html', blocked_slots=blocked_slots)
-
-
-@admin.route('/availability/<int:id>/delete', methods=['POST'])
-@role_required('admin')
-def delete_blocked_slot(id):
-    slot = BlockedSlot.query.get_or_404(id)
-    db.session.delete(slot)
-    db.session.commit()
-    log_activity('Unblocked slot', f'{slot.date} {slot.time_slot or "(Full Day)"}')
-    flash('Slot unblocked.', 'success')
-    return redirect(url_for('admin.availability'))
 
 @admin.route('/settings', methods=['GET', 'POST'])
 @role_required('admin')
