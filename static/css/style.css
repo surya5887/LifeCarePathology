@@ -737,59 +737,7 @@ input:focus, select:focus, textarea:focus {
 }
 .appointment-form-card h3 { font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 24px; }
 
-/* === RESPONSIVE ADJUSTMENTS === */
-@media (max-width: 1024px) {
-    .brand-search { margin: 0 20px; }
-    .hero-title { font-size: 2.5rem; }
-    .footer-grid { grid-template-columns: 1fr 1fr; }
-}
 
-@media (max-width: 900px) {
-    .navbar { height: 50px; }
-    .brand-header { display: none; }
-    
-    .nav-logo-mobile { display: flex !important; } 
-    
-    .hero { padding-top: 20px; min-height: auto; }
-    
-    .nav-toggle { display: flex; }
-    .nav-links, .nav-right { display: none; }
-    
-    .nav-container { justify-content: space-between; }
-    .top-bar-red { padding: 0 10px; font-size: 0.75rem; }
-    .carousel-slide img { height: 220px; }
-    .footer-grid { grid-template-columns: 1fr; gap: 32px; }
-    .form-row { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 480px) {
-    .hero { min-height: 60vh; padding: 110px 14px 40px; }
-    .hero-title { font-size: 1.6rem; }
-    .hero-subtitle { font-size: 0.85rem; }
-    .hero-buttons { flex-direction: column; align-items: center; }
-    .btn-lg { width: 100%; font-size: 0.9rem; padding: 12px 24px; }
-    .carousel-slide img { height: 180px; }
-    .carousel-btn { width: 36px; height: 36px; font-size: 0.9rem; }
-    .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-    .stat-card { padding: 16px 10px; }
-    .stat-number { font-size: 1.5rem; }
-    .auth-card { padding: 28px 18px; }
-    .auth-header h2 { font-size: 1.4rem; }
-    .report-form-card { padding: 22px 16px; }
-    .section-header { padding-top: 40px; margin-bottom: 28px; }
-    .section-badge { font-size: 0.72rem; padding: 5px 14px; }
-    .testimonial-card { padding: 20px; }
-    .testimonial-text { font-size: 0.88rem; }
-    .why-icon { width: 44px; height: 44px; font-size: 1.1rem; }
-    .data-table { min-width: 500px; }
-    .data-table th, .data-table td { padding: 10px 12px; font-size: 0.78rem; }
-    .scroll-service-card { width: 130px; padding: 14px 10px; }
-    .footer-grid { gap: 24px; }
-    .footer h4 { font-size: 0.95rem; margin-bottom: 16px; }
-    .footer-col a { font-size: 0.85rem; margin-bottom: 8px; }
-    .footer-social a { width: 36px; height: 36px; font-size: 0.9rem; }
-    .health-categories-grid { grid-template-columns: 1fr; }
-}
 
 /* === GRADIENT TEXT === */
 .gradient-text {
