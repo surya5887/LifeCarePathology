@@ -3,123 +3,328 @@
 
 {% block content %}
 <style>
-    .booking-section { padding: 40px 0; background: #f8f9fa; }
-    .booking-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; max-width: 800px; margin: 0 auto; }
-    .booking-header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 30px; color: #fff; text-align: center; }
-    .booking-header h1 { font-size: 24px; margin-bottom: 5px; color: #fff; }
-    .booking-header p { opacity: 0.8; font-size: 14px; }
-    .booking-body { padding: 30px; }
+    .booking-section { 
+        padding: 60px 0; 
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: calc(100vh - 80px);
+    }
     
-    .form-section-title { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; display: flex; align-items: center; gap: 10px; }
-    .form-section-title i { color: #3B82F6; }
+    .booking-card { 
+        background: rgba(255, 255, 255, 0.95); 
+        backdrop-filter: blur(10px);
+        border-radius: 20px; 
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05); 
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        overflow: hidden; 
+        max-width: 850px; 
+        margin: 0 auto; 
+        transition: transform 0.3s ease;
+    }
+
+    .booking-header { 
+        background: var(--primary-gradient, linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)); 
+        padding: 40px; 
+        color: #fff; 
+        text-align: center;
+        position: relative;
+    }
     
-    .slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; }
-    .slot-btn { border: 1px solid #e2e8f0; background: #fff; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: 500; }
-    .slot-btn:hover { border-color: #3B82F6; color: #3B82F6; }
-    .slot-btn.active { background: #3B82F6; color: #fff; border-color: #3B82F6; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2); }
-    .slot-btn.disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; border-color: #f1f5f9; opacity: 0.7; }
+    .booking-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--success);
+    }
+
+    .booking-header h1 { 
+        font-size: 32px; 
+        font-weight: 800;
+        margin-bottom: 10px; 
+        color: #fff;
+        letter-spacing: -0.5px;
+    }
     
-    .payment-notice { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px; margin-top: 20px; font-size: 13px; color: #92400e; display: flex; gap: 10px; align-items: start; }
+    .booking-header p { 
+        opacity: 0.9; 
+        font-size: 15px;
+        font-weight: 400;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .booking-body { padding: 40px; }
+    
+    .form-section-title { 
+        font-size: 18px; 
+        font-weight: 800; 
+        color: var(--text-dark); 
+        margin-bottom: 25px; 
+        padding-bottom: 12px; 
+        border-bottom: 2px solid #f1f5f9;
+        display: flex; 
+        align-items: center; 
+        gap: 12px; 
+    }
+    
+    .form-section-title i { 
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 1.2rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+        padding: 12px 18px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+
+    .form-control:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    .test-select-wrap {
+        position: relative;
+    }
+
+    .test-select-wrap i {
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        pointer-events: none;
+    }
+    
+    .slot-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
+        gap: 12px; 
+        margin-top: 15px; 
+    }
+    
+    .slot-btn { 
+        border: 2px solid #e2e8f0; 
+        background: #fff; 
+        padding: 12px; 
+        text-align: center; 
+        border-radius: 12px; 
+        cursor: pointer; 
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+        font-size: 14px; 
+        font-weight: 600; 
+        color: var(--text-secondary);
+    }
+    
+    .slot-btn:hover:not(.disabled) { 
+        border-color: #3b82f6; 
+        color: #3b82f6; 
+        transform: translateY(-2px);
+        background: rgba(59, 130, 246, 0.05);
+    }
+    
+    .slot-btn.active { 
+        background: var(--primary-gradient); 
+        color: #fff; 
+        border-color: transparent; 
+        box-shadow: 0 8px 15px rgba(26, 26, 46, 0.2); 
+    }
+    
+    .slot-btn.disabled { 
+        background: #f8fafc; 
+        color: #cbd5e1; 
+        cursor: not-allowed; 
+        border-color: #f1f5f9; 
+        opacity: 0.6; 
+    }
+    
+    .payment-notice { 
+        background: rgba(255, 187, 0, 0.05); 
+        border: 1px solid rgba(255, 187, 0, 0.2);
+        border-left: 5px solid #fbbf24; 
+        padding: 20px; 
+        border-radius: 12px; 
+        margin-top: 30px; 
+        font-size: 14px; 
+        color: #92400e; 
+        display: flex; 
+        gap: 15px; 
+        align-items: center; 
+    }
+
+    .payment-notice i {
+        font-size: 1.5rem;
+        color: #f59e0b;
+    }
+
+    .booking-btn {
+        background: var(--primary-gradient);
+        color: #fff;
+        padding: 16px 50px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        border: none;
+        box-shadow: 0 10px 20px rgba(26, 26, 46, 0.15);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .booking-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(26, 26, 46, 0.25);
+    }
+
+    .booking-btn:active {
+        transform: translateY(-1px);
+    }
+
+    @media (max-width: 768px) {
+        .booking-header { padding: 30px 20px; }
+        .booking-header h1 { font-size: 24px; }
+        .booking-body { padding: 25px 20px; }
+        .booking-section { padding: 30px 0; }
+        .slot-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+    }
 </style>
 
 <section class="booking-section">
     <div class="booking-card">
         <div class="booking-header">
             <h1>Start Your Healthy Journey</h1>
-            <p>Fill in the details below to schedule your test appointment.</p>
+            <p>Fill in the details below to schedule your laboratory test appointment today.</p>
         </div>
         
         <div class="booking-body">
             <form method="POST" action="{{ url_for('patient.book_test') }}" id="bookingForm">
                 
                 <!-- 1. Test Selection -->
-                <div class="form-section-title"><i class="fas fa-microscope"></i> Test Selection</div>
-                <div class="form-group mb-4">
-                    <label>Select Test *</label>
-                    <select name="test_id" required class="form-control" style="height: 50px;">
-                        <option value="">-- Helper choosing a test --</option>
-                        {% for test in tests %}
-                        <option value="{{ test.id }}">{{ test.name }} — ₹{{ "%.0f"|format(test.price) }}</option>
-                        {% endfor %}
-                    </select>
+                <div class="form-section-title"><i class="fas fa-vials"></i> Test Selection</div>
+                <div class="form-group mb-5">
+                    <label>Choose Laboratory Test *</label>
+                    <div class="test-select-wrap">
+                        <select name="test_id" required class="form-control" style="height: 55px; appearance: none;">
+                            <option value="">-- Click to choose a test --</option>
+                            {% for test in tests %}
+                            <option value="{{ test.id }}">{{ test.name }} — ₹{{ "%.0f"|format(test.price) }}</option>
+                            {% endfor %}
+                        </select>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
                 </div>
 
                 <!-- 2. Date & Time -->
-                <div class="form-section-title"><i class="fas fa-calendar-alt"></i> Date & Time</div>
+                <div class="form-section-title"><i class="fas fa-clock"></i> Appointment Schedule</div>
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label>Date *</label>
+                    <div class="col-md-6 mb-4">
+                        <label>Preferred Date *</label>
                         <input type="date" id="booking_date" name="booking_date" required class="form-control">
                     </div>
                 </div>
                 
-                <div class="mb-4">
+                <div class="mb-5">
                     <label>Available Time Slots *</label>
-                    <div id="slotsLoader" style="display:none; color:#666; font-size:13px; margin: 10px 0;"><i class="fas fa-spinner fa-spin"></i> Checking availability...</div>
+                    <div id="slotsLoader" style="display:none; color:var(--text-secondary); font-size:14px; margin: 15px 0;">
+                        <i class="fas fa-circle-notch fa-spin"></i> Checking live availability...
+                    </div>
                     <div id="slotContainer" class="slot-grid">
-                        <div style="color:#94a3b8; font-size:13px; grid-column: 1/-1;">Please select a date first.</div>
+                        <div style="color:#94a3b8; font-size:14px; grid-column: 1/-1; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px dashed #cbd5e1;">
+                            <i class="fas fa-info-circle"></i> Please select a date to view available time slots.
+                        </div>
                     </div>
                     <input type="hidden" name="slot_time" id="selected_slot" required>
-                    <div id="slotError" style="color:red; font-size:12px; display:none; margin-top:5px;">Please select a time slot.</div>
+                    <div id="slotError" style="color:var(--danger); font-size:13px; display:none; margin-top:10px; font-weight:600;">
+                        <i class="fas fa-exclamation-circle"></i> Please select an available time slot before continuing.
+                    </div>
                 </div>
 
                 <!-- 3. Patient Details -->
-                <div class="form-section-title"><i class="fas fa-user-injured"></i> Patient Details</div>
-                <p style="font-size:12px; color:#666; margin-bottom:15px;">Who is this test for? (Fill new details if booking for someone else)</p>
+                <div class="form-section-title"><i class="fas fa-user-circle"></i> Patient Information</div>
+                <div class="alert alert-info" style="border:none; background: #eef2ff; color: #4338ca; border-radius: 12px; font-size: 13px; margin-bottom: 25px;">
+                    <i class="fas fa-info-circle"></i> You are currenty booking as <strong>{{ current_user.name }}</strong>. If you are booking for someone else, please update the details below.
+                </div>
                 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label>Patient Name *</label>
-                        <input type="text" name="patient_name" value="{{ current_user.name }}" required class="form-control">
+                    <div class="col-md-6 mb-4">
+                        <label>Full Name *</label>
+                        <input type="text" name="patient_name" value="{{ current_user.name }}" required class="form-control" placeholder="Full name of patient">
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label>Phone Number *</label>
-                        <input type="tel" name="patient_phone" value="{{ current_user.phone }}" required class="form-control">
+                    <div class="col-md-6 mb-4">
+                        <label>Contact Number *</label>
+                        <input type="tel" name="patient_phone" value="{{ current_user.phone }}" required class="form-control" placeholder="Active phone number">
                     </div>
                 </div>
                 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label>Email (for Report)</label>
-                        <input type="email" name="patient_email" value="{{ current_user.email }}" class="form-control">
+                    <div class="col-md-6 mb-4">
+                        <label>Email Address</label>
+                        <input type="email" name="patient_email" value="{{ current_user.email }}" class="form-control" placeholder="For digital report delivery">
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label>Referral *</label>
-                        <select id="referral_type" name="referral_type" class="form-control" onchange="toggleReferral()">
-                            <option value="self">Self (No Doctor)</option>
-                            <option value="doctor">Referral by Doctor</option>
+                    <div class="col-md-6 mb-4">
+                        <label>Referral Type *</label>
+                        <select id="referral_type" name="referral_type" class="form-control" onchange="toggleReferral()" style="appearance: none;">
+                            <option value="self">Self / Walk-in</option>
+                            <option value="doctor">Referred by Doctor</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="form-group mb-3" id="doctorInput" style="display:none;">
-                    <label>Doctor's Name</label>
-                    <input type="text" name="referral_doctor" class="form-control" placeholder="Dr. Name">
+                <div class="form-group mb-4" id="doctorInput" style="display:none;">
+                    <label>Referring Doctor's Name</label>
+                    <div style="position: relative;">
+                        <input type="text" name="referral_doctor" class="form-control" placeholder="Dr. Name" style="padding-left: 45px;">
+                        <i class="fas fa-user-md" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                    </div>
                 </div>
 
-                <div class="form-group mb-4">
-                    <label>Full Address *</label>
-                    <textarea name="patient_address" rows="2" class="form-control" required placeholder="House No, Street, Locality...">{{ current_user.address }}</textarea>
-                    <div class="form-check mt-2">
-                        <input class="form-check-input" type="checkbox" name="home_collection" id="home_collection">
-                        <label class="form-check-label" for="home_collection" style="font-size:13px; color:#3B82F6; font-weight:600;">
-                            Reqest Home Sample Collection
-                        </label>
+                <div class="form-group mb-5">
+                    <label>Residential Address *</label>
+                    <textarea name="patient_address" rows="3" class="form-control" required placeholder="Full home address (House No, Street, Locality...)">{{ current_user.address }}</textarea>
+                    
+                    <div class="mt-3 p-3" style="background: #f0fdf4; border-radius: 12px; border: 1px solid #bbf7d0;">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="home_collection" id="home_collection" style="width: 1.2rem; height: 1.2rem; cursor: pointer;">
+                            <label class="form-check-label ms-2" for="home_collection" style="font-size:14px; color:#166534; font-weight:700; cursor: pointer;">
+                                <i class="fas fa-home"></i> Request Home Sample Collection
+                            </label>
+                            <p class="mb-0 ms-4" style="font-size: 12px; color: #166534; opacity: 0.8;">Our technician will visit your address at the selected time.</p>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Payment Notice -->
                 <div class="payment-notice">
-                    <i class="fas fa-wallet" style="margin-top:2px;"></i>
+                    <i class="fas fa-shield-alt"></i>
                     <div>
-                        <strong>Payment Offline</strong><br>
-                        Currently we accept payment at the lab or during home collection via Cash/UPI. No online payment required now.
+                        <strong>Confidential & Secure Payment</strong><br>
+                        Payment is processed offline at the lab or during home collection via Cash, UPI, or Cards. No pre-payment is required on this portal.
                     </div>
                 </div>
 
-                <div class="mt-4 text-center">
-                    <button type="submit" class="btn btn-primary" style="padding: 12px 40px; border-radius: 30px; font-weight:600;">Confirm Appointment</button>
-                    <p class="mt-3" style="font-size:12px; color:#666;">You will receive an email confirmation shortly.</p>
+                <div class="mt-5 text-center">
+                    <button type="submit" class="booking-btn">
+                        <i class="fas fa-check-circle"></i> Confirm Appointment
+                    </button>
+                    <p class="mt-3" style="font-size:13px; color:var(--text-secondary);">
+                        <i class="fas fa-envelope-open-text"></i> An email confirmation will be sent upon successful booking.
+                    </p>
                 </div>
             </form>
         </div>
