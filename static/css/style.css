@@ -865,3 +865,317 @@ body.light-theme .brand-search input { background: #f8fafc; border-color: #e2e8f
 }
 .back-to-top:hover { transform: translateY(-3px); }
 
+/* ===========================================================
+   RESPONSIVE — TABLET (≤900px)
+   =========================================================== */
+@media (max-width: 900px) {
+    /* Top red bar */
+    .top-bar-red { font-size: 0.75rem; padding: 0 10px; height: 32px; }
+    .top-contact { font-size: 0.72rem; gap: 4px; }
+    .top-right-menu { gap: 8px; font-size: 0.75rem; }
+
+    /* Navbar */
+    .navbar { height: 54px; }
+    .nav-toggle { display: flex; }
+    .nav-links { display: none; }
+    .nav-phones { display: none; }
+    .nav-logo-mobile span:last-child { font-size: 1rem; }
+    .sign-in-btn { padding: 6px 16px; font-size: 0.8rem; }
+    .theme-btn { padding: 3px 6px; font-size: 0.75rem; }
+
+    /* Brand header (homepage only) */
+    .brand-header { padding: 10px 12px; }
+    .brand-info { gap: 10px; }
+    .brand-logo-large { font-size: 2rem !important; height: 40px; }
+    .brand-logo-large span { font-size: 2rem !important; }
+    .brand-text h1 { font-size: 1.1rem; }
+    .brand-text span { font-size: 0.7rem; letter-spacing: 1px; }
+    .brand-search { margin: 0 16px; max-width: 300px; }
+    .brand-search input { padding: 8px 14px; padding-right: 36px; font-size: 0.85rem; }
+    .action-btn { padding: 7px 14px; font-size: 0.75rem; }
+
+    /* Hero */
+    .hero { padding: 40px 16px 50px; }
+    .hero-title { font-size: clamp(1.6rem, 4vw, 2.5rem); margin-bottom: 14px; }
+    .hero-subtitle { font-size: 0.9rem; margin-bottom: 24px; }
+    .hero-badge { padding: 6px 14px; font-size: 0.75rem; margin-bottom: 16px; }
+
+    /* Carousel */
+    .carousel-wrapper { padding: 30px 16px; }
+    .carousel-header { margin-bottom: 20px; }
+    .carousel-header h2 { font-size: 1.3rem; }
+    .carousel-slide img { height: 250px; }
+    .carousel-slide .slide-overlay { padding: 20px 16px 16px; }
+    .carousel-slide .slide-overlay h3 { font-size: 1rem; }
+    .carousel-slide .slide-overlay p { font-size: 0.8rem; }
+    .carousel-btn { width: 36px; height: 36px; font-size: 0.9rem; }
+    .carousel-dots { gap: 6px; margin-top: 14px; }
+
+    /* Sections */
+    .section-header { margin-bottom: 30px; padding-top: 40px; }
+    .section-badge { font-size: 0.72rem; padding: 4px 12px; }
+    .section-title { font-size: 1.5rem; }
+    .section-subtitle { font-size: 0.9rem; }
+
+    /* Grids */
+    .services-grid, .why-grid, .tests-grid, .testimonials-grid, .facility-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px; margin-bottom: 40px;
+    }
+    .service-card, .why-card, .testimonial-card, .facility-card { padding: 24px; }
+    .service-card h3, .why-card h3 { font-size: 1.1rem; }
+
+    /* Stats */
+    .stats-section { padding: 40px 16px; }
+    .stats-grid { gap: 16px; }
+    .stat-card { padding: 24px 14px; }
+    .stat-number { font-size: 2rem; }
+    .stat-label { font-size: 0.85rem; }
+
+    /* Steps */
+    .how-it-works { padding: 40px 16px; }
+    .steps-grid { grid-template-columns: 1fr; gap: 20px; }
+    .steps-grid::before { display: none; }
+    .step-number { width: 50px; height: 50px; font-size: 1.1rem; }
+    .step-card { padding: 20px 14px; }
+
+    /* CTA */
+    .cta-section { padding: 40px 16px; }
+    .cta-container { padding: 40px 20px; }
+    .cta-container h2 { font-size: 1.5rem; }
+    .cta-container p { font-size: 0.95rem; }
+
+    /* Auth */
+    .auth-section { padding: 30px 16px; min-height: auto; }
+    .auth-card { padding: 28px 20px; }
+    .auth-icon { font-size: 2rem; margin-bottom: 10px; }
+    .auth-header h2 { font-size: 1.3rem; }
+
+    /* Forms */
+    .form-row { grid-template-columns: 1fr; gap: 0; }
+
+    /* Page Hero */
+    .page-hero { padding: 30px 16px 30px; }
+    .page-title { font-size: 1.5rem; margin-bottom: 8px; }
+    .page-subtitle { font-size: 0.85rem; }
+
+    /* Footer */
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+    .footer-inner { padding: 30px 0 20px; }
+    .footer h4 { font-size: 0.9rem; margin-bottom: 12px; }
+    .footer-col a { font-size: 0.8rem; margin-bottom: 8px; }
+    .footer-logo { font-size: 1.2rem; margin-bottom: 12px; }
+    .footer-desc { font-size: 0.8rem; }
+    .footer-social a { width: 34px; height: 34px; font-size: 0.85rem; }
+
+    /* Testimonials */
+    .testimonial-card { padding: 24px; }
+    .testimonial-text { font-size: 0.9rem; }
+
+    /* Appointment */
+    .health-categories-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+    .health-category-card { padding: 16px 12px; }
+    .health-category-card h3 { font-size: 0.85rem; }
+    .health-category-card p { font-size: 0.7rem; }
+    .category-icon { font-size: 1.8rem; }
+    .appointment-form-card { padding: 24px 18px; }
+
+    /* Report */
+    .report-form-card { padding: 28px 20px; }
+
+    /* WhatsApp */
+    .whatsapp-float { width: 46px; height: 46px; font-size: 1.4rem; bottom: 20px; left: 16px; }
+}
+
+/* ===========================================================
+   RESPONSIVE — MOBILE (≤768px)
+   =========================================================== */
+@media (max-width: 768px) {
+    .top-bar-red { font-size: 0.7rem; height: 30px; }
+    .top-contact { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 50%; }
+
+    .navbar { height: 48px; }
+    .nav-container { padding: 0 12px; }
+    .nav-logo-mobile span:first-child { font-size: 1.4rem; }
+    .nav-logo-mobile span:last-child { font-size: 0.95rem; }
+    .sign-in-btn { padding: 5px 12px; font-size: 0.75rem; gap: 4px; }
+    .theme-toggle-group { padding: 1px; }
+
+    /* Brand header stack on mobile */
+    .brand-header { padding: 8px 10px; }
+    .brand-logo-large { display: none; }
+    .brand-text h1 { font-size: 0.95rem; }
+    .brand-text span { font-size: 0.65rem; }
+    .brand-search { display: none; }
+    .brand-actions { gap: 6px; }
+    .action-btn { padding: 5px 10px; font-size: 0.68rem; gap: 4px; }
+
+    /* Hero compact */
+    .hero { padding: 30px 14px 40px; }
+    .hero-title { font-size: 1.5rem; }
+    .hero-subtitle { font-size: 0.85rem; margin-bottom: 20px; }
+    .hero-buttons { gap: 10px; }
+    .btn { padding: 10px 20px; font-size: 0.85rem; }
+    .btn-lg { padding: 12px 24px; font-size: 0.9rem; }
+
+    /* Carousel smaller */
+    .carousel-section { padding-top: 0; }
+    .carousel-wrapper { padding: 20px 12px; }
+    .carousel-slide img { height: 200px; }
+    .carousel-slide .slide-overlay h3 { font-size: 0.9rem; }
+    .carousel-slide .slide-overlay p { font-size: 0.72rem; }
+    .carousel-btn { width: 30px; height: 30px; font-size: 0.8rem; }
+    .carousel-btn-prev { left: 8px; }
+    .carousel-btn-next { right: 8px; }
+
+    /* Sections compact */
+    .section-header { padding-top: 30px; margin-bottom: 24px; }
+    .section-title { font-size: 1.3rem; margin-bottom: 8px; }
+    .section-subtitle { font-size: 0.82rem; }
+
+    /* Grids single column */
+    .services-grid, .why-grid, .tests-grid, .testimonials-grid, .facility-grid {
+        grid-template-columns: 1fr;
+        gap: 12px; margin-bottom: 30px;
+    }
+    .service-card, .why-card { padding: 20px 16px; }
+    .service-card h3, .why-card h3 { font-size: 1rem; }
+    .service-card p, .why-card p { font-size: 0.85rem; }
+    .service-icon, .why-icon, .facility-icon { font-size: 2rem; margin-bottom: 14px; }
+    .why-icon { width: 44px; height: 44px; font-size: 1.1rem; }
+
+    /* 3D cards */
+    .test-card { padding: 20px 16px; }
+    .test-card h3 { font-size: 1.1rem; }
+    .test-price { font-size: 1.5rem; }
+    .test-meta { gap: 10px; font-size: 0.78rem; }
+
+    /* Stats compact */
+    .stats-section { padding: 30px 14px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .stat-card { padding: 18px 10px; }
+    .stat-number { font-size: 1.6rem; }
+    .stat-label { font-size: 0.78rem; }
+
+    /* Testimonials */
+    .testimonial-card { padding: 20px 16px; }
+    .testimonial-text { font-size: 0.85rem; line-height: 1.6; margin-bottom: 16px; }
+    .author-avatar { width: 38px; height: 38px; font-size: 1rem; }
+
+    /* CTA compact */
+    .cta-section { padding: 30px 12px; }
+    .cta-container { padding: 30px 16px; border-radius: var(--radius-lg); }
+    .cta-container h2 { font-size: 1.3rem; }
+    .cta-container p { font-size: 0.85rem; margin-bottom: 20px; }
+    .cta-buttons { gap: 10px; }
+
+    /* Auth compact */
+    .auth-section { padding: 20px 14px; }
+    .auth-card { padding: 24px 16px; }
+    .auth-header h2 { font-size: 1.2rem; }
+    .auth-header p { font-size: 0.8rem; }
+
+    /* Page Hero compact */
+    .page-hero { padding: 24px 14px 24px; }
+    .page-title { font-size: 1.3rem; }
+    .page-subtitle { font-size: 0.8rem; }
+
+    /* Footer */
+    .footer-grid { grid-template-columns: 1fr; gap: 20px; }
+    .footer-inner { padding: 24px 0 16px; }
+    .footer-social a { width: 32px; height: 32px; font-size: 0.8rem; }
+    .footer-bottom { padding-top: 16px; text-align: center; }
+    .footer-bottom-links { justify-content: center; }
+    .developer-credit { font-size: 0.78rem; }
+
+    /* Appointment compact */
+    .health-categories-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .health-category-card { padding: 14px 10px; }
+    .health-category-card h3 { font-size: 0.8rem; }
+    .health-category-card p { font-size: 0.65rem; }
+    .category-icon { font-size: 1.5rem; }
+    .appointment-form-card { padding: 20px 14px; }
+    .appointment-form-card h3 { font-size: 1.1rem; }
+
+    /* Report compact */
+    .report-form-card { padding: 24px 16px; }
+    .report-form-header h2 { font-size: 1.2rem; }
+
+    /* Services page */
+    .services-filter { flex-direction: column; gap: 10px; }
+    .filter-form { flex-direction: column; gap: 10px; }
+    .search-box, .category-filter { width: 100%; }
+
+    /* Contact dropdown */
+    .contact-dropdown { min-width: 250px; right: -10px; }
+
+    /* Sidebar (already fine, just tweak) */
+    .telegram-sidebar { width: 280px; }
+
+    /* Health tips */
+    .tips-ticker { padding: 10px 0; }
+    .tips-ticker-track span { font-size: 0.75rem; }
+
+    /* Services scroll */
+    .scroll-service-card { width: 150px; padding: 14px 12px; }
+    .scroll-service-icon { font-size: 1.6rem; margin-bottom: 8px; }
+    .scroll-service-card h4 { font-size: 0.78rem; }
+
+    /* How it works */
+    .how-it-works { padding: 30px 14px; }
+    .step-card h3 { font-size: 0.95rem; }
+    .step-card p { font-size: 0.8rem; }
+}
+
+/* ===========================================================
+   RESPONSIVE — SMALL PHONE (≤480px)
+   =========================================================== */
+@media (max-width: 480px) {
+    .top-bar-red { font-size: 0.65rem; height: 28px; padding: 0 8px; }
+    .top-contact { max-width: 45%; }
+
+    .navbar { height: 44px; }
+    .nav-logo-mobile span:first-child { font-size: 1.2rem; }
+    .nav-logo-mobile span:last-child { font-size: 0.85rem; }
+    .sign-in-btn { padding: 4px 10px; font-size: 0.7rem; }
+
+    .hero-title { font-size: 1.3rem; }
+    .hero-subtitle { font-size: 0.78rem; }
+    .btn { padding: 8px 16px; font-size: 0.8rem; }
+
+    .carousel-slide img { height: 160px; }
+
+    .section-title { font-size: 1.15rem; }
+    .section-badge { font-size: 0.65rem; padding: 3px 10px; }
+
+    .stat-number { font-size: 1.4rem; }
+    .stat-label { font-size: 0.72rem; }
+
+    .auth-card { padding: 20px 14px; }
+    .auth-icon { font-size: 1.6rem; }
+    .auth-header h2 { font-size: 1.05rem; }
+
+    .page-title { font-size: 1.15rem; }
+    .page-subtitle { font-size: 0.75rem; }
+
+    .health-categories-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .health-category-card { padding: 12px 8px; }
+    .category-icon { font-size: 1.3rem; }
+    .health-category-card h3 { font-size: 0.72rem; }
+    .health-category-card p { font-size: 0.6rem; }
+
+    .footer-logo { font-size: 1rem; }
+    .footer h4 { font-size: 0.82rem; }
+    .footer-col a { font-size: 0.75rem; }
+    .footer-contact-item { font-size: 0.78rem; }
+
+    .whatsapp-float { width: 42px; height: 42px; font-size: 1.2rem; bottom: 16px; left: 12px; }
+
+    .cta-container h2 { font-size: 1.1rem; }
+    .cta-container p { font-size: 0.78rem; }
+
+    .test-card h3 { font-size: 1rem; }
+    .test-price { font-size: 1.3rem; }
+}
+
+
