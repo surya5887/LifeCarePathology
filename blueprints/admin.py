@@ -467,29 +467,45 @@ def create_report():
             return render_template('admin/create_report.html',
                                    tests=all_tests, categories=categories)
 
-        # Save to database
-        report = Report(
-            report_id=report_id,
-            patient_name=patient_name,
-            token_number=sample_id,
-            file_path=filename,
-            remarks=remarks,
-            age=int(age) if age else None,
-            gender=gender,
-            doctor_name=doctor_name,
-            test_name=test_name
-        )
-        report.set_password(password)
-        report.set_test_results(test_results)
-        db.session.add(report)
-        db.session.commit()
+        try:
+            # Safe age conversion
+            safe_age = None
+            if age:
+                try:
+                    safe_age = int(age)
+                except ValueError:
+                    safe_age = None
 
-        log_activity('Created report',
-                     f'Patient: {patient_name}, RID: {report_id}')
-        flash(f'Report created! ID: {report_id} | Password: {password}',
-              'success')
-        return redirect(url_for('admin.report_preview',
-                                report_id=report_id))
+            # Save to database
+            report = Report(
+                report_id=report_id,
+                patient_name=patient_name,
+                token_number=sample_id,
+                file_path=filename,
+                remarks=remarks,
+                age=safe_age,
+                gender=gender,
+                doctor_name=doctor_name,
+                test_name=test_name
+            )
+            report.set_password(password)
+            report.set_test_results(test_results)
+            db.session.add(report)
+            db.session.commit()
+
+            log_activity('Created report',
+                         f'Patient: {patient_name}, RID: {report_id}')
+            flash(f'Report created! ID: {report_id} | Password: {password}',
+                  'success')
+            return redirect(url_for('admin.report_preview',
+                                    report_id=report_id))
+
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error saving report to DB: {str(e)}")
+            flash(f'Error saving report to database: {str(e)}', 'error')
+            return render_template('admin/create_report.html',
+                                   tests=all_tests, categories=categories)
 
     return render_template('admin/create_report.html',
                            tests=all_tests, categories=categories)
