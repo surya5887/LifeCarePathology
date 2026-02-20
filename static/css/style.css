@@ -99,6 +99,8 @@ ul { list-style: none; }
     position: relative;
     z-index: 1000;
     transition: var(--transition);
+    display: flex;
+    justify-content: space-between;
 }
 .navbar.scrolled {
     background: var(--bg-glass);
