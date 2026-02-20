@@ -41,13 +41,12 @@
     <!-- 2. MAIN NAVBAR -->
     <nav class="navbar" id="navbar">
         <div class="nav-container">
-            <!-- Mobile Toggle (Left) — hidden on desktop -->
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
-                <span class="hamburger"></span>
-            </button>
-
-            <!-- Left: Logo & Links -->
+            <!-- Left: Toggle + Logo & Links -->
             <div class="nav-left">
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                    <span class="hamburger"></span>
+                </button>
+
                 <a href="{{ url_for('main.home') }}" class="nav-logo-mobile">
                      <span style="font-size:1.3rem;">🔬</span>
                      <span class="nav-brand-name">Life Care Pathology Lab<small>ASARA</small></span>
