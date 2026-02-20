@@ -1001,6 +1001,54 @@ def delete_template(tpl_id):
     name = tpl.name
     db.session.delete(tpl)
     db.session.commit()
+    db.session.commit()
     log_activity('Deleted report template', name)
     flash(f'Template "{name}" deleted.', 'success')
     return redirect(url_for('admin.report_templates'))
+
+@admin.route('/force-db-update')
+@role_required('admin')
+def force_db_update():
+    """Temporary endpoint to force database schema updates on Vercel."""
+    try:
+        from extensions import db
+        import sqlalchemy as sa
+        
+        # 1. Create any missing tables (like report_templates)
+        db.create_all()
+        
+        # 2. Try to intentionally alter the 'reports' table to add the new columns
+        # (Ignore errors if they already exist)
+        engine = db.engine
+        inspector = sa.inspect(engine)
+        columns = [col['name'] for col in inspector.get_columns('reports')]
+        
+        with engine.connect() as conn:
+            if 'test_results_json' not in columns:
+                conn.execute(sa.text("ALTER TABLE reports ADD COLUMN test_results_json TEXT DEFAULT '[]'"))
+            if 'phone' not in columns:
+                conn.execute(sa.text("ALTER TABLE reports ADD COLUMN phone VARCHAR(20) DEFAULT ''"))
+            if 'test_name' not in columns:
+                conn.execute(sa.text("ALTER TABLE reports ADD COLUMN test_name VARCHAR(200) DEFAULT ''"))
+            if 'doctor_name' not in columns:
+                conn.execute(sa.text("ALTER TABLE reports ADD COLUMN doctor_name VARCHAR(100) DEFAULT ''"))
+            if 'sample_type' not in columns:
+                conn.execute(sa.text("ALTER TABLE reports ADD COLUMN sample_type VARCHAR(50) DEFAULT 'Blood'"))
+            if 'collection_date' not in columns:
+                conn.execute(sa.text("ALTER TABLE reports ADD COLUMN collection_date VARCHAR(50) DEFAULT ''"))
+            if 'collected_at' not in columns:
+                conn.execute(sa.text("ALTER TABLE reports ADD COLUMN collected_at VARCHAR(100) DEFAULT ''"))
+            if 'age' not in columns:
+                conn.execute(sa.text("ALTER TABLE reports ADD COLUMN age INTEGER"))
+            if 'gender' not in columns:
+                conn.execute(sa.text("ALTER TABLE reports ADD COLUMN gender VARCHAR(10)"))
+            if 'user_id' not in columns:
+                conn.execute(sa.text("ALTER TABLE reports ADD COLUMN user_id INTEGER REFERENCES users(id)"))
+                
+            conn.commit()
+
+        flash("Vercel Database successfully updated with new columns and tables! ✅", "success")
+        return redirect(url_for('admin.dashboard'))
+    except Exception as e:
+        flash(f"Database update failed. Reason: {e}", "error")
+        return redirect(url_for('admin.dashboard'))
