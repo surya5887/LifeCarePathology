@@ -207,6 +207,14 @@ ul { list-style: none; }
 .brand-search i { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: #64748b; }
 
 .brand-actions { display: flex; gap: 12px; }
+.brand-desktop-right { display: flex; align-items: center; gap: 20px; }
+.brand-mobile-right { display: none; align-items: center; gap: 10px; }
+.brand-phones {
+    display: flex; flex-direction: column; align-items: flex-end;
+    line-height: 1.2; font-size: 0.65rem; color: #1e3a8a; font-weight: 700;
+}
+.brand-phones span { display: flex; align-items: center; gap: 4px; }
+.brand-phones span i { font-size: 0.55rem; color: var(--header-red); }
 .action-btn {
     padding: 10px 24px; font-weight: 800; text-transform: uppercase; border-radius: var(--radius-full);
     font-size: 0.9rem; display: flex; align-items: center; gap: 8px; transition: var(--transition);
@@ -911,9 +919,12 @@ body.light-theme .brand-search input { background: #f8fafc; border-color: #e2e8f
     .brand-header { padding: 8px 10px; }
     .brand-info { gap: 8px; }
     .brand-logo-large { display: none; }
-    .brand-text h1 { font-size: 0.9rem; }
-    .brand-text span { font-size: 0.6rem; letter-spacing: 1px; }
+    .brand-text h1 { font-size: 0.85rem; }
+    .brand-text span { font-size: 0.55rem; letter-spacing: 1px; }
     .brand-search { display: none; }
+    .brand-desktop-right { display: none; }
+    .brand-mobile-right { display: flex; }
+    .brand-mobile-right .action-btn { padding: 4px 8px; font-size: 0.6rem; gap: 3px; }
     .action-btn { padding: 5px 10px; font-size: 0.65rem; gap: 3px; }
 
     /* Hero */
