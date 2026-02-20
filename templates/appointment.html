@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% block title %}Book Appointment — Life Care Pathology Lab{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="page-hero-content">
+        <span class="section-badge"><i class="fas fa-calendar-check"></i> Appointment</span>
+        <h1 class="page-title">Book Your <span class="gradient-text">Appointment</span></h1>
+        <p class="page-subtitle">Select your health concern below and book an appointment with our expert pathologists. We'll help you get the right tests.</p>
+    </div>
+</section>
+
+<section class="appointment-section">
+    <div class="section-container">
+        <!-- Step 1: Choose Health Concern -->
+        <div style="text-align:center; margin-bottom:32px;">
+            <h2 style="font-size:1.5rem; font-weight:800; color:var(--text-primary); margin-bottom:8px;">
+                <i class="fas fa-stethoscope" style="color:var(--primary); margin-right:8px;"></i>
+                What brings you here?
+            </h2>
+            <p style="color:var(--text-secondary); font-size:0.95rem;">Select the category that best describes your health concern</p>
+        </div>
+
+        <div class="health-categories-grid" id="categoriesGrid">
+            <div class="health-category-card" data-category="blood" onclick="selectCategory(this)">
+                <span class="category-icon">🩸</span>
+                <h3>Blood Related Issues</h3>
+                <p>Anemia, infection, CBC, blood group, platelets count</p>
+            </div>
+            <div class="health-category-card" data-category="diabetes" onclick="selectCategory(this)">
+                <span class="category-icon">💉</span>
+                <h3>Diabetes Checkup</h3>
+                <p>Fasting sugar, HbA1c, glucose tolerance, insulin levels</p>
+            </div>
+            <div class="health-category-card" data-category="thyroid" onclick="selectCategory(this)">
+                <span class="category-icon">🦋</span>
+                <h3>Thyroid Issues</h3>
+                <p>T3, T4, TSH, thyroid profile, thyroid antibodies</p>
+            </div>
+            <div class="health-category-card" data-category="liver" onclick="selectCategory(this)">
+                <span class="category-icon">🫁</span>
+                <h3>Liver Function</h3>
+                <p>LFT, SGPT, SGOT, bilirubin, liver enzymes</p>
+            </div>
+            <div class="health-category-card" data-category="kidney" onclick="selectCategory(this)">
+                <span class="category-icon">🫘</span>
+                <h3>Kidney Function</h3>
+                <p>KFT, creatinine, urea, uric acid, electrolytes</p>
+            </div>
+            <div class="health-category-card" data-category="general" onclick="selectCategory(this)">
+                <span class="category-icon">🏥</span>
+                <h3>General Health Checkup</h3>
+                <p>Complete body checkup, full body panel, wellness screening</p>
+            </div>
+            <div class="health-category-card" data-category="urine" onclick="selectCategory(this)">
+                <span class="category-icon">🧪</span>
+                <h3>Urine Analysis</h3>
+                <p>Routine urine, culture, microscopy, protein, sugar</p>
+            </div>
+            <div class="health-category-card" data-category="lipid" onclick="selectCategory(this)">
+                <span class="category-icon">❤️</span>
+                <h3>Heart & Cholesterol</h3>
+                <p>Lipid profile, cholesterol, triglycerides, HDL, LDL</p>
+            </div>
+            <div class="health-category-card" data-category="allergy" onclick="selectCategory(this)">
+                <span class="category-icon">🤧</span>
+                <h3>Allergy & Immunity</h3>
+                <p>IgE levels, allergy panel, immunoglobulins, ANA</p>
+            </div>
+            <div class="health-category-card" data-category="pregnancy" onclick="selectCategory(this)">
+                <span class="category-icon">🤰</span>
+                <h3>Pregnancy Tests</h3>
+                <p>HCG, pregnancy profile, prenatal screening, TORCH panel</p>
+            </div>
+            <div class="health-category-card" data-category="vitamin" onclick="selectCategory(this)">
+                <span class="category-icon">☀️</span>
+                <h3>Vitamin & Nutrition</h3>
+                <p>Vitamin D, B12, iron, calcium, folate deficiency</p>
+            </div>
+            <div class="health-category-card" data-category="infection" onclick="selectCategory(this)">
+                <span class="category-icon">🦠</span>
+                <h3>Infection & Fever</h3>
+                <p>Dengue, malaria, typhoid, Widal test, blood culture</p>
+            </div>
+        </div>
+
+        <!-- Step 2: Appointment Form (shown after selecting a category) -->
+        <div class="appointment-form-card" id="appointmentForm" style="display:none;">
+            <h3><i class="fas fa-calendar-alt" style="color:var(--primary); margin-right:8px;"></i> Fill Your Details</h3>
+            <form method="POST" action="{{ url_for('main.appointment') }}">
+                <input type="hidden" name="health_concern" id="healthConcern" value="">
+                
+                <div class="form-group">
+                    <label for="patient_name">Full Name</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="patient_name" name="patient_name" placeholder="Enter your full name" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <div class="input-icon-wrapper">
+                            <i class="fas fa-phone"></i>
+                            <input type="tel" id="phone" name="phone" placeholder="+91 XXXXX XXXXX" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email (Optional)</label>
+                        <div class="input-icon-wrapper">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="email" name="email" placeholder="your@email.com">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-birthday-cake"></i>
+                        <input type="number" id="age" name="age" placeholder="Enter your age" min="1" max="120" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="preferred_date">Preferred Date</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-calendar"></i>
+                        <input type="date" id="preferred_date" name="preferred_date" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="preferred_time">Preferred Time</label>
+                    <select id="preferred_time" name="preferred_time" required>
+                        <option value="">Select Time Slot</option>
+                        <option value="08:00 - 10:00 AM">08:00 - 10:00 AM</option>
+                        <option value="10:00 - 12:00 PM">10:00 - 12:00 PM</option>
+                        <option value="12:00 - 02:00 PM">12:00 - 02:00 PM</option>
+                        <option value="02:00 - 04:00 PM">02:00 - 04:00 PM</option>
+                        <option value="04:00 - 06:00 PM">04:00 - 06:00 PM</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="symptoms">Describe Your Symptoms (Optional)</label>
+                    <textarea id="symptoms" name="symptoms" rows="3" placeholder="Tell us more about your health concern..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                        <input type="checkbox" name="home_collection" value="yes" style="width:auto; accent-color:var(--primary);">
+                        <span>I want Home Sample Collection</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    <i class="fas fa-calendar-check"></i> Book Appointment
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Set minimum date to today
+    const dateInput = document.getElementById('preferred_date');
+    if (dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.min = today;
+    }
+
+    function selectCategory(card) {
+        // Remove existing selections
+        document.querySelectorAll('.health-category-card').forEach(c => c.classList.remove('selected'));
+        // Select this one
+        card.classList.add('selected');
+        // Set hidden field
+        document.getElementById('healthConcern').value = card.dataset.category;
+        // Show form with smooth animation
+        const form = document.getElementById('appointmentForm');
+        form.style.display = 'block';
+        setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    }
+</script>
+{% endblock %}

@@ -108,3 +108,35 @@ def download_report_by_rid(report_id):
                          download_name=f'Report_{report.report_id}.pdf')
     flash('Report file not found. Please contact the lab.', 'error')
     return redirect(url_for('main.check_report'))
+
+
+@main.route('/appointment', methods=['GET', 'POST'])
+def appointment():
+    if request.method == 'POST':
+        patient_name = request.form.get('patient_name', '').strip()
+        phone = request.form.get('phone', '').strip()
+        email = request.form.get('email', '').strip()
+        age = request.form.get('age', '').strip()
+        gender = request.form.get('gender', '').strip()
+        health_concern = request.form.get('health_concern', '').strip()
+        preferred_date = request.form.get('preferred_date', '').strip()
+        preferred_time = request.form.get('preferred_time', '').strip()
+        symptoms = request.form.get('symptoms', '').strip()
+        home_collection = request.form.get('home_collection') == 'yes'
+
+        if not patient_name or not phone:
+            flash('Please provide your name and phone number.', 'error')
+            return render_template('appointment.html')
+
+        # Save as contact enquiry with appointment details
+        message = f"[APPOINTMENT REQUEST]\nHealth Concern: {health_concern}\nAge: {age}, Gender: {gender}\nPreferred Date: {preferred_date}\nPreferred Time: {preferred_time}\nSymptoms: {symptoms}\nHome Collection: {'Yes' if home_collection else 'No'}"
+        
+        enquiry = ContactEnquiry(name=patient_name, email=email, phone=phone, message=message)
+        db.session.add(enquiry)
+        db.session.commit()
+
+        flash('Your appointment request has been submitted! We will contact you shortly to confirm. ✅', 'success')
+        return redirect(url_for('main.appointment'))
+
+    return render_template('appointment.html')
+

@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             root.style.setProperty('--bg-card', '#1e293b');
             root.style.setProperty('--bg-glass', 'rgba(15, 23, 42, 0.85)');
             root.style.setProperty('--bg-sidebar', '#1e293b');
+            root.style.setProperty('--auth-card-bg', '#1e293b');
             
             root.style.setProperty('--text-primary', '#F8FAFC');
             root.style.setProperty('--text-secondary', '#94A3B8');
@@ -62,20 +63,23 @@ document.addEventListener('DOMContentLoaded', () => {
             root.style.setProperty('--border-color', 'rgba(255,255,255,0.08)');
             root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)');
             
+            document.body.classList.remove('light-theme');
             if(btnDark) { btnDark.classList.add('active'); btnLight.classList.remove('active'); }
         } else {
-            // LIGHT MODE (Professional Clean)
-            root.style.setProperty('--bg-main', '#F1F5F9'); // Light Blue-Grey
+            // LIGHT MODE (Professional Clean — not plain white)
+            root.style.setProperty('--bg-main', '#F0F4F8');
             root.style.setProperty('--bg-card', '#FFFFFF');
-            root.style.setProperty('--bg-glass', 'rgba(255, 255, 255, 0.9)');
+            root.style.setProperty('--bg-glass', 'rgba(255, 255, 255, 0.92)');
             root.style.setProperty('--bg-sidebar', '#FFFFFF');
+            root.style.setProperty('--auth-card-bg', 'linear-gradient(135deg, #f8faff 0%, #eef2ff 50%, #faf5ff 100%)');
             
-            root.style.setProperty('--text-primary', '#0f172a'); // Dark Blue Text
-            root.style.setProperty('--text-secondary', '#64748B'); // Muted Blue-Grey
+            root.style.setProperty('--text-primary', '#0f172a');
+            root.style.setProperty('--text-secondary', '#64748B');
             
             root.style.setProperty('--border-color', 'rgba(0,0,0,0.08)');
             root.style.setProperty('--hero-gradient', 'linear-gradient(135deg, #E2E8F0 0%, #F8FAFC 100%)');
             
+            document.body.classList.add('light-theme');
             if(btnLight) { btnLight.classList.add('active'); btnDark.classList.remove('active'); }
         }
         localStorage.setItem('theme', theme);
@@ -87,8 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
              if (icon) {
                  icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
              }
-             // Optional: Update text if it exists
-             // mobileThemeToggle.innerHTML = ... 
         }
     }
 

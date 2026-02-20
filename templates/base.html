@@ -21,14 +21,27 @@
         <div class="top-right-menu">
             <span>Support</span>
             <span>|</span>
-            <span>Contact Us <i class="fas fa-caret-down"></i></span>
+            <div class="contact-dropdown-wrap">
+                <span>Contact Us <i class="fas fa-caret-down"></i></span>
+                <div class="contact-dropdown">
+                    <a href="mailto:LifeCarePathologyLabAsara@outlook.com" class="contact-dropdown-item">
+                        <i class="fas fa-envelope"></i> LifeCarePathologyLabAsara@outlook.com
+                    </a>
+                    <a href="tel:+919058275073" class="contact-dropdown-item">
+                        <i class="fas fa-phone"></i> +91 9058275073
+                    </a>
+                    <a href="tel:+918923291708" class="contact-dropdown-item">
+                        <i class="fas fa-phone-alt"></i> +91 8923291708
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- 2. MAIN NAVBAR -->
     <nav class="navbar" id="navbar">
         <div class="nav-container">
-            <!-- Mobile Toggle (Left) -->
+            <!-- Mobile Toggle (Left) — hidden on desktop -->
             <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
                 <span class="hamburger"></span>
             </button>
@@ -46,15 +59,8 @@
                         <i class="fas fa-home"></i> Home
                     </a>
                     <a href="{{ url_for('main.about') }}" class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}">About Us</a>
-                    
-                    <div class="dropdown" style="position:relative; display:inline-block;">
-                        <a href="{{ url_for('main.services') }}" class="nav-link {% if request.endpoint == 'main.services' %}active{% endif %}">
-                            Test & Services <i class="fas fa-caret-down"></i>
-                        </a>
-                        <!-- Dropdown content would go here -->
-                    </div>
-
-                    <a href="{{ url_for('main.contact') }}" class="nav-link {% if request.endpoint == 'main.contact' %}active{% endif %}">Appointment</a>
+                    <a href="{{ url_for('main.services') }}" class="nav-link {% if request.endpoint == 'main.services' %}active{% endif %}">Test & Services</a>
+                    <a href="{{ url_for('main.appointment') }}" class="nav-link {% if request.endpoint == 'main.appointment' %}active{% endif %}">Appointment</a>
                 </div>
             </div>
 
@@ -66,10 +72,10 @@
                     <button class="theme-btn active" id="themeLight" title="Light Mode"><i class="fas fa-sun"></i></button>
                 </div>
 
-                <!-- Phones -->
+                <!-- Phones with icons -->
                 <div class="nav-phones">
-                    <span>+91 9058275073</span>
-                    <span>+91 8923291708</span>
+                    <span><i class="fas fa-phone-alt"></i> +91 9058275073</span>
+                    <span><i class="fas fa-phone"></i> +91 8923291708</span>
                 </div>
 
                 <!-- Sign In -->
@@ -167,6 +173,9 @@
             <a href="{{ url_for('main.about') }}" class="sidebar-link">
                 <i class="fas fa-info-circle"></i> About Us
             </a>
+            <a href="{{ url_for('main.appointment') }}" class="sidebar-link">
+                <i class="fas fa-calendar-check"></i> Appointment
+            </a>
             <a href="{{ url_for('main.contact') }}" class="sidebar-link">
                 <i class="fas fa-headset"></i> Contact Support
             </a>
@@ -252,7 +261,7 @@
                         <a href="{{ url_for('main.about') }}">About Us</a>
                         <a href="{{ url_for('main.services') }}">Test & Services</a>
                         <a href="{{ url_for('main.check_report') }}">Download Report</a>
-                        <a href="{{ url_for('main.contact') }}">Appointment</a>
+                        <a href="{{ url_for('main.appointment') }}">Appointment</a>
                     </div>
                     <div class="footer-col">
                         <h4>Our Services</h4>
@@ -278,34 +287,20 @@
                         </div>
                         <div class="footer-contact-item">
                             <i class="fas fa-envelope"></i>
-                            <span>info@lifecarelab.com</span>
+                            <span>LifeCarePathologyLabAsara@outlook.com</span>
                         </div>
                     </div>
                 </div>
                 <div class="footer-bottom">
-                    <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:15px;">
-                            <p>&copy; 2026 Life Care Pathology Lab. All rights reserved.</p>
-                            <div class="footer-bottom-links">
-                                <a href="#">Privacy Policy</a>
-                                <a href="#">Terms of Service</a>
-                            </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:16px;">
+                        <p>&copy; 2026 Life Care Pathology Lab. All rights reserved.</p>
+                        <div class="footer-bottom-links">
+                            <a href="#">Privacy Policy</a>
+                            <a href="#">Terms of Service</a>
                         </div>
-                        
-                        <!-- Developer Credit (Responsive) -->
-                        <div class="developer-credit-responsive" style="text-align:center; padding-top:10px;">
-                            <!-- Desktop View (Single Line) -->
-                            <span class="d-none d-md-block" style="color:#9CA3AF; font-size:0.9rem;">
-                                Designed & Developed by <strong style="color:var(--primary);">Anees Chaudhary Asara</strong> <span style="margin-left:8px;">+91 9837957711</span>
-                            </span>
-                            
-                            <!-- Mobile View (Stacked) -->
-                            <div class="d-block d-md-none" style="display:flex; flex-direction:column; gap:4px; font-size:0.85rem; color:#9CA3AF;">
-                                <span>Designed & Developed by</span>
-                                <strong style="color:var(--primary); font-size:1rem;">Anees Chaudhary Asara</strong>
-                                <span>+91 9837957711</span>
-                            </div>
-                        </div>
+                    </div>
+                    <div class="developer-credit">
+                        Designed & Developed by <strong>Anees Chaudhary Asara</strong> &nbsp; +91 9837957711
                     </div>
                 </div>
             </div>

@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}Check Report — Life Care Pathology Lab{% endblock %}
+{% block title %}Download Report — Life Care Pathology Lab{% endblock %}
 
 {% block content %}
 <section class="page-hero">
     <div class="page-hero-content">
-        <span class="section-badge"><i class="fas fa-file-medical"></i> Reports</span>
-        <h1 class="page-title">Check Your <span class="gradient-text">Report</span></h1>
-        <p class="page-subtitle">Enter your Report ID (RID) or Token Number along with your password to view and download your pathology report.</p>
+        <span class="section-badge"><i class="fas fa-file-medical-alt"></i> Reports</span>
+        <h1 class="page-title">Download Your <span class="gradient-text">Report</span></h1>
+        <p class="page-subtitle">Enter your Report ID or Token Number and password to access your diagnostic report securely.</p>
     </div>
 </section>
 
@@ -14,52 +14,54 @@
     <div class="section-container">
         <div class="report-check-container">
             {% if not report %}
-            <div class="report-form-card animate-on-scroll">
+            <!-- Search Form -->
+            <div class="report-form-card">
                 <div class="report-form-header">
-                    <div class="report-form-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <h2>Find Your Report</h2>
-                    <p>Access your test results securely</p>
+                    <div class="report-form-icon">📋</div>
+                    <h2>Access Your Report</h2>
+                    <p>Your reports are password-protected for security</p>
                 </div>
 
                 {% if error %}
-                <div class="alert alert-error">
+                <div class="alert-error">
                     <i class="fas fa-exclamation-circle"></i> {{ error }}
                 </div>
                 {% endif %}
 
                 <form method="POST" action="{{ url_for('main.check_report') }}">
                     <div class="form-group">
-                        <label for="report_identifier">Report ID or Token Number</label>
+                        <label for="report_identifier">Report ID / Token Number</label>
                         <div class="input-icon-wrapper">
                             <i class="fas fa-hashtag"></i>
-                            <input type="text" id="report_identifier" name="report_identifier"
-                                   placeholder="e.g. RID482910 or TKN-2026-001" required>
+                            <input type="text" id="report_identifier" name="report_identifier" 
+                                   placeholder="e.g., RID00001 or TOKEN123" required>
                         </div>
-                        <p class="form-hint-text">Enter the Report ID (starts with RID) or your Token Number</p>
+                        <p class="form-hint-text"><i class="fas fa-info-circle"></i> Enter your Report ID (starts with RID) or Token Number</p>
                     </div>
+
                     <div class="form-group">
-                        <label for="password">Password</label>
+                        <label for="password">Report Password</label>
                         <div class="input-icon-wrapper">
                             <i class="fas fa-lock"></i>
-                            <input type="password" id="password" name="password"
-                                   placeholder="Enter your password" required>
+                            <input type="password" id="password" name="password" 
+                                   placeholder="Enter report password" required>
                         </div>
-                        <p class="form-hint-text">Password is the first 4 letters of your name in CAPS (e.g. SAHI)</p>
+                        <p class="form-hint-text"><i class="fas fa-shield-alt"></i> This was provided when your report was uploaded</p>
                     </div>
+
                     <button type="submit" class="btn btn-primary btn-block btn-lg">
-                        <i class="fas fa-search"></i> Find Report
+                        <i class="fas fa-search"></i> Find My Report
                     </button>
                 </form>
             </div>
             {% else %}
             <!-- Report Found -->
-            <div class="report-result-card animate-on-scroll">
+            <div class="report-result-card">
                 <div class="report-result-header">
                     <div class="report-result-icon"><i class="fas fa-check-circle"></i></div>
                     <h2>Report Found!</h2>
                 </div>
+
                 <div class="report-details">
                     <div class="report-detail-item">
                         <span class="label">Report ID</span>
@@ -70,32 +72,22 @@
                         <span class="value">{{ report.patient_name }}</span>
                     </div>
                     <div class="report-detail-item">
-                        <span class="label">Token Number</span>
-                        <span class="value">{{ report.token_number }}</span>
-                    </div>
-                    {% if report.test_name %}
-                    <div class="report-detail-item">
                         <span class="label">Test Name</span>
                         <span class="value">{{ report.test_name }}</span>
                     </div>
-                    {% endif %}
                     <div class="report-detail-item">
-                        <span class="label">Uploaded On</span>
-                        <span class="value">{{ report.uploaded_at.strftime('%d %b %Y, %I:%M %p') }}</span>
+                        <span class="label">Date</span>
+                        <span class="value">{{ report.created_at.strftime('%d %b %Y') }}</span>
                     </div>
-                    {% if report.remarks %}
-                    <div class="report-detail-item">
-                        <span class="label">Remarks</span>
-                        <span class="value">{{ report.remarks }}</span>
-                    </div>
-                    {% endif %}
                 </div>
-                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <a href="{{ url_for('main.download_report', report_id=report.id) }}" class="btn btn-primary btn-lg" style="flex: 1;">
-                        <i class="fas fa-download"></i> Download Report
-                    </a>
-                    <a href="{{ url_for('main.check_report') }}" class="btn btn-outline btn-lg" style="flex: 1;">
-                        <i class="fas fa-search"></i> Check Another
+
+                <a href="{{ url_for('main.download_report', report_id=report.id) }}" class="btn btn-primary btn-block btn-lg">
+                    <i class="fas fa-download"></i> Download Report (PDF)
+                </a>
+
+                <div style="text-align:center; margin-top:20px;">
+                    <a href="{{ url_for('main.check_report') }}" style="color:var(--text-secondary); font-size:0.9rem;">
+                        <i class="fas fa-arrow-left"></i> Check Another Report
                     </a>
                 </div>
             </div>
