@@ -72,18 +72,24 @@
                     <button class="theme-btn active" id="themeLight" title="Light Mode"><i class="fas fa-sun"></i></button>
                 </div>
 
-                <!-- Download Report (mobile visible) -->
-                <a href="{{ url_for('main.check_report') }}" class="nav-download-btn">
-                    <i class="fas fa-file-download"></i> <span class="nav-download-text">Download Report</span>
-                </a>
-
-                <!-- Phones with icons -->
+                <!-- Phones with icons (desktop hidden, mobile stacked) -->
                 <div class="nav-phones">
                     <span><i class="fas fa-phone-alt"></i> +91 9058275073</span>
                     <span><i class="fas fa-phone"></i> +91 8923291708</span>
                 </div>
 
-                <!-- Sign In -->
+                <!-- Mobile phones (stacked, shown on mobile only) -->
+                <div class="nav-phones-mobile">
+                    <span><i class="fas fa-phone-alt"></i> 9058275073</span>
+                    <span><i class="fas fa-phone"></i> 8923291708</span>
+                </div>
+
+                <!-- Download Report (far right on mobile) -->
+                <a href="{{ url_for('main.check_report') }}" class="nav-download-btn">
+                    <i class="fas fa-file-download"></i> <span class="nav-download-text">Download Report</span>
+                </a>
+
+                <!-- Sign In (desktop only) -->
                 {% if not current_user.is_authenticated %}
                     <a href="{{ url_for('auth.login') }}" class="sign-in-btn">
                         <i class="fas fa-user-circle"></i> Sign In
@@ -169,11 +175,11 @@
              </div>
 
              <!-- Developer Info (Mobile Stacked) -->
-             <div class="sidebar-footer-info">
-                <div class="dev-info-stacked">
+             <div class="sidebar-footer-info" style="margin-top:auto; padding:12px 20px 16px; border-top:1px solid rgba(255,255,255,0.06);">
+                <div class="dev-info-stacked" style="font-size:0.65rem; opacity:0.6; text-align:center; line-height:1.4;">
                     <span>Designed & Developed by</span>
-                    <strong>Anees Chaudhary Asara</strong>
-                    <span>+91 9837957711</span>
+                    <strong style="font-size:0.7rem; display:block;">Anees Chaudhary Asara</strong>
+                    <span style="font-size:0.6rem;">+91 9837957711</span>
                 </div>
              </div>
         </div>

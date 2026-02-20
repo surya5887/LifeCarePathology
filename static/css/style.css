@@ -156,6 +156,14 @@ ul { list-style: none; }
 .nav-download-btn:hover { background: #eab308; }
 .nav-download-btn i { font-size: 0.7rem; }
 
+/* Mobile phones (hidden on desktop, stacked on mobile) */
+.nav-phones-mobile {
+    display: none; flex-direction: column; align-items: flex-end;
+    line-height: 1.1; font-size: 0.58rem; color: var(--primary); font-weight: 700;
+}
+.nav-phones-mobile span { display: flex; align-items: center; gap: 3px; }
+.nav-phones-mobile span i { font-size: 0.5rem; }
+
 .theme-toggle-group {
     background: rgba(255,255,255,0.05); border-radius: 20px; padding: 2px; display: flex; align-items: center;
     border: 1px solid var(--border-color);
@@ -579,11 +587,12 @@ input:focus, select:focus, textarea:focus {
     transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 10px 0 30px rgba(0,0,0,0.5);
     overflow-y: auto;
+    display: flex; flex-direction: column;
 }
 .telegram-sidebar.active { left: 0; }
 
 .sidebar-header {
-    background: #1e293b; /* Slightly lighter/different shade */
+    background: #1e293b;
     padding: 24px 20px;
     border-bottom: 1px solid rgba(255,255,255,0.05);
 }
@@ -609,7 +618,7 @@ input:focus, select:focus, textarea:focus {
 .sidebar-user-info h3 { font-size: 1.1rem; color: #fff; font-weight: 700; }
 .sidebar-user-info p { font-size: 0.85rem; color: var(--text-muted); }
 
-.sidebar-menu { padding: 10px 0; }
+.sidebar-menu { padding: 10px 0; flex: 1; }
 .sidebar-link {
     display: flex; align-items: center; gap: 16px;
     padding: 14px 24px;
@@ -628,16 +637,15 @@ input:focus, select:focus, textarea:focus {
 .sidebar-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 8px 0; }
 
 .sidebar-footer-info {
-    padding: 24px;
+    padding: 10px 20px 14px;
     text-align: center;
     border-top: 1px solid rgba(255,255,255,0.05);
-    margin-top: auto;
 }
 .dev-info-stacked { 
-    display: flex; flex-direction: column; gap: 4px; 
-    font-size: 0.8rem; color: var(--text-muted); 
+    display: flex; flex-direction: column; gap: 2px; 
+    font-size: 0.62rem; color: var(--text-muted); opacity: 0.5;
 }
-.dev-info-stacked strong { color: var(--primary); font-size: 0.9rem; }
+.dev-info-stacked strong { color: var(--primary); font-size: 0.68rem; }
 
 /* === REPORT PAGE === */
 .report-section { padding: 60px 0 80px; }
@@ -894,7 +902,8 @@ body.light-theme .brand-search input { background: #f8fafc; border-color: #e2e8f
     .sign-in-btn { display: none; }
     .nav-logo-mobile { display: flex; }
     .nav-download-btn { display: flex; }
-    .nav-right { gap: 8px; }
+    .nav-phones-mobile { display: flex; }
+    .nav-right { gap: 6px; }
     .theme-btn { padding: 3px 5px; font-size: 0.65rem; }
     .theme-toggle-group { padding: 1px; }
 
