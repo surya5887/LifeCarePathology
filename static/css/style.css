@@ -117,12 +117,13 @@ ul { list-style: none; }
     align-items: center; justify-content: center;
 }
 .hamburger, .hamburger::before, .hamburger::after {
-    display: block; width: 18px; height: 2.5px; background: var(--text-primary);
+    display: block; width: 20px; height: 3px; background: #fff;
     border-radius: 2px; transition: var(--transition);
 }
 .hamburger::before, .hamburger::after { content: ''; position: absolute; }
-.hamburger::before { top: -6px; }
-.hamburger::after { top: 6px; }
+.hamburger::before { top: -7px; }
+.hamburger::after { top: 7px; }
+body.light-theme .hamburger, body.light-theme .hamburger::before, body.light-theme .hamburger::after { background: #1e293b; }
 
 .nav-left { display: flex; align-items: center; gap: 24px; }
 .nav-logo-mobile { display: none; align-items: center; gap: 6px; text-decoration: none; }
@@ -858,22 +859,13 @@ body.light-theme .brand-search input { background: #f8fafc; border-color: #e2e8f
     .sign-in-btn { display: none; }
     .nav-logo-mobile { display: flex; }
     .nav-download-btn { display: flex; }
-    .nav-phones-mobile { display: flex; }
+    .nav-left { gap: 0; }
     .nav-right { gap: 6px; }
     .theme-btn { padding: 3px 5px; font-size: 0.65rem; }
     .theme-toggle-group { padding: 1px; }
 
-    /* Brand header (homepage only) */
-    .brand-header { padding: 8px 10px; }
-    .brand-info { gap: 8px; }
-    .brand-logo-large { display: none; }
-    .brand-text h1 { font-size: 0.85rem; }
-    .brand-text span { font-size: 0.55rem; letter-spacing: 1px; }
-    .brand-search { display: none; }
-    .brand-desktop-right { display: none; }
-    .brand-mobile-right { display: flex; }
-    .brand-mobile-right .action-btn { padding: 4px 8px; font-size: 0.6rem; gap: 3px; }
-    .action-btn { padding: 5px 10px; font-size: 0.65rem; gap: 3px; }
+    /* Brand header — HIDE on mobile */
+    .brand-header { display: none !important; }
 
     /* Hero */
     .hero { padding: 30px 14px 40px; }
