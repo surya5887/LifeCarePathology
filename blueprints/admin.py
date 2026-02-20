@@ -326,7 +326,10 @@ def upload_report():
 
         filename = secure_filename(f"{report_id}_{file.filename}")
         upload_dir = current_app.config['UPLOAD_FOLDER']
-        os.makedirs(upload_dir, exist_ok=True)
+        try:
+            os.makedirs(upload_dir, exist_ok=True)
+        except OSError:
+            pass  # Read-only filesystem (Vercel)
         file_path = os.path.join(upload_dir, filename)
         file.save(file_path)
 
@@ -385,126 +388,134 @@ def api_test_parameters(test_id):
 @admin.route('/create-report', methods=['GET', 'POST'])
 @role_required('admin')
 def create_report():
-    all_tests = Test.query.filter_by(is_active=True)\
-        .order_by(Test.name).all()
-    categories = TestCategory.query.order_by(TestCategory.name).all()
+    try:
+        all_tests = Test.query.filter_by(is_active=True)\
+            .order_by(Test.name).all()
+        categories = TestCategory.query.order_by(TestCategory.name).all()
 
-    if request.method == 'POST':
-        try:
-            patient_name = request.form.get('patient_name', '').strip()
-            age = request.form.get('age', '').strip()
-            gender = request.form.get('gender', '').strip()
-            doctor_name = request.form.get('doctor_name', '').strip()
-            phone = request.form.get('phone', '').strip()
-            test_id = request.form.get('test_id', '').strip()
-            test_name = request.form.get('test_name', '').strip()
-            sample_id = request.form.get('sample_id', '').strip()
-            remarks = request.form.get('remarks', '').strip()
-            sample_type = request.form.get('sample_type', 'Blood').strip()
-            collection_date = request.form.get('collection_date', '').strip()
-            report_time = request.form.get('report_time', '').strip()
-            collected_at = request.form.get('collected_at', '').strip()
+        if request.method == 'POST':
+            try:
+                patient_name = request.form.get('patient_name', '').strip()
+                age = request.form.get('age', '').strip()
+                gender = request.form.get('gender', '').strip()
+                doctor_name = request.form.get('doctor_name', '').strip()
+                phone = request.form.get('phone', '').strip()
+                test_id = request.form.get('test_id', '').strip()
+                test_name = request.form.get('test_name', '').strip()
+                sample_id = request.form.get('sample_id', '').strip()
+                remarks = request.form.get('remarks', '').strip()
+                sample_type = request.form.get('sample_type', 'Blood').strip()
+                collection_date = request.form.get('collection_date', '').strip()
+                report_time = request.form.get('report_time', '').strip()
+                collected_at = request.form.get('collected_at', '').strip()
 
-            if not patient_name or not test_name:
-                flash('Patient Name and Test are required.', 'error')
+                if not patient_name or not test_name:
+                    flash('Patient Name and Test are required.', 'error')
+                    return render_template('admin/create_report.html',
+                                           tests=all_tests, categories=categories)
+
+                # Auto-generate sample_id if empty
+                if not sample_id:
+                    sample_id = Report.generate_report_id()
+
+                # Collect test parameters
+                param_names = request.form.getlist('param_name[]')
+                param_values = request.form.getlist('param_value[]')
+                param_units = request.form.getlist('param_unit[]')
+                param_ranges = request.form.getlist('param_range[]')
+
+                test_results = []
+                for i in range(len(param_names)):
+                    if param_names[i].strip():
+                        test_results.append({
+                            'parameter': param_names[i].strip(),
+                            'value': param_values[i].strip() if i < len(param_values) else '',
+                            'unit': param_units[i].strip() if i < len(param_units) else '',
+                            'normal_range': param_ranges[i].strip() if i < len(param_ranges) else ''
+                        })
+
+                # Generate Report ID and password
+                report_id = Report.generate_report_id()
+                password = Report.generate_password_from_name(patient_name)
+
+                # Report data dict
+                report_data = {
+                    'report_id': report_id,
+                    'patient_name': patient_name,
+                    'age': age or 'N/A',
+                    'gender': gender or 'N/A',
+                    'doctor_name': doctor_name or 'Self',
+                    'phone': phone,
+                    'test_name': test_name,
+                    'token_number': sample_id,
+                    'sample_type': sample_type,
+                    'collection_date': collection_date,
+                    'report_time': report_time,
+                    'collected_at': collected_at,
+                    'remarks': remarks,
+                    'test_results': test_results
+                }
+
+                filename = secure_filename(f"{report_id}_{sample_id}.pdf")
+                upload_dir = current_app.config['UPLOAD_FOLDER']
+                os.makedirs(upload_dir, exist_ok=True)
+                output_path = os.path.join(upload_dir, filename)
+
+                # Download URL for QR code
+                download_url = url_for('main.download_report_by_rid',
+                                       report_id=report_id, _external=True)
+
+                # Generate PDF
+                generate_report_pdf(report_data, output_path, download_url)
+
+                # Safe age conversion
+                safe_age = None
+                if age:
+                    try:
+                        safe_age = int(age)
+                    except ValueError:
+                        safe_age = None
+
+                # Save to database
+                report = Report(
+                    report_id=report_id,
+                    patient_name=patient_name,
+                    token_number=sample_id,
+                    file_path=filename,
+                    remarks=remarks,
+                    age=safe_age,
+                    gender=gender,
+                    doctor_name=doctor_name,
+                    test_name=test_name,
+                    phone=phone,
+                    sample_type=sample_type,
+                    collection_date=collection_date,
+                    collected_at=collected_at
+                )
+                report.set_password(password)
+                report.set_test_results(test_results)
+                db.session.add(report)
+                db.session.commit()
+
+                log_activity('Created report',
+                             f'Patient: {patient_name}, RID: {report_id}')
+                flash(f'Report created! ID: {report_id} | Password: {password}',
+                      'success')
+                return redirect(url_for('admin.report_preview',
+                                        report_id=report_id))
+
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.error(f"Report Creation Failed: {str(e)}")
+                flash(f'Total failure during report creation: {str(e)}. (Check if Vercel storage is blocked)', 'error')
                 return render_template('admin/create_report.html',
                                        tests=all_tests, categories=categories)
 
-            # Auto-generate sample_id if empty
-            if not sample_id:
-                sample_id = Report.generate_report_id()
-
-            # Collect test parameters
-            param_names = request.form.getlist('param_name[]')
-            param_values = request.form.getlist('param_value[]')
-            param_units = request.form.getlist('param_unit[]')
-            param_ranges = request.form.getlist('param_range[]')
-
-            test_results = []
-            for i in range(len(param_names)):
-                if param_names[i].strip():
-                    test_results.append({
-                        'parameter': param_names[i].strip(),
-                        'value': param_values[i].strip() if i < len(param_values) else '',
-                        'unit': param_units[i].strip() if i < len(param_units) else '',
-                        'normal_range': param_ranges[i].strip() if i < len(param_ranges) else ''
-                    })
-
-            # Generate Report ID and password
-            report_id = Report.generate_report_id()
-            password = Report.generate_password_from_name(patient_name)
-
-            # Report data dict
-            report_data = {
-                'report_id': report_id,
-                'patient_name': patient_name,
-                'age': age or 'N/A',
-                'gender': gender or 'N/A',
-                'doctor_name': doctor_name or 'Self',
-                'phone': phone,
-                'test_name': test_name,
-                'token_number': sample_id,
-                'sample_type': sample_type,
-                'collection_date': collection_date,
-                'report_time': report_time,
-                'collected_at': collected_at,
-                'remarks': remarks,
-                'test_results': test_results
-            }
-
-            filename = secure_filename(f"{report_id}_{sample_id}.pdf")
-            upload_dir = current_app.config['UPLOAD_FOLDER']
-            os.makedirs(upload_dir, exist_ok=True)
-            output_path = os.path.join(upload_dir, filename)
-
-            # Download URL for QR code
-            download_url = url_for('main.download_report_by_rid',
-                                   report_id=report_id, _external=True)
-
-            # Generate PDF
-            generate_report_pdf(report_data, output_path, download_url)
-
-            # Safe age conversion
-            safe_age = None
-            if age:
-                try:
-                    safe_age = int(age)
-                except ValueError:
-                    safe_age = None
-
-            # Save to database
-            report = Report(
-                report_id=report_id,
-                patient_name=patient_name,
-                token_number=sample_id,
-                file_path=filename,
-                remarks=remarks,
-                age=safe_age,
-                gender=gender,
-                doctor_name=doctor_name,
-                test_name=test_name
-            )
-            report.set_password(password)
-            report.set_test_results(test_results)
-            db.session.add(report)
-            db.session.commit()
-
-            log_activity('Created report',
-                         f'Patient: {patient_name}, RID: {report_id}')
-            flash(f'Report created! ID: {report_id} | Password: {password}',
-                  'success')
-            return redirect(url_for('admin.report_preview',
-                                    report_id=report_id))
-
-        except Exception as e:
-            db.session.rollback()
-            current_app.logger.error(f"Report Creation Failed: {str(e)}")
-            flash(f'Total failure during report creation: {str(e)}. (Check if Vercel storage is blocked)', 'error')
-            return render_template('admin/create_report.html',
-                                   tests=all_tests, categories=categories)
-
-    return render_template('admin/create_report.html',
-                           tests=all_tests, categories=categories)
+        return render_template('admin/create_report.html',
+                               tests=all_tests, categories=categories)
+    except Exception as e:
+        current_app.logger.error(f"Critical error in create_report route: {str(e)}")
+        return f"<h1>A critical error occurred</h1><p>{str(e)}</p><p>Please check your database connectivity or if tables exist.</p>", 500
 
 
 @admin.route('/report/<report_id>/preview')

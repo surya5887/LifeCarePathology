@@ -217,8 +217,6 @@ def logout():
     return redirect(url_for('main.home'))
 
 
-    # Remove debug route
-
 
 
 # ============================================================

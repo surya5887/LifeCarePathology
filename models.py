@@ -154,6 +154,10 @@ class Report(db.Model):
     gender = db.Column(db.String(10), nullable=True)
     doctor_name = db.Column(db.String(100), default='')
     test_name = db.Column(db.String(200), default='')
+    phone = db.Column(db.String(20), default='')
+    sample_type = db.Column(db.String(50), default='Blood')
+    collection_date = db.Column(db.String(50), default='')
+    collected_at = db.Column(db.String(100), default='')
     test_results_json = db.Column(db.Text, default='[]')  # JSON string
 
     user = db.relationship('User', backref='reports', foreign_keys=[user_id])
