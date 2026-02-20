@@ -92,34 +92,8 @@
         </div>
     </nav>
 
-    <!-- 3. BRAND HEADER -->
-    <header class="brand-header">
-        <div class="section-container" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-            <div class="brand-info">
-                <div class="brand-logo-large">
-                    <span style="font-size: 3.5rem;">🔬</span>
-                </div>
-                <div class="brand-text">
-                    <h1>Life Care Pathology Lab</h1>
-                    <span>ASARA</span>
-                </div>
-            </div>
-
-            <div class="brand-search">
-                <input type="text" placeholder="Search for tests, packages...">
-                <i class="fas fa-search"></i>
-            </div>
-
-            <div class="brand-actions">
-                <a href="{{ url_for('main.check_report') }}" class="action-btn btn-yellow">
-                    <i class="fas fa-file-download"></i> Download Report
-                </a>
-                <a href="{{ url_for('main.services') }}" class="action-btn btn-blue">
-                    <i class="fas fa-vial"></i> Test
-                </a>
-            </div>
-        </div>
-    </header>
+    <!-- Brand Header block — only homepage uses this -->
+    {% block brand_header %}{% endblock %}
 
     <!-- TELEGRAM STYLE SIDEBAR (Mobile) -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
