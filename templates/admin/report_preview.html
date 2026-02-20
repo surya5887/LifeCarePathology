@@ -112,15 +112,15 @@
         <a href="{{ url_for('admin.report_templates') }}" style="color:var(--admin-primary); text-decoration:none;">Manage Templates &rarr;</a>
     </div>
     <div class="tpl-thumbs">
-        <div class="tpl-item active" onclick="setTemplate('''', this)">
+        <div class="tpl-item active" onclick="setTemplate('', this)">
             <div class="tpl-img" style="background:#fff; display:flex; align-items:center; justify-content:center; color:#ccc;">
                 <i class="fas fa-ban"></i>
             </div>
             <div class="tpl-name">None</div>
         </div>
         {% for t in templates %}
-        <div class="tpl-item" onclick="setTemplate(''{{ url_for(''static'', filename=''images/templates/'' + t.file_path) }}'', this)">
-            <img src="{{ url_for(''static'', filename=''images/templates/'' + t.file_path) }}" class="tpl-img">
+        <div class="tpl-item" onclick="setTemplate('{{ url_for(\'static\', filename=\'images/templates/\' + t.file_path) }}', this)">
+            <img src="{{ url_for('static', filename='images/templates/' + t.file_path) }}" class="tpl-img">
             <div class="tpl-name">{{ t.name }}</div>
         </div>
         {% endfor %}
@@ -139,15 +139,15 @@
             </tr>
             <tr>
                 <td class="lbl">Age/Sex</td><td class="val">{{ report.age }} Yrs / {{ report.gender }}</td>
-                <td class="lbl">Date</td><td class="val">{{ report.uploaded_at.strftime(''%d/%m/%Y %I:%M %p'') }}</td>
+                <td class="lbl">Date</td><td class="val">{{ report.uploaded_at.strftime('%d/%m/%Y %I:%M %p') }}</td>
             </tr>
             <tr>
-                <td class="lbl">Ref. Dr</td><td class="val">{{ report.doctor_name or ''Self'' }}</td>
+                <td class="lbl">Ref. Dr</td><td class="val">{{ report.doctor_name or 'Self' }}</td>
                 <td class="lbl">Sample ID</td><td class="val">{{ report.token_number }}</td>
             </tr>
             <tr>
-                <td class="lbl">Phone</td><td class="val">{{ report.phone|default(''N/A'', true) }}</td>
-                <td class="lbl">Collected</td><td class="val">{{ report.collected_at|default(''Lab'', true) }} ({{ report.collection_date|default(''N/A'', true) }})</td>
+                <td class="lbl">Phone</td><td class="val">{{ report.phone|default('N/A', true) }}</td>
+                <td class="lbl">Collected</td><td class="val">{{ report.collected_at|default('Lab', true) }} ({{ report.collection_date|default('N/A', true) }})</td>
             </tr>
             <tr>
                 <td class="lbl">Test</td><td class="val" colspan="3" style="color:#000;">{{ report.test_name }}</td>
@@ -162,18 +162,18 @@
             <td style="width:35%" class="p-name">{{ r.parameter }}</td>
             <td style="width:20%">
                 {% set val = r.value|string %}
-                {% set rng = r.normal_range|default('''', true) %}
+                {% set rng = r.normal_range|default('', true) %}
                 {% set is_abnormal = false %}
                 {% if val and rng %}
                      {% set v = val|float(default=None) %}
                      {% if v is not none %}
-                        {% if '' - '' in rng %}
-                            {% set p = rng.split('' - '') %}
+                        {% if ' - ' in rng %}
+                            {% set p = rng.split(' - ') %}
                             {% if p|length == 2 %}
                                 {% if v < p[0]|float or v > p[1]|float %}{% set is_abnormal = true %}{% endif %}
                             {% endif %}
-                        {% elif ''-'' in rng and rng.replace(''.'','''').replace(''-'','''').isdigit() %}
-                             {% set p = rng.split(''-'') %}
+                        {% elif '-' in rng and rng.replace('.','').replace('-','').isdigit() %}
+                             {% set p = rng.split('-') %}
                              {% if p|length == 2 %}
                                  {% if v < p[0]|float or v > p[1]|float %}{% set is_abnormal = true %}{% endif %}
                              {% endif %}
@@ -206,40 +206,40 @@
 </div>
 
 <script>
-let currentTemplateUrl = '''';
+let currentTemplateUrl = '';
 
 function setTemplate(url, el) {
     currentTemplateUrl = url;
-    document.querySelectorAll(''.tpl-item'').forEach(i => i.classList.remove(''active''));
-    el.classList.add(''active'');
-    document.querySelectorAll(''.tpl-bg'').forEach(img => {
+    document.querySelectorAll('.tpl-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.tpl-bg').forEach(img => {
         img.src = url;
-        img.style.display = url ? ''block'' : ''none'';
+        img.style.display = url ? 'block' : 'none';
     });
 }
 
 function paginateReport() {
-    const viewer = document.getElementById(''reportViewer'');
-    viewer.innerHTML = '''';
-    const srcPatient = document.getElementById(''srcPatientInfo'').innerHTML;
-    const srcRows = Array.from(document.querySelectorAll(''#srcResults tr''));
-    const srcFooter = document.getElementById(''srcFooter'').innerHTML;
+    const viewer = document.getElementById('reportViewer');
+    viewer.innerHTML = '';
+    const srcPatient = document.getElementById('srcPatientInfo').innerHTML;
+    const srcRows = Array.from(document.querySelectorAll('#srcResults tr'));
+    const srcFooter = document.getElementById('srcFooter').innerHTML;
 
     let pageNum = 1;
     let currPage = createPage(pageNum);
-    let currContent = currPage.querySelector(''.page-content'');
+    let currContent = currPage.querySelector('.page-content');
     
-    let pInfo = document.createElement(''div'');
+    let pInfo = document.createElement('div');
     pInfo.innerHTML = srcPatient;
     currContent.appendChild(pInfo);
 
     let table = createTableStructure();
-    let tbody = table.querySelector(''tbody'');
+    let tbody = table.querySelector('tbody');
     currContent.appendChild(table);
 
-    let resHeader = document.createElement(''div'');
-    resHeader.className = ''section-header'';
-    resHeader.textContent = ''Test Results'';
+    let resHeader = document.createElement('div');
+    resHeader.className = 'section-header';
+    resHeader.textContent = 'Test Results';
     currContent.insertBefore(resHeader, table);
 
     for (let i = 0; i < srcRows.length; i++) {
@@ -249,26 +249,26 @@ function paginateReport() {
             tbody.removeChild(row);
             pageNum++;
             currPage = createPage(pageNum);
-            currContent = currPage.querySelector(''.page-content'');
-            let contHeader = document.createElement(''div'');
-            contHeader.className = ''section-header first''; 
-            contHeader.textContent = ''Test Results (Cont.)'';
+            currContent = currPage.querySelector('.page-content');
+            let contHeader = document.createElement('div');
+            contHeader.className = 'section-header first'; 
+            contHeader.textContent = 'Test Results (Cont.)';
             currContent.appendChild(contHeader);
             table = createTableStructure();
-            tbody = table.querySelector(''tbody'');
+            tbody = table.querySelector('tbody');
             currContent.appendChild(table);
             tbody.appendChild(row);
         }
     }
 
-    let fDiv = document.createElement(''div'');
+    let fDiv = document.createElement('div');
     fDiv.innerHTML = srcFooter;
     currContent.appendChild(fDiv);
     if (checkOverflow(currContent)) {
         currContent.removeChild(fDiv);
          pageNum++;
          currPage = createPage(pageNum);
-         currContent = currPage.querySelector(''.page-content'');
+         currContent = currPage.querySelector('.page-content');
          currContent.appendChild(fDiv);
     }
 }
@@ -282,17 +282,17 @@ function checkOverflow(contentDiv) {
 }
 
 function createPage(num) {
-    const p = document.createElement(''div'');
-    p.className = ''report-page'';
-    p.id = ''page-'' + num;
-    p.innerHTML = `<img src="${currentTemplateUrl}" class="tpl-bg" style="display:${currentTemplateUrl?''block'':''none'' }"><div class="page-content"></div>`;
-    document.getElementById(''reportViewer'').appendChild(p);
+    const p = document.createElement('div');
+    p.className = 'report-page';
+    p.id = 'page-' + num;
+    p.innerHTML = `<img src="${currentTemplateUrl}" class="tpl-bg" style="display:${currentTemplateUrl ? 'block' : 'none'}"><div class="page-content"></div>`;
+    document.getElementById('reportViewer').appendChild(p);
     return p;
 }
 
 function createTableStructure() {
-    const t = document.createElement(''table'');
-    t.className = ''results-table'';
+    const t = document.createElement('table');
+    t.className = 'results-table';
     t.innerHTML = `
         <thead>
             <tr>
