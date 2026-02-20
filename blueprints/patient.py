@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
-from flask_login import current_user
+from flask_login import current_user, login_required
 from flask_mail import Message
 from models import Booking, Test, TestCategory, Report, BlockedSlot
 from extensions import db, mail
@@ -207,7 +207,7 @@ def my_bookings():
 
 
 @patient.route('/profile', methods=['GET', 'POST'])
-@role_required('patient')
+@login_required
 def profile():
 
     if request.method == 'POST':

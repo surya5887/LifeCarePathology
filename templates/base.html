@@ -88,9 +88,51 @@
                         <i class="fas fa-user-circle"></i> Sign In
                     </a>
                 {% else %}
-                    <a href="{{ url_for('patient.dashboard') }}" class="sign-in-btn" style="background:var(--success); color:#fff;">
-                        <i class="fas fa-user"></i> Dashboard
-                    </a>
+                    <!-- User Dropdown (desktop) -->
+                    <div class="nav-user-dropdown">
+                        <div class="nav-user-btn">
+                            <div class="nav-avatar">
+                                {% if current_user.profile_pic %}
+                                    <img src="{{ current_user.profile_pic }}" alt="Profile">
+                                {% else %}
+                                    <i class="fas fa-user"></i>
+                                {% endif %}
+                            </div>
+                            <div class="nav-user-info-text">
+                                <span class="nav-user-name">{{ current_user.name.split(' ')[0] }}</span>
+                                <span class="nav-user-role">{{ current_user.role }}</span>
+                            </div>
+                            <i class="fas fa-chevron-down" style="font-size:0.7rem; color:var(--text-secondary);"></i>
+                        </div>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-item" style="pointer-events:none; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 8px;">
+                                <div style="display:flex; flex-direction:column;">
+                                    <span style="font-weight:700; font-size:0.85rem;">{{ current_user.name }}</span>
+                                    <span style="font-size:0.75rem; color:var(--text-secondary);">{{ current_user.email }}</span>
+                                </div>
+                            </div>
+                            
+                            {% if current_user.role == 'admin' %}
+                                <a href="{{ url_for('admin.dashboard') }}" class="dropdown-item">
+                                    <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('patient.dashboard') }}" class="dropdown-item">
+                                    <i class="fas fa-chart-line"></i> Patient Dashboard
+                                </a>
+                            {% endif %}
+                            
+                            <a href="{{ url_for('patient.profile') }}" class="dropdown-item">
+                                <i class="fas fa-user-circle"></i> Your Profile
+                            </a>
+                            
+                            <div class="dropdown-divider"></div>
+                            
+                            <a href="{{ url_for('auth.logout') }}" class="dropdown-item" style="color:var(--danger);">
+                                <i class="fas fa-sign-out-alt"></i> Log Out
+                            </a>
+                        </div>
+                    </div>
                 {% endif %}
             </div>
         </div>
@@ -126,8 +168,11 @@
             </div>
             
             {% if current_user.is_authenticated %}
-                <div style="margin-top:16px; display:flex; gap:10px;">
-                    <a href="{{ url_for('patient.profile') }}" style="font-size:0.85rem; color:var(--primary); font-weight:600;">Edit Profile</a>
+                <div style="margin-top:16px; display:flex; flex-direction:column; gap:8px;">
+                    <div style="background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:8px; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-check-circle" style="color:var(--success); font-size:0.8rem;"></i>
+                        <span style="font-size:0.75rem; color:#fff; font-weight:600;">Verified Account</span>
+                    </div>
                 </div>
             {% else %}
                  <div style="margin-top:16px;">
@@ -150,6 +195,25 @@
             <a href="{{ url_for('main.services') }}" class="sidebar-link">
                 <i class="fas fa-vial"></i> Test & Services
             </a>
+            
+            {% if current_user.is_authenticated %}
+                <div class="sidebar-divider"></div>
+                {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard (Admin)
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('patient.dashboard') }}" class="sidebar-link">
+                        <i class="fas fa-chart-line"></i> My Dashboard
+                    </a>
+                {% endif %}
+                <a href="{{ url_for('patient.profile') }}" class="sidebar-link">
+                    <i class="fas fa-user-circle"></i> Your Profile
+                </a>
+                <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color:var(--danger);">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            {% endif %}
              <div class="sidebar-divider"></div>
             <a href="{{ url_for('main.about') }}" class="sidebar-link">
                 <i class="fas fa-info-circle"></i> About Us
