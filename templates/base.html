@@ -48,9 +48,9 @@
 
             <!-- Left: Logo & Links -->
             <div class="nav-left">
-                <a href="{{ url_for('main.home') }}" class="nav-logo-mobile" style="display:none; align-items:center; gap:8px;">
-                     <span style="font-size:1.5rem;">🔬</span>
-                     <span style="font-weight:800; color:#fff;">Life Care</span>
+                <a href="{{ url_for('main.home') }}" class="nav-logo-mobile">
+                     <span style="font-size:1.3rem;">🔬</span>
+                     <span class="nav-brand-name">Life Care Pathology Lab<small>, ASARA</small></span>
                 </a>
 
                 <!-- Desktop Nav Links -->
@@ -66,11 +66,16 @@
 
             <!-- Right: Tools & Auth -->
             <div class="nav-right">
-                <!-- Theme Toggle -->
+                <!-- Theme Toggle (always visible, top-right) -->
                 <div class="theme-toggle-group">
                     <button class="theme-btn" id="themeDark" title="Dark Mode"><i class="fas fa-moon"></i></button>
                     <button class="theme-btn active" id="themeLight" title="Light Mode"><i class="fas fa-sun"></i></button>
                 </div>
+
+                <!-- Download Report (mobile visible) -->
+                <a href="{{ url_for('main.check_report') }}" class="nav-download-btn">
+                    <i class="fas fa-file-download"></i> <span class="nav-download-text">Download Report</span>
+                </a>
 
                 <!-- Phones with icons -->
                 <div class="nav-phones">
@@ -142,6 +147,9 @@
             </a>
             <a href="{{ url_for('main.check_report') }}" class="sidebar-link">
                 <i class="fas fa-file-medical-alt"></i> Download Reports
+            </a>
+            <a href="{{ url_for('main.services') }}" class="sidebar-link">
+                <i class="fas fa-vial"></i> Test & Services
             </a>
              <div class="sidebar-divider"></div>
             <a href="{{ url_for('main.about') }}" class="sidebar-link">
@@ -229,21 +237,24 @@
                             <a href="#" aria-label="YouTube" class="social-youtube"><i class="fab fa-youtube"></i></a>
                         </div>
                     </div>
-                    <div class="footer-col">
-                        <h4>Quick Links</h4>
-                        <a href="{{ url_for('main.home') }}">Home</a>
-                        <a href="{{ url_for('main.about') }}">About Us</a>
-                        <a href="{{ url_for('main.services') }}">Test & Services</a>
-                        <a href="{{ url_for('main.check_report') }}">Download Report</a>
-                        <a href="{{ url_for('main.appointment') }}">Appointment</a>
-                    </div>
-                    <div class="footer-col">
-                        <h4>Our Services</h4>
-                        <a href="{{ url_for('main.services') }}">Blood Tests</a>
-                        <a href="{{ url_for('main.services') }}">Urine Analysis</a>
-                        <a href="{{ url_for('main.services') }}">Thyroid Profile</a>
-                        <a href="{{ url_for('main.services') }}">Diabetes Screening</a>
-                        <a href="{{ url_for('main.services') }}">Home Collection</a>
+                    <!-- Quick Links + Our Services wrapper for mobile parallel -->
+                    <div class="footer-links-row">
+                        <div class="footer-col">
+                            <h4>Quick Links</h4>
+                            <a href="{{ url_for('main.home') }}">Home</a>
+                            <a href="{{ url_for('main.about') }}">About Us</a>
+                            <a href="{{ url_for('main.services') }}">Test & Services</a>
+                            <a href="{{ url_for('main.check_report') }}">Download Report</a>
+                            <a href="{{ url_for('main.appointment') }}">Appointment</a>
+                        </div>
+                        <div class="footer-col">
+                            <h4>Our Services</h4>
+                            <a href="{{ url_for('main.services') }}">Blood Tests</a>
+                            <a href="{{ url_for('main.services') }}">Urine Analysis</a>
+                            <a href="{{ url_for('main.services') }}">Thyroid Profile</a>
+                            <a href="{{ url_for('main.services') }}">Diabetes Screening</a>
+                            <a href="{{ url_for('main.services') }}">Home Collection</a>
+                        </div>
                     </div>
                     <div class="footer-col">
                         <h4>Contact Info</h4>
