@@ -87,7 +87,6 @@
         .report-page { 
             box-shadow: none; 
             margin: 0 auto !important; /* Centered */
-            /* REDUCED SIZE as per request */
             width: 200mm;   /* 10mm less than A4 */
             height: 280mm;  /* 17mm less than A4 */
             
@@ -194,7 +193,7 @@
                         {% elif '-' in rng and rng.replace('.','').replace('-','').isdigit() %}
                              {% set p = rng.split('-') %}
                              {% if p|length == 2 %}
-                                {% if v < p[0]|float or v > p[1]|float %}{% set is_abnormal = true %}{% endif %}
+                                 {% if v < p[0]|float or v > p[1]|float %}{% set is_abnormal = true %}{% endif %}
                              {% endif %}
                         {% endif %}
                      {% endif %}
@@ -320,20 +319,10 @@ function paginateReport() {
 }
 
 function checkOverflow(contentDiv) {
-    // Reduced page height to 280mm (~1058px) in print.
-    // Content should fit within this reduced height.
-    // Top Padding = 204px.
-    // Footer Start = 280mm - 52mm = 228mm (~862px).
-    // Buffer = 12px.
-    // Limit = 850px.
-    
     const LIMIT_PX = 850;
-    
     const lastEl = contentDiv.lastElementChild;
     if (!lastEl) return false;
-    
     const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-    
     return bottom > LIMIT_PX;
 }
 

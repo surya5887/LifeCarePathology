@@ -32,7 +32,13 @@ class Config:
         }
     }
 
-    UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads", "reports")
+    # Vercel / Serverless Filesystem Handling
+    IS_VERCEL = os.environ.get('VERCEL') == '1' or os.environ.get('VERCEL_ENV') is not None
+    
+    if IS_VERCEL:
+        UPLOAD_FOLDER = "/tmp" # Writable scratch space on Vercel
+    else:
+        UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads", "reports")
 
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
 
