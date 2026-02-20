@@ -853,7 +853,8 @@ body.light-theme .brand-search input { background: #f8fafc; border-color: #e2e8f
 
     /* Navbar — hamburger visible, full name, download report */
     .navbar { height: 42px; }
-    .nav-toggle { display: flex; }
+    .nav-container { padding: 0 8px; }
+    .nav-toggle { display: flex; margin-right: 2px; }
     .nav-links { display: none; }
     .nav-phones { display: none; }
     .sign-in-btn { display: none; }
