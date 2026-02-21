@@ -81,8 +81,8 @@
         .report-page { 
             box-shadow: none; 
             margin: 0 auto !important;
-            width: 794px;
-            height: 1320px;
+            width: 210mm;
+            height: 297mm;
             break-after: page; page-break-after: always; 
             overflow: hidden; 
             position: relative;
@@ -274,7 +274,7 @@ function paginateReport() {
 }
 
 function checkOverflow(contentDiv, buffer = 0) {
-    const LIMIT_PX = 900;
+    const LIMIT_PX = 700;
     const lastEl = contentDiv.lastElementChild;
     if (!lastEl) return false;
     const bottom = lastEl.offsetTop + lastEl.offsetHeight + buffer;
