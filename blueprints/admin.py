@@ -521,12 +521,16 @@ def create_report():
 @admin.route('/report/<report_id>/preview')
 @role_required('admin')
 def report_preview(report_id):
-    report = Report.query.filter_by(report_id=report_id.upper()).first_or_404()
-    test_results = report.get_test_results() if report.test_results_json else []
-    templates = ReportTemplate.query.order_by(ReportTemplate.name).all()
-    return render_template('admin/report_preview.html',
-                           report=report, test_results=test_results,
-                           templates=templates)
+    try:
+        report = Report.query.filter_by(report_id=report_id.upper()).first_or_404()
+        test_results = report.get_test_results() if getattr(report, 'test_results_json', None) else []
+        templates = ReportTemplate.query.order_by(ReportTemplate.name).all()
+        return render_template('admin/report_preview.html',
+                               report=report, test_results=test_results,
+                               templates=templates)
+    except Exception as e:
+        import traceback
+        return f"<h1>Error Rendering Preview</h1><pre style='background:#f4f4f4; padding:20px; border:1px solid #ccc; white-space:pre-wrap;'>{traceback.format_exc()}</pre>", 500
 
 
 # ── Test Parameter Management ──
