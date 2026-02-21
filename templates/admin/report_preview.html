@@ -75,18 +75,18 @@
     @media print {
         * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
         body, html { background: #fff !important; margin: 0 !important; padding: 0 !important; height: 100%; }
-        .admin-sidebar, .admin-topbar, .preview-actions, .tpl-section { display: none !important; }
+        .admin-sidebar, .admin-topbar, .preview-actions, .tpl-section, footer { display: none !important; }
         .admin-main, .admin-content { margin: 0 !important; padding: 0 !important; width: 100%; display: block; }
         .report-container { display: block !important; margin: 0 !important; padding: 0 !important; gap: 0 !important; }
         .report-page { 
             box-shadow: none; 
             margin: 0 auto !important;
-            width: 200mm;
-            height: 280mm;
+            width: 210mm;
+            height: 297mm;
             break-after: page; page-break-after: always; 
             overflow: hidden; 
             position: relative;
-            border: 1px solid transparent;
+            border: none;
         }
         .report-page:last-child { break-after: auto; page-break-after: auto; }
         @page { size: A4; margin: 0; }
@@ -274,7 +274,7 @@ function paginateReport() {
 }
 
 function checkOverflow(contentDiv) {
-    const LIMIT_PX = 650;
+    const LIMIT_PX = 900;
     const lastEl = contentDiv.lastElementChild;
     if (!lastEl) return false;
     const bottom = lastEl.offsetTop + lastEl.offsetHeight;
