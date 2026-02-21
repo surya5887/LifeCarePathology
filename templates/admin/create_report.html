@@ -317,7 +317,7 @@ async function loadParams(testId) {
 function addParamRow(name, value, unit, range) {
     const row = document.createElement('tr');
     row.innerHTML = `
-        <td><input type="text" name="param_name[]" value="${escHtml(name)}" class="readonly"></td>
+        <td><input type="text" name="param_name[]" value="${escHtml(name)}" class="readonly" required placeholder="Parameter Name"></td>
         <td><input type="text" name="param_value[]" value="${escHtml(value)}" class="value-input"
                    placeholder="Enter result"></td>
         <td><input type="text" name="param_unit[]" value="${escHtml(unit)}" class="readonly"></td>
