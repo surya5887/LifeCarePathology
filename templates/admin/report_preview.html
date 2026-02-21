@@ -81,8 +81,8 @@
         .report-page { 
             box-shadow: none; 
             margin: 0 auto !important;
-            width: 210mm;
-            height: 297mm;
+            width: 794px;
+            height: 1320px;
             break-after: page; page-break-after: always; 
             overflow: hidden; 
             position: relative;
@@ -245,7 +245,7 @@ function paginateReport() {
     for (let i = 0; i < srcRows.length; i++) {
         let row = srcRows[i].cloneNode(true);
         tbody.appendChild(row);
-        if (checkOverflow(currContent)) {
+        if (checkOverflow(currContent, 60)) {
             tbody.removeChild(row);
             pageNum++;
             currPage = createPage(pageNum);
@@ -273,11 +273,11 @@ function paginateReport() {
     }
 }
 
-function checkOverflow(contentDiv) {
-    const LIMIT_PX = 700;
+function checkOverflow(contentDiv, buffer = 0) {
+    const LIMIT_PX = 900;
     const lastEl = contentDiv.lastElementChild;
     if (!lastEl) return false;
-    const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+    const bottom = lastEl.offsetTop + lastEl.offsetHeight + buffer;
     return bottom > LIMIT_PX;
 }
 
