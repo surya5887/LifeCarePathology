@@ -119,7 +119,7 @@
             <div class="tpl-name">None</div>
         </div>
         {% for t in templates %}
-        <div class="tpl-item" onclick="setTemplate('{{ url_for(\'static\', filename=\'images/templates/\' + t.file_path) }}', this)">
+        <div class="tpl-item" onclick='setTemplate("{{ url_for("static", filename="images/templates/" ~ t.file_path) }}", this)'>
             <img src="{{ url_for('static', filename='images/templates/' + t.file_path) }}" class="tpl-img">
             <div class="tpl-name">{{ t.name }}</div>
         </div>
